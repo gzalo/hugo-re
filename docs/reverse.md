@@ -18,10 +18,13 @@ Data was extracted from [HUGO3](https://sites.google.com/view/ajugarconhugopc/ju
 
 - PBR: [This format contains images, documented here](reverse-pbr.md)
 
-# Unknown formats
-- CBR: Likely images?
+- CBR: [Similar to PBR but simpler, documented here](reverse-cbr.md)
 
-- TIL/TI2/TI4: tiled animations? first 0x20 header, 0x20-0x320 seems pallete, 0x320 on data. `Intro.til` seems to show typical blue and white ITE logo, but parsing it is harder.
+- TIL/TI2/TI4: [tiled animations, see here](reverse-til.md)
+
+- CGF: [Used in newer (WIN32) versions of games, see here](https://reverseengineering.stackexchange.com/questions/26594/opening-an-undocumented-90s-graphics-format)
+
+# Unknown formats
 
 - DAT/BIN: binary data about game logic. Very sparse. Variations for TV and Arcade modes that have different difficulty. Seems to be made of blocks of 12 bytes, no headers
     - poleX.bin has a different structure: only 00s at the start, then 10h-16h and 19h
