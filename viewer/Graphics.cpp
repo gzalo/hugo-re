@@ -19,6 +19,7 @@ void Graphics::setPalleteCollor(int idx, uint32_t color) {
     if(idx >= 256){
         return;
     }
+    //printf("SetPalColor: %x => %x\n", idx, color);
     palette[idx] = color;
 }
 

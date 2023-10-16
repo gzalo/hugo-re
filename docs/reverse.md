@@ -22,7 +22,7 @@ Data was extracted from [HUGO3](https://sites.google.com/view/ajugarconhugopc/ju
 
 - TIL/TI2/TI4: [tiled animations, see here](reverse-til.md)
 
-- CGF: [Used in newer (WIN32) versions of games, see here](https://reverseengineering.stackexchange.com/questions/26594/opening-an-undocumented-90s-graphics-format)
+- CGF: [Used in newer (WIN32) versions of games, see here for more info](https://reverseengineering.stackexchange.com/questions/26594/opening-an-undocumented-90s-graphics-format)
 
 # Unknown formats
 

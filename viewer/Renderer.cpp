@@ -154,7 +154,7 @@ int Renderer::loadData(const string &filename){
     return 0;
 }
 
-int Renderer::loadPalette(const string &filename, bool swap){
+int Renderer::loadPalette(const string &filename, bool swap, int startOffset){
     uint8_t palleteFileData[0x326] = {0};
 
     FILE *inputPalette = fopen(filename.c_str(), "rb");
@@ -165,7 +165,7 @@ int Renderer::loadPalette(const string &filename, bool swap){
     fclose(inputPalette);
 
     for(int i=0;i<256;i++) {
-        int offset = 0x20 + i*3;
+        int offset = startOffset + i*3;
         if(swap) {
             graphics->setPalleteCollor(i, palleteFileData[offset] | (palleteFileData[offset + 1] << 8) | (palleteFileData[offset + 2] << 16) | 0xFF000000);
         } else {
@@ -173,6 +173,10 @@ int Renderer::loadPalette(const string &filename, bool swap){
         }
     }
     return 0;
+}
+
+int Renderer::loadPalPalette(const string &filename, bool swap){
+    return loadPalette(filename, swap, 0x0A);
 }
 
 Renderer::Renderer(Graphics *graphics, FileType type) {
@@ -227,6 +231,22 @@ void Renderer::render(int currentFrame) {
                     graphics->setPixelPallete(x+p,y+q,fileData[i]);
             }
         }
+    } else if(type == FileType::CGF) {
+        int frameMetaOffset = 28 + currentFrame * 24;
+
+        uint32_t *dwords = (uint32_t*) (fileData+frameMetaOffset);
+        uint32_t p = dwords[0];
+        uint32_t q = dwords[1];
+        uint32_t w = dwords[2];
+        uint32_t h = dwords[3];
+        uint32_t payloadOffset = dwords[5];
+
+        uint32_t startOffset = 28 + 24 * totalFrames + payloadOffset;
+        for(int y=0;y<h;y++) {
+            uint32_t len = *(uint32_t*)(fileData+startOffset);
+            cgfParseLine(startOffset+4, len, w, h, p, q+y);
+            startOffset += len;
+        }
     }
 }
 
@@ -253,5 +273,60 @@ void Renderer::init() {
 
         delta = totalWidthTiles*totalHeightTiles*2;
         tileDataOffset = totalFrames*delta+0x320;
+    } else if(type == FileType::CGF) {
+        totalFrames = *(uint32_t*)(fileData+8);
     }
+}
+
+void Renderer::cgfParseLine(uint32_t idx, uint32_t len, uint32_t w, uint32_t h, uint32_t x, uint32_t y) {
+
+    for(int i=0;i<len;i++){
+//        printf("%x ", fileData[idx+i]);
+//        continue;
+        uint8_t v = fileData[idx+i];
+        i++;
+
+        if(v == 0){
+            x += fileData[idx+i];
+        } else if(v == 1){
+            uint8_t count = fileData[idx+i];
+
+            for(int j=0;j<count;j++) {
+                i++;
+                graphics->setPixelPallete(x++, y, fileData[idx + i]);
+                i++;
+                uint8_t alpha = fileData[idx + i];
+            }
+        } else if(v == 2){
+            uint8_t count = fileData[idx+i];
+
+            i++;
+            uint8_t value = fileData[idx+i];
+
+            i++;
+            uint8_t valueAlpha = fileData[idx+i];
+
+            for(int j=0;j<count;j++) {
+                graphics->setPixelPallete(x++, y, value);
+            }
+        } else if(v == 3){
+            uint8_t count = fileData[idx+i];
+
+            for(int j=0;j<count;j++) {
+                i++;
+                graphics->setPixelPallete(x++, y, fileData[idx + i]);
+            }
+        } else if(v == 4){
+            uint8_t count = fileData[idx+i];
+
+            i++;
+            uint8_t value = fileData[idx+i];
+
+            for(int j=0;j<count;j++) {
+                graphics->setPixelPallete(x++, y, value);
+            }
+        }
+    }
+    //printf("\n");
+
 }

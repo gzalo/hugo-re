@@ -11,7 +11,8 @@ enum class FileType {
     TIL,
     PBR,
     CBR,
-    BRS
+    BRS,
+    CGF
 };
 
 class Renderer {
@@ -44,16 +45,19 @@ private:
     void cbrParsePart(uint32_t start, uint32_t len);
 
     void tilDrawTile(int tileId, int tileRealWidth, int tileRealHeight, int xOff, int yOff);
+    void cgfParseLine(uint32_t idx, uint32_t len, uint32_t w, uint32_t h, uint32_t p, uint32_t q);
 
     public:
     Renderer(Graphics *graphics, FileType type);
-    int loadPalette(const string &filename, bool swap);
+    int loadPalette(const string &filename, bool swap, int startOffset = 0x20);
+    int loadPalPalette(const string &filename, bool swap);
     int loadData(const string &filename);
     int getTotalFrames();
 
     void render(int i);
 
     void init();
+
 };
 
 #endif
