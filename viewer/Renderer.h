@@ -43,7 +43,7 @@ private:
     void cbrUnpackbits(uint32_t idx, int largo, int startingOffset, int x, int y);
     void cbrParsePart(uint32_t start, uint32_t len);
 
-    void tilDrawTile(int tileId, int xOff, int yOff);
+    void tilDrawTile(int tileId, int tileRealWidth, int tileRealHeight, int xOff, int yOff);
 
     public:
     Renderer(Graphics *graphics, FileType type);

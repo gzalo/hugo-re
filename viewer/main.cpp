@@ -11,9 +11,9 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char **args){
     freopen("out.txt", "w", stdout);
 
     // TIL
-    /*Renderer renderer(&graphics, FileType::TIL);
-    if(renderer.loadData("C:\\Users\\Gzalo\\Downloads\\quickbms\\4hugo\\ice\\hugofall.til") == -1) return -1;
-    if(renderer.loadPalette("C:\\Users\\Gzalo\\Downloads\\quickbms\\4hugo\\ice\\hugofall.til", false) == -1) return -1;*/
+    Renderer renderer(&graphics, FileType::TIL);
+    if(renderer.loadData("C:\\Users\\Gzalo\\Desktop\\tmp\\TIL\\OUTRO.TIL") == -1) return -1;
+    if(renderer.loadPalette("C:\\Users\\Gzalo\\Desktop\\tmp\\TIL\\OUTRO.TIL", false) == -1) return -1;
 
     // PBR
     /*Renderer renderer(&graphics, FileType::PBR);
@@ -28,10 +28,10 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char **args){
     graphics.zeroIsTransparent = true;*/
 
     // BRS
-    Renderer renderer(&graphics, FileType::BRS);
+    /*Renderer renderer(&graphics, FileType::BRS);
     if(renderer.loadData("C:\\Users\\Gzalo\\Downloads\\quickbms\\4hugo\\ice\\hopv3.brs") == -1) return -1;
     if(renderer.loadPalette("C:\\Users\\Gzalo\\Downloads\\quickbms\\4hugo\\ice\\hugostor.pic", false) == -1) return -1;
-    graphics.zeroIsTransparent = true;
+    graphics.zeroIsTransparent = true;*/
 
     renderer.init();
 

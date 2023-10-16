@@ -104,10 +104,10 @@ void Renderer::cbrParsePart(uint32_t start, uint32_t len) {
     }
 }
 
-void Renderer::tilDrawTile(int tileId, int xOff, int yOff) {
-    int offset = tileDataOffset + tileId*tileHeight*tileWidth;
-    for (int y = 0; y < tileHeight; y++)
-        for (int x = 0; x < tileWidth; x++) {
+void Renderer::tilDrawTile(int tileId, int tileRealWidth, int tileRealHeight, int xOff, int yOff) {
+    int offset = tileDataOffset + tileId*tileRealHeight*tileRealWidth;
+    for (int y = 0; y < tileRealHeight; y++)
+        for (int x = 0; x < tileRealWidth; x++) {
             uint8_t color = fileData[offset++];
             graphics->setPixelPallete(x + xOff, y + yOff, color);
         }
@@ -127,7 +127,7 @@ int Renderer::loadData(const string &filename){
     file.read(reinterpret_cast<char*>(fileData), fileDataLen);
     file.close();
 
-    string extension = filename.substr(filename.size()-4);
+    string extension = filename.substr(filename.size()-3);
     if(extension == "ti2"){
         qualityFactor = 2; // 2 -> x half width
     } else if(extension == "ti4"){
@@ -192,22 +192,24 @@ void Renderer::render(int currentFrame) {
         uint32_t end = currentFrame == totalFrames - 1 ? fileDataLen-4*totalFrames : offsetData[currentFrame+1];
         pbrParsePart(offsetData[currentFrame], end - offsetData[currentFrame]);
     } else if (type == FileType::TIL){
+        int realTileWidth = tileWidth;
+        int realTileHeight = tileHeight;
         if(qualityFactor == 2){
-            tileWidth/=2;
+            realTileWidth/=2;
         }
         if(qualityFactor == 4){
-            tileWidth/=2;
-            tileHeight/=2;
+            realTileWidth/=2;
+            realTileHeight/=2;
         }
         int offset = 0x320+currentFrame*delta;
         for(int l=0;l<totalWidthTiles*totalHeightTiles;l++){
             uint16_t tileId = fileData[offset] + fileData[offset + 1] * 256;
             offset+=2;
 
-            int xOff = (l%totalWidthTiles)*tileWidth;
-            int yOff = (l/totalWidthTiles)*tileHeight;
+            int xOff = (l%totalWidthTiles)*realTileWidth;
+            int yOff = (l/totalWidthTiles)*realTileHeight;
 
-            tilDrawTile(tileId, xOff, yOff);
+            tilDrawTile(tileId, realTileWidth, realTileHeight, xOff, yOff);
         }
     } else if (type == FileType::BRS) {
         int startingOffset = offsetData[currentFrame];
@@ -249,7 +251,7 @@ void Renderer::init() {
 
         totalFrames = (fileData[6] | (fileData[7] <<8))+2;
 
-        tileDataOffset = totalFrames*totalWidthTiles*totalHeightTiles*2+0x320;
         delta = totalWidthTiles*totalHeightTiles*2;
+        tileDataOffset = totalFrames*delta+0x320;
     }
 }
