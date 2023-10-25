@@ -47,3 +47,28 @@ void Graphics::clear() {
     for(int i=0;i<renderWidth*renderHeight;i++)
         pixels[i] = 0xFFFFFFFF;
 }
+
+uint32_t Graphics::getPalleteCollor(uint8_t idx) {
+    uint32_t argb_color = palette[idx];
+    unsigned char alpha = (argb_color >> 24) & 0xFF;
+    unsigned char red = (argb_color >> 16) & 0xFF;
+    unsigned char green = (argb_color >> 8) & 0xFF;
+    unsigned char blue = argb_color & 0xFF;
+    return (alpha << 24) | (blue << 16) | (green << 8) | red;
+}
+
+uint8_t Graphics::getCollor(uint32_t color) {
+    if(color == 0) return 0xFF;
+    unsigned char alpha = (color >> 24) & 0xFF;
+    unsigned char red = (color >> 16) & 0xFF;
+    unsigned char green = (color >> 8) & 0xFF;
+    unsigned char blue = color & 0xFF;
+    uint32_t lookup = (alpha << 24) | (blue << 16) | (green << 8) | red;
+    for(int i=0;i<256;i++){
+        if(palette[i] == lookup){
+            return i;
+        }
+    }
+    printf("CANT FIND COLOR for %x\n", color);
+    return 0xFF;
+}

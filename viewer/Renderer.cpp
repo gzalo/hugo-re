@@ -1,4 +1,6 @@
 #include "Renderer.h"
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+#include "stb_image_write.h"
 #include <fstream>
 #include <iostream>
 
@@ -232,19 +234,14 @@ void Renderer::render(int currentFrame) {
             }
         }
     } else if(type == FileType::CGF) {
-        int frameMetaOffset = 28 + currentFrame * 24;
+        int frameMetaOffset = sizeof(CGFHeader) + currentFrame * sizeof(CGFFrameMeta);
 
-        uint32_t *dwords = (uint32_t*) (fileData+frameMetaOffset);
-        uint32_t p = dwords[0];
-        uint32_t q = dwords[1];
-        uint32_t w = dwords[2];
-        uint32_t h = dwords[3];
-        uint32_t payloadOffset = dwords[5];
+        CGFFrameMeta *frameMeta = (CGFFrameMeta*) (fileData+frameMetaOffset);
 
-        uint32_t startOffset = 28 + 24 * totalFrames + payloadOffset;
-        for(int y=0;y<h;y++) {
+        uint32_t startOffset = sizeof(CGFHeader) + totalFrames * sizeof(CGFFrameMeta)  + frameMeta->payloadOffset;
+        for(int y=0;y<frameMeta->height;y++) {
             uint32_t len = *(uint32_t*)(fileData+startOffset);
-            cgfParseLine(startOffset+4, len, w, h, p, q+y);
+            cgfParseLine(startOffset+4, len-4, frameMeta->xOffset, frameMeta->yOffset+y);
             startOffset += len;
         }
     }
@@ -274,21 +271,26 @@ void Renderer::init() {
         delta = totalWidthTiles*totalHeightTiles*2;
         tileDataOffset = totalFrames*delta+0x320;
     } else if(type == FileType::CGF) {
-        totalFrames = *(uint32_t*)(fileData+8);
+        CGFHeader *header = (CGFHeader*)(fileData);
+        totalFrames = header->totalFrames;
     }
 }
 
-void Renderer::cgfParseLine(uint32_t idx, uint32_t len, uint32_t w, uint32_t h, uint32_t x, uint32_t y) {
-
+void Renderer::cgfParseLine(uint32_t idx, uint32_t len, uint32_t x, uint32_t y) {
+    //printf("\n");
     for(int i=0;i<len;i++){
-//        printf("%x ", fileData[idx+i]);
-//        continue;
+        //printf("%x ", fileData[idx+i]);
+        //continue;
         uint8_t v = fileData[idx+i];
         i++;
 
         if(v == 0){
-            x += fileData[idx+i];
-        } else if(v == 1){
+            uint8_t off = fileData[idx+i];
+            if(off == 0){
+                return;
+            }
+            x += off;
+        } else if(v == 1) { // UNUSED
             uint8_t count = fileData[idx+i];
 
             for(int j=0;j<count;j++) {
@@ -297,7 +299,7 @@ void Renderer::cgfParseLine(uint32_t idx, uint32_t len, uint32_t w, uint32_t h, 
                 i++;
                 uint8_t alpha = fileData[idx + i];
             }
-        } else if(v == 2){
+        } else if(v == 2) { // UNUSED
             uint8_t count = fileData[idx+i];
 
             i++;
@@ -325,8 +327,67 @@ void Renderer::cgfParseLine(uint32_t idx, uint32_t len, uint32_t w, uint32_t h, 
             for(int j=0;j<count;j++) {
                 graphics->setPixelPallete(x++, y, value);
             }
+        } else {
+            printf("Unk%x in %d\n", v, y);
         }
     }
     //printf("\n");
 
+}
+
+void Renderer::save(int currentFrame) {
+    if(type != FileType::CGF) {
+        return;
+    }
+    int frameMetaOffset = sizeof(CGFHeader) + currentFrame * sizeof(CGFFrameMeta);
+
+    CGFFrameMeta *frameMeta = (CGFFrameMeta*) (fileData+frameMetaOffset);
+
+    uint32_t *data = new uint32_t[frameMeta->width * frameMeta->height];
+    memset(data, 0, frameMeta->width * frameMeta->height * sizeof(uint32_t));
+
+    uint32_t startOffset = sizeof(CGFHeader) + totalFrames * sizeof(CGFFrameMeta)  + frameMeta->payloadOffset;
+    for(int y=0;y<frameMeta->height;y++) {
+        uint32_t len = *(uint32_t*)(fileData+startOffset);
+        cgfParseLineToBuffer(data+y*frameMeta->width, startOffset+4, len-4);
+        startOffset += len;
+    }
+
+    char filename[64];
+    snprintf(filename, 64, "%d_%d_%d_%d.png", currentFrame, frameMeta->xOffset, frameMeta->yOffset, frameMeta->unk3);
+    stbi_write_png(filename, frameMeta->width, frameMeta->height, 4, data, frameMeta->width*4);
+    delete []data;
+}
+
+void Renderer::cgfParseLineToBuffer(uint32_t *buffer, uint32_t idx, uint32_t len) {
+    for(int i=0;i<len;i++){
+        uint8_t v = fileData[idx+i];
+        i++;
+
+        if(v == 0){
+            uint8_t off = fileData[idx+i];
+            if(off == 0){
+                return;
+            }
+            buffer += off;
+        } else if(v == 3){
+            uint8_t count = fileData[idx+i];
+
+            for(int j=0;j<count;j++) {
+                i++;
+                *(buffer++) = graphics->getPalleteCollor(fileData[idx+i]);
+            }
+        } else if(v == 4){
+            uint8_t count = fileData[idx+i];
+
+            i++;
+            uint8_t value = fileData[idx+i];
+
+            for(int j=0;j<count;j++) {
+                *(buffer++) = graphics->getPalleteCollor(value);
+            }
+        } else {
+            printf("Unk%x\n", v);
+        }
+    }
 }

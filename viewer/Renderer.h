@@ -15,6 +15,26 @@ enum class FileType {
     CGF
 };
 
+struct CGFHeader {
+    uint32_t magic;
+    uint32_t flags;
+    uint32_t totalFrames;
+    uint32_t frameMetadataSize;
+    uint32_t framePayloadSize;
+    uint32_t unk1;
+    uint32_t unk2;
+};
+
+struct CGFFrameMeta {
+    uint32_t xOffset;
+    uint32_t yOffset;
+    uint32_t width;
+    uint32_t height;
+    uint32_t unk3;
+    uint32_t payloadOffset;
+};
+
+
 class Renderer {
 private:
     Graphics *graphics;
@@ -45,7 +65,7 @@ private:
     void cbrParsePart(uint32_t start, uint32_t len);
 
     void tilDrawTile(int tileId, int tileRealWidth, int tileRealHeight, int xOff, int yOff);
-    void cgfParseLine(uint32_t idx, uint32_t len, uint32_t w, uint32_t h, uint32_t p, uint32_t q);
+    void cgfParseLine(uint32_t idx, uint32_t len, uint32_t p, uint32_t q);
 
     public:
     Renderer(Graphics *graphics, FileType type);
@@ -58,6 +78,9 @@ private:
 
     void init();
 
+    void save(int i);
+
+    void cgfParseLineToBuffer(uint32_t *string, uint32_t i, uint32_t i1);
 };
 
 #endif

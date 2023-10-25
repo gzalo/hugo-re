@@ -24,6 +24,7 @@ class Graphics {
         Graphics();
         void setPixelPallete(int x, int y, uint8_t val);
         void setPalleteCollor(int idx, uint32_t color);
+        uint32_t getPalleteCollor(uint8_t idx);
 
     void init();
 
@@ -32,6 +33,8 @@ class Graphics {
     void render(const string &title);
 
     void clear();
+
+    uint8_t getCollor(uint32_t color);
 };
 
 

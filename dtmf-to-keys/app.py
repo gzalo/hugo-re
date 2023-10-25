@@ -24,15 +24,17 @@ DTMF_FREQUENCIES = {
 
 MAPPING = {
     '1': 79,
-    '2': 80,
+    '2': 72, # 8
     '3': 81,
     '4': 75,
     '5': 76,
     '6': 77,
     '7': 71,
-    '8': 72,
+    '8': 80, # 2
     '9': 73,
     '0': 82,
+    '#': 28, # Enter
+    '*': 1 # Escape
 }
 
 # Function to detect DTMF tone
