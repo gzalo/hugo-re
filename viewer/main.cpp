@@ -46,8 +46,8 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char **args){
     int currentFrame = 0;
     int totalFrames = renderer.getTotalFrames();
 
-    //CgfCreator creator(&graphics);
-    /*creator.loadFrame("0_46_101_38.png", 0, 46, 101, 38);
+    CgfCreator creator(&graphics);
+    creator.loadFrame("0_46_101_38.png", 0, 46, 101, 38);
     creator.loadFrame("1_45_100_38.png", 1, 45, 100, 38);
     creator.loadFrame("2_8_49_38.png", 2, 8, 49, 38);
     creator.loadFrame("3_7_48_38.png", 3, 7, 48, 38);
@@ -55,7 +55,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char **args){
     creator.loadFrame("5_98_51_38.png", 5, 98, 51, 38);
     creator.loadFrame("6_49_11_38.png", 6, 49, 11, 38);
     creator.loadFrame("7_48_10_38.png", 7, 48, 10, 38);
-    creator.save("test.cgf");*/
+    if(creator.save("Arrows.cgf") != 0) return -1;
 
     while (!quit) {
         SDL_Event event;

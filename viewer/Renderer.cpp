@@ -278,6 +278,8 @@ void Renderer::init() {
 
 void Renderer::cgfParseLine(uint32_t idx, uint32_t len, uint32_t x, uint32_t y) {
     //printf("\n");
+    printf("PARSING LINE at %x (len = %x)\n", idx, len);
+    fflush(stdout);
     for(int i=0;i<len;i++){
         //printf("%x ", fileData[idx+i]);
         //continue;
@@ -328,7 +330,7 @@ void Renderer::cgfParseLine(uint32_t idx, uint32_t len, uint32_t x, uint32_t y) 
                 graphics->setPixelPallete(x++, y, value);
             }
         } else {
-            printf("Unk%x in %d\n", v, y);
+            printf("Unk%x in %x\n", v, idx+i);
         }
     }
     //printf("\n");

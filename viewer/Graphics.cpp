@@ -57,7 +57,7 @@ uint32_t Graphics::getPalleteCollor(uint8_t idx) {
     return (alpha << 24) | (blue << 16) | (green << 8) | red;
 }
 
-uint8_t Graphics::getCollor(uint32_t color) {
+uint8_t Graphics::getColor(uint32_t color) {
     if(color == 0) return 0xFF;
     unsigned char alpha = (color >> 24) & 0xFF;
     unsigned char red = (color >> 16) & 0xFF;

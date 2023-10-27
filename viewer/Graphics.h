@@ -34,7 +34,7 @@ class Graphics {
 
     void clear();
 
-    uint8_t getCollor(uint32_t color);
+    uint8_t getColor(uint32_t color);
 };
 
 
