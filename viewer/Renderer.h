@@ -12,7 +12,8 @@ enum class FileType {
     PBR,
     CBR,
     BRS,
-    CGF
+    CGF,
+    LZP
 };
 
 struct CGFHeader {
@@ -56,6 +57,10 @@ private:
     int tileDataOffset;
     int delta;
 
+    // LZP
+    int lzpWidth;
+    int lzpHeight;
+
     int8_t pbrGetHighContrib(uint8_t x);
     int8_t pbrGetLowContrib(uint8_t x);
     void pbrUnpackbits(uint32_t idx, int largo, int startingOffset, int y);
@@ -71,6 +76,8 @@ private:
     Renderer(Graphics *graphics, FileType type);
     int loadPalette(const string &filename, bool swap, int startOffset = 0x20);
     int loadPalPalette(const string &filename, bool swap);
+    int loadPalPaletteC(const string &filename, bool swap);
+    int loadDummyPalette();
     int loadData(const string &filename);
     int getTotalFrames();
 

@@ -36,9 +36,16 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char **args){
     graphics.zeroIsTransparent = true;*/
 
     // CGF+PAL
-    Renderer renderer(&graphics, FileType::CGF);
-    if(renderer.loadData("Z:\\Gonzalo\\Proyectos\\2023-hugo\\HugoGoldFlashparty\\BigFile\\MenuData\\Arrows.cgf") == -1) return -1;
-    if(renderer.loadPalPalette("Z:\\Gonzalo\\Proyectos\\2023-hugo\\HugoGoldFlashparty\\BigFile\\MenuData\\ok_mainpal.pal", true) == -1) return -1;
+   /* Renderer renderer(&graphics, FileType::CGF);
+    if(renderer.loadData("Z:\\Gonzalo\\Juegos\\Hugo\\A jugar con Hugo - Edicion Platino (v1.0)\\BigFile\\BalloonData\\gfx\\3D\\3DGynge_kurv.cgf") == -1) return -1;
+    //renderer.loadDummyPalette();
+    if(renderer.loadPalPaletteC("Z:\\Gonzalo\\Juegos\\Hugo\\A jugar con Hugo - Edicion Platino (v1.0)\\BigFile\\BalloonData\\gfx\\Palette.pal", true) == -1) return -1;
+*/
+    // LZP
+    Renderer renderer(&graphics, FileType::LZP);
+    if(renderer.loadData("Z:\\Gonzalo\\Juegos\\Hugo\\A jugar con Hugo - Edicion Platino (v1.0)\\BigFile\\DolmenData\\Graphics\\Tunnels\\rope-up+wall.lzp") == -1) return -1;
+    if(renderer.loadPalette("Z:\\Gonzalo\\Juegos\\Hugo\\A jugar con Hugo - Edicion Platino (v1.0)\\BigFile\\DolmenData\\Graphics\\Tunnels\\rope-up+wall.lzp", false) == -1) return -1;
+
 
     renderer.init();
 
@@ -46,7 +53,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char **args){
     int currentFrame = 0;
     int totalFrames = renderer.getTotalFrames();
 
-    CgfCreator creator(&graphics);
+    /*CgfCreator creator(&graphics);
     creator.loadFrame("0_46_101_38.png", 0, 46, 101, 38);
     creator.loadFrame("1_45_100_38.png", 1, 45, 100, 38);
     creator.loadFrame("2_8_49_38.png", 2, 8, 49, 38);
@@ -55,7 +62,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char **args){
     creator.loadFrame("5_98_51_38.png", 5, 98, 51, 38);
     creator.loadFrame("6_49_11_38.png", 6, 49, 11, 38);
     creator.loadFrame("7_48_10_38.png", 7, 48, 10, 38);
-    if(creator.save("Arrows.cgf") != 0) return -1;
+    if(creator.save("Arrows.cgf") != 0) return -1;*/
 
     while (!quit) {
         SDL_Event event;
@@ -77,7 +84,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char **args){
         renderer.render(currentFrame);
 
         stringstream title;
-        title << "Frame " << currentFrame;
+        title << "Frame " << currentFrame << "/" << totalFrames;
         graphics.render(title.str());
     }
     graphics.deinit();

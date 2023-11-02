@@ -24,9 +24,11 @@ Data was extracted from [HUGO3](https://sites.google.com/view/ajugarconhugopc/ju
 
 - CGF: [Used in newer (WIN32) versions of games, see here for more info](https://reverseengineering.stackexchange.com/questions/26594/opening-an-undocumented-90s-graphics-format)
 
+- LZP: [Used in newer (WIN32) versions of games mostly for cutscenes, individual frames compressed using LZSS](reverse-lzp.md)
+
 # Unknown formats
 
-- DAT/BIN: binary data about game logic. Very sparse. Variations for TV and Arcade modes that have different difficulty. Seems to be made of blocks of 12 bytes, no headers
+- DAT/BIN: binary data about game logic, present in older games Very sparse. Variations for TV and Arcade modes that have different difficulty. Seems to be made of blocks of 12 bytes, no headers
     - poleX.bin has a different structure: only 00s at the start, then 10h-16h and 19h
 
 - BSH: only in pladebag: has some texts: FORM/GRAB/DRNG

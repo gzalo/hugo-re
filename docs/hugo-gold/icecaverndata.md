@@ -1,0 +1,128 @@
+# IceCavernData
+## gfx
+- background.bmp: Blue background for menus
+- BANKEPAA.CGF: hitting screen fist
+- blh_cut_02tw.cgf: right punch 3
+- blv_cut_02tw.cgf: left punch 3
+- bmh_cut_02tw.cgf: right punch 2
+- bmv_cut_02tw.cgf: left punch 2
+- bsh_cut_02tw.cgf: right punch 1
+- bsv_cut_02tw.cgf: left punch 1
+- font.cgf: for high scores and loading?
+- gate.cgf: after ending, gate raising
+- hojresten.cgf: ball falling
+- HOPH1.CGF: hugo jump right far
+- hoph2_02tw.cgf: hugo jump right med
+- HOPH3.CGF: hugo jump right close
+- hopind1.cgf: back 
+- HOPIND21.CGF: med to back
+- HOPIND32.CGF: front to med
+- HoppeForkert1.cgf: falling 1 right
+- HoppeForkert2.cgf: falling 2 left
+- HoppeForkertHojre.lzp: Jump Wrong Right
+- HoppeForkertVenstre.lzp: Jump Wrong Left
+- HopTilUd.cgf: mid to back?
+- HOPUD12.CGF: back to mid
+- HOPUD23.CGF: mid to front
+- hopud3.cgf: front looking
+- HOPV1.CGF: right to left back
+- hopv2_02tw.cgf: right to left mid
+- HOPV3.CGF: right to left front
+- Hugobig.cgf: troledrit overlay
+- HugoIntro.cgf: cutscene tied in chains
+- HugoStorTale.cgf: talking close
+- HulMedHaleHojre.cgf: cutscene stamp right
+- HulMedHaleVenstre.cgf: cutscene stamp left
+- laase.cgf: locks
+- LysHojre.cgf: background right
+- LysVenstre.cgf: background left
+- pile.cgf: arrows
+- Poles.cgf: icicles
+- PufMedRulle.cgf: show logo
+- RAMME.RAW: end logo selector, also has palette
+- RamtAf1--.cgf: hit left to right
+- RamtAf2--.cgf: hit right to left
+- RamtAf3--.cgf: hit behind
+- RamtAfBokseHojre.lzp: Hit By Boxes Right
+- RamtAfBokseVenstre.lzp: Hit By Boxes Left
+- RamtAfSten.lzp: Hit by stone
+- sack.cgf: bag diff sizes
+- score.cgf: font and unused things
+- Slutbane.bmp: door after game ends
+- Slutbane.iff: door after game ends
+- slutpile.cgf: icon chooser arrows
+- sluttale.cgf: speak segments
+- smaa.cgf: icons for endgame
+- smaating.cgf: more icons
+- startspk.cgf: speak for start
+- startspk_02tw.cgf: speak for start 2?
+- VASE1.CGF: gold bag
+- VASE2.CGF: gold bag
+- VASE3.CGF: gold bag
+- vendhb1.cgf: looking right
+- vendhb2.cgf: looking right
+- vendhb3.cgf: looking right
+- VENDHF1.CGF: rotating to front
+- VENDHF2.CGF: rotating to front
+- VENDHF3.CGF: rotating to front
+- vendvb1.cgf: lookinig left
+- vendvb2.cgf: lookinig left
+- vendvb3.cgf: lookinig left
+- VENDVF1.CGF: rotating to front
+- VENDVF2.CGF: rotating to front
+- VENDVF3.CGF: rotating to front
+- venstresten.cgf: right boulder
+
+## sndfx
+- Ba-22.wav
+- Ba-24.wav
+- Ca-57st.wav
+- Da-4.wav
+- Da-95.wav
+- Ea-118st.wav
+- Ea-129.wav
+- Ea-51.wav
+- Fa-155.wav
+- Ga-39.wav
+- Ia-111.wav
+- Ia-112.wav
+- Ia-113.wav
+- Ia-115.wav
+- Ia-117.wav
+- Ia-118.wav
+- Ia-119.wav
+- Ia-120.wav
+- Ia-56.wav
+- Ia-59l.wav
+- Ia-59r.wav
+- Ia-59st.wav
+- Ia-62.wav
+- Ia-67.wav
+- Ia-68.wav
+- Ia-70.wav
+- Ia-82.wav
+- Ia-83.wav
+- Ia-85.wav
+- Ia-90.wav
+- Scrnbank.wav
+
+# Speak
+- 009-01.wav
+- 009-02.wav
+- 009-03.wav
+- 009-04.wav
+- 009-05.wav
+- 009-06.wav
+- 009-07.wav
+- 009-08.wav
+- 009-09.wav
+- 009-10.wav
+
+# Sync
+- 009-01.oos
+- 009-03.oos
+- 009-06.oos
+- 009-07.oos
+- 009-08.oos
+- 009-09.oos
+- 009-10.oos

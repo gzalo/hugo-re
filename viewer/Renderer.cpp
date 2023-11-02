@@ -157,7 +157,7 @@ int Renderer::loadData(const string &filename){
 }
 
 int Renderer::loadPalette(const string &filename, bool swap, int startOffset){
-    uint8_t palleteFileData[0x326] = {0};
+    uint8_t palleteFileData[0x400] = {0};
 
     FILE *inputPalette = fopen(filename.c_str(), "rb");
     if(inputPalette == nullptr){
@@ -179,6 +179,16 @@ int Renderer::loadPalette(const string &filename, bool swap, int startOffset){
 
 int Renderer::loadPalPalette(const string &filename, bool swap){
     return loadPalette(filename, swap, 0x0A);
+}
+
+int Renderer::loadPalPaletteC(const string &filename, bool swap){
+    return loadPalette(filename, swap, 0x0C);
+}
+
+int Renderer::loadDummyPalette(){
+    for(int i=0;i<256;i++) {
+        graphics->setPalleteCollor(i, i | 0xFF000000);
+    }
 }
 
 Renderer::Renderer(Graphics *graphics, FileType type) {
@@ -244,6 +254,55 @@ void Renderer::render(int currentFrame) {
             cgfParseLine(startOffset+4, len-4, frameMeta->xOffset, frameMeta->yOffset+y);
             startOffset += len;
         }
+    } else if(type == FileType::LZP){
+        uint32_t offsetToOffsets = fileDataLen - totalFrames * 4 + currentFrame * 4;
+        uint32_t offset = *(uint32_t*)(fileData+offsetToOffsets);
+        uint32_t compressedLen = *(uint32_t*)(fileData+offset);
+
+        uint8_t *data = (uint8_t*)(fileData+offset+4);
+        uint8_t *dataEnd = (uint8_t*)(fileData+offset+4+compressedLen);
+
+        uint8_t window[4096];
+        memset(window, 0, 4096);
+        int dstPos = 0;
+        uint16_t N = 4095;
+        uint32_t windowIndex = 4078;
+        uint8_t idx = 0;
+        bool end = false;
+        uint8_t flags = 0;
+        while(!end){
+            if(idx == 0) {
+                if(data >= dataEnd) break;
+                flags = *data++;
+            }
+            if(flags & 1) {
+                if(data >= dataEnd) break;
+                uint8_t c = *data++;
+                if(dstPos > lzpWidth * lzpHeight) break;
+                graphics->setPixelPallete(dstPos%lzpWidth, dstPos/lzpWidth, c);
+                dstPos++;
+                window[windowIndex++] = c;
+                windowIndex &= N;
+            } else {
+                if(data >= dataEnd) break;
+                int offset = *data++;
+                if(data >= dataEnd) break;
+                int len = *data++;
+                offset |= (len & 0xF0) << 4;
+                len  = (len & 0xF) + 3;
+                for(int k = 0; k < len; k++) {
+                    uint8_t c = window[(offset + k) & N];
+                    if(dstPos > lzpWidth * lzpHeight) {end = true; break;}
+                    graphics->setPixelPallete(dstPos%lzpWidth, dstPos/lzpWidth, c);
+                    dstPos++;
+                    window[windowIndex++] = c;
+                    windowIndex &= N;
+                }
+            }
+            flags >>= 1;
+            idx++;
+            idx &= 7;
+        }
     }
 }
 
@@ -273,6 +332,10 @@ void Renderer::init() {
     } else if(type == FileType::CGF) {
         CGFHeader *header = (CGFHeader*)(fileData);
         totalFrames = header->totalFrames;
+    } else if(type == FileType::LZP){
+        lzpWidth = *(uint32_t*)(fileData+4);
+        lzpHeight = *(uint32_t*)(fileData+8);
+        totalFrames = *(uint32_t*)(fileData+0);
     }
 }
 
