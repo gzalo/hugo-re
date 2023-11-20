@@ -19,7 +19,7 @@ public:
     CgfCreator(Graphics *graphics);
     void loadFrame(const char *filename, int i, int i1, int i2, int i3);
 
-    int save(const char *string);
+    int save(const char *string, uint32_t i1, uint32_t i2);
 
     int processRow(int w, int y, uint8_t *bff, uint8_t *pixels);
 };

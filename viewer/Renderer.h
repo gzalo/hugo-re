@@ -35,7 +35,6 @@ struct CGFFrameMeta {
     uint32_t payloadOffset;
 };
 
-
 class Renderer {
 private:
     Graphics *graphics;
@@ -80,6 +79,8 @@ private:
     int loadDummyPalette();
     int loadData(const string &filename);
     int getTotalFrames();
+    int loadBmpPallete(const string &filename);
+    int loadCgfPallete(const string &str);
 
     void render(int i);
 
@@ -88,6 +89,7 @@ private:
     void save(int i);
 
     void cgfParseLineToBuffer(uint32_t *string, uint32_t i, uint32_t i1);
+
 };
 
 #endif

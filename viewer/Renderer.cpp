@@ -177,6 +177,43 @@ int Renderer::loadPalette(const string &filename, bool swap, int startOffset){
     return 0;
 }
 
+int Renderer::loadBmpPallete(const string &filename) {
+    uint8_t palleteFileData[0x400] = {0};
+
+    FILE *inputPalette = fopen(filename.c_str(), "rb");
+    if(inputPalette == nullptr){
+        return -1;
+    }
+    fread(palleteFileData, 1, 0x326, inputPalette);
+    fclose(inputPalette);
+
+    int startOffset = 0x36;
+
+    for(int i=0;i<256;i++) {
+        int offset = startOffset + i*4;
+        graphics->setPalleteCollor(i, palleteFileData[offset] | (palleteFileData[offset + 1] << 8) | (palleteFileData[offset + 2] << 16) | 0xFF000000);
+    }
+}
+
+int Renderer::loadCgfPallete(const string &filename) {
+    uint8_t palleteFileData[0x400] = {0};
+
+    FILE *inputPalette = fopen(filename.c_str(), "rb");
+    if(inputPalette == nullptr){
+        return -1;
+    }
+    fseek(inputPalette, 0, SEEK_END);
+    fseek(inputPalette, -0x400, SEEK_CUR);
+    fread(palleteFileData, 1, 0x400, inputPalette);
+    fclose(inputPalette);
+
+    for(int i=0;i<256;i++) {
+        int offset = i*4;
+        graphics->setPalleteCollor(i, palleteFileData[offset] | (palleteFileData[offset + 1] << 8) | (palleteFileData[offset + 2] << 16) | 0xFF000000);
+    }
+}
+
+
 int Renderer::loadPalPalette(const string &filename, bool swap){
     return loadPalette(filename, swap, 0x0A);
 }
@@ -341,7 +378,7 @@ void Renderer::init() {
 
 void Renderer::cgfParseLine(uint32_t idx, uint32_t len, uint32_t x, uint32_t y) {
     //printf("\n");
-    printf("PARSING LINE at %x (len = %x)\n", idx, len);
+    //printf("PARSING LINE at %x (len = %x)\n", idx, len);
     fflush(stdout);
     for(int i=0;i<len;i++){
         //printf("%x ", fileData[idx+i]);

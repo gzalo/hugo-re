@@ -7,20 +7,29 @@ int CgfCreator::processRow(int w, int y, uint8_t *bff, uint8_t *pixels) {
     uint16_t firstCompression[w];
     size_t firstLen = 0;
 
+#if 0
+    // No alpha uncompressed
+    if(w >= 256) exit(-1);
     int bbbb = 0;
     bff[bbbb++] = 3;
     bff[bbbb++] = w;
     for (int i = 0; i < w; i++){
         uint8_t p = pixels[i+y*w];
-        bff[bbbb++] = p == 0xFF ? 10 : p;
+        bff[bbbb++] = p == 0xFF ? 0xFF : p;
     }
+    bff[bbbb++] = 0;
+    bff[bbbb++] = 0;
     return bbbb;
+#endif
 
+
+#if 0
     printf("%d\n", y);
     for(int i=0;i<w;i++) {
         printf("%x ", pixels[i+y*w]);
     }
     printf("\n");
+#endif
 
     uint8_t prev = pixels[0+y*w];
     int count = 1;
@@ -37,10 +46,11 @@ int CgfCreator::processRow(int w, int y, uint8_t *bff, uint8_t *pixels) {
     }
     firstCompression[firstLen++] =  (count << 8) | prev;
 
+/*
     for(int i=0;i<firstLen;i++) {
         printf("%x ", firstCompression[i]);
     }
-    printf("\n");
+    printf("\n");*/
 
     int bytes = 0;
     for(int i=0;i<firstLen;i++){
@@ -74,6 +84,9 @@ int CgfCreator::processRow(int w, int y, uint8_t *bff, uint8_t *pixels) {
             i = j-1;
         }
     }
+
+    bff[bytes++] = 0;
+    bff[bytes++] = 0;
 
     // Transp => 0 LEN
     // Dist => 3 LEN x y z
@@ -126,15 +139,15 @@ CgfCreator::CgfCreator(Graphics *graphics) {
     this->totalFrames = 0;
 }
 
-int CgfCreator::save(const char *filename) {
+int CgfCreator::save(const char *filename, uint32_t unk1, uint32_t unk2) {
     CGFHeader header = (CGFHeader) {
             .magic = 0x46464743,
             .flags = 1,
             .totalFrames = (uint32_t) totalFrames,
             .frameMetadataSize = (uint32_t) sizeof(CGFFrameMeta) * totalFrames,
             .framePayloadSize = 0,
-            .unk1 = 0,
-            .unk2 = 0
+            .unk1 = unk1,
+            .unk2 = unk2
     };
 
     for(int i=0;i<totalFrames;i++) {
