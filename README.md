@@ -3,7 +3,11 @@ Relive the Hugo TV gaming experience from the 90s!
 
 Using an IP phone (or an analog phone with a FXS gateway) you'll be able to call the virtual Hugo hotline and play the games virtually.
 Eventually we'll have some AI-generated voices for Hugo and the host (Gaby in Argentina)
- 
+
+**Phase 0**: As seen in Flashparty 2023, with quite a high latency due to the audio processing chain
+
+**Phase 1**: As seen in Cybercirujas federal event 2023, way lower latency and quite playable
+
 ![Remake](docs/hugoremake.drawio.png)
 
 - [DTMF tones to key](dtmf-to-keys/)
