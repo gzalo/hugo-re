@@ -1,4 +1,6 @@
 import pygame
+import win32gui
+import win32con
 import subprocess
 import pygame.freetype 
 import os
@@ -91,9 +93,11 @@ BTN_OFF_HOOK = "q"
 BTN_HUNG_UP = "w"
 BTN_END = "e"
 BTN_PLAY = "5"
+TITLE = "A jugar con Hugo!"
 
-screen = pygame.display.set_mode((480, 360))
-pygame.display.set_caption("A jugar con Hugo!")
+screen = pygame.display.set_mode((640, 480), pygame.FULLSCREEN)
+pygame.mouse.set_visible(False)
+pygame.display.set_caption(TITLE)
 pygame.font.init()
 GAME_FONT = pygame.freetype.SysFont("Arial", 10)
 overlay = pygame.image.load("overlay.png").convert()
@@ -137,6 +141,9 @@ while running:
     if hugo_proc != None:
         if hugo_proc.poll() != None:
             end_event = True
+            hugo_proc = None
+            handle = win32gui.FindWindow(0, TITLE)
+            win32gui.ShowWindow(handle, win32con.SW_RESTORE)
 
         current_image = capture_screen()
         if images_are_equal(last_image, current_image):
@@ -243,8 +250,8 @@ while running:
 
     if vid_draw and vid_draw.draw(screen, (0, 0), force_draw=False):
         text_surface, rect = GAME_FONT.render(str(state), (0, 0, 0))
-        screen.blit(text_surface, (10, 340))
-        screen.blit(overlay, (400, 10))
+        screen.blit(text_surface, (10, 460))
+        screen.blit(overlay, (520, 15))
         pygame.display.update()
     
     pygame.time.wait(16)

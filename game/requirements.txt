@@ -2,3 +2,4 @@ pygame
 pyvidplayer2
 pillow
 keyboard
+pywin32
