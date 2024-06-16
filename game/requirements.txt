@@ -1,0 +1,4 @@
+pygame
+pyvidplayer2
+pillow
+keyboard
