@@ -6,7 +6,7 @@ using namespace pj;
 
 int my_snd_dev_id;
 
-void processDtmf(string digit, bool down){
+void processDtmfLegacy(string digit, bool down){
     /*'1': 79,
     '2': 72, # 8
     '3': 81,
@@ -48,6 +48,61 @@ void processDtmf(string digit, bool down){
     }
 }
 
+INPUT createScanCodeEvent(WORD scancode, bool isDown){
+    INPUT input = {};
+    input.type = INPUT_KEYBOARD;
+    input.ki.wVk = 0;
+    input.ki.wScan = scancode;
+    input.ki.dwFlags = (isDown ? 0 : KEYEVENTF_KEYUP) | KEYEVENTF_SCANCODE;
+    input.ki.time = 0;
+    input.ki.dwExtraInfo = 0;
+    return input;
+}
+
+void processDtmf(string digit, bool down){
+    /*'1': 79,
+    '2': 72, # 8
+    '3': 81,
+    '4': 75,
+    '5': 76,
+    '6': 77,
+    '7': 71,
+    '8': 80, # 2
+    '9': 73,
+    '0': 82,
+    '#': # Enter
+    '*': # Escape*/
+    INPUT input;
+
+    if(digit == "1"){
+        input = createScanCodeEvent(79, down);
+    } else if (digit == "2"){
+        input = createScanCodeEvent(72, down);
+    } else if (digit == "3"){
+        input = createScanCodeEvent(81, down);
+    } else if (digit == "4"){
+        input = createScanCodeEvent(75, down);
+    } else if (digit == "5"){
+        input = createScanCodeEvent(76, down);
+    } else if (digit == "6"){
+        input = createScanCodeEvent(77, down);
+    } else if (digit == "7"){
+        input = createScanCodeEvent(71, down);
+    } else if (digit == "8"){
+        input = createScanCodeEvent(80, down);
+    } else if (digit == "9"){
+        input = createScanCodeEvent(73, down);
+    } else if (digit == "0"){
+        input = createScanCodeEvent(82, down);
+    } else if (digit == "#"){
+        input = createScanCodeEvent(28, down);
+    } else if (digit == "*"){
+        input = createScanCodeEvent(1, down);
+    }
+
+    SendInput(1, &input, sizeof(INPUT));
+}
+
 class MyAudioMediaPort: public AudioMediaPort
 {
     virtual void onFrameRequested(MediaFrame &frame)
@@ -81,6 +136,30 @@ public:
         if (ci.state == PJSIP_INV_STATE_CONFIRMED)
         {
             std::cout << "Call is confirmed. You can start receiving DTMF codes." << std::endl;
+            // Q => offhook
+            {
+                INPUT input = createScanCodeEvent(0x10, true);
+                SendInput(1, &input, sizeof(INPUT));
+            }
+            Sleep(50);
+            {
+                INPUT input = createScanCodeEvent(0x10, false);
+                SendInput(1, &input, sizeof(INPUT));
+            }
+        }
+        if (ci.state == PJSIP_INV_STATE_DISCONNECTED)
+        {
+            // W => hung up
+            std::cout << "Call is disconnected." << std::endl;
+            {
+                INPUT input = createScanCodeEvent(0x11, true);    
+                SendInput(1, &input, sizeof(INPUT));
+            }
+            Sleep(50);
+            {
+                INPUT input = createScanCodeEvent(0x11, false);     
+                SendInput(1, &input, sizeof(INPUT));       
+            }
         }
     }
 
@@ -170,9 +249,9 @@ int main(int argc, char **argv)
 
     // Configure an AccountConfig
     AccountConfig acfg;
-    acfg.idUri = "sip:105@192.168.0.20";
-    acfg.regConfig.registrarUri = "sip:192.168.0.20";
-    AuthCredInfo cred("digest", "*", "105", 0, "unsecurepassword");
+    acfg.idUri = "sip:5@10.0.0.1";
+    acfg.regConfig.registrarUri = "sip:10.0.0.1";
+    AuthCredInfo cred("digest", "*", "5", 0, "unsecurepassword");
     acfg.sipConfig.authCreds.push_back( cred );
 
     // Create the account
