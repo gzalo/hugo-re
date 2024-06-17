@@ -6,13 +6,19 @@ Eventually we'll have some AI-generated voices for Hugo and the host (Gaby in Ar
 
 **Phase 0**: As seen in Flashparty 2023, with quite a high latency due to the audio processing chain
 
-**Phase 1**: As seen in Cybercirujas federal event 2023, way lower latency and quite playable
+**Phase 1**: As seen in Cybercirujas federal event 2023, way lower latency using pjsua, quite playable
+
+**Phase 2**: As seen in Cybercirujas event June 2024, introduced a wrapper with full-motion videos and random game selector
 
 ![Remake](docs/hugoremake.drawio.png)
 
-- [DTMF tones to key](dtmf-to-keys/)
+- [Game wrapper with full-motion videos](game/)
+- [PJSUA (SIP tones to keys)](pjsua-to-keys/)
+- [Asterisk config](asterisk-config/)
+
 - [Reverse engineering progress (WIP)](docs/reverse.md)
 - [Hugo resource viewer (WIP)](viewer/)
+- [DTMF tones to key (outdated)](dtmf-to-keys/)
 
 I'm looking for contributors! If you are interested in:
 - AI/LLM
@@ -21,3 +27,13 @@ I'm looking for contributors! If you are interested in:
 - 3d modeling and gamedev
 
 ...you can join the team and help the project advance!
+
+## Todo: 
+- Add subtitles to videos
+- After losing game, stop looping again and ask the user to hang up
+
+## Original Hugo Landline phone numbers
+- 4317-8501
+- 0600-111-0203
+
+### In memoriam - Hugo Avila - 1921-2007
