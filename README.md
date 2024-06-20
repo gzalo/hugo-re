@@ -37,3 +37,12 @@ I'm looking for contributors! If you are interested in:
 - 0600-111-0203
 
 ### In memoriam - Hugo Avila - 1921-2007
+
+**Disclaimer: Obviously, this project is not official and is unrelated to ITE/Pramer/Promofilm/Magic Kids. Please support the official Hugo franchise by buying their newest games and merch**
+
+Similar projects:
+- https://github.com/tuomasth/Hugo_Ski_Game_Finnish_24-2-2023
+- https://github.com/supinrus/HugoMega
+- https://github.com/supinrus/HugoResourceViewer
+- https://github.com/erengaygusuz/hugo-lululu
+- https://github.com/ElMiauro/KitoPizzas

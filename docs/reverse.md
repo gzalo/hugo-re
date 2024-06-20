@@ -26,6 +26,8 @@ Data was extracted from [HUGO3](https://sites.google.com/view/ajugarconhugopc/ju
 
 - LZP: [Used in newer (WIN32) versions of games mostly for cutscenes, individual frames compressed using LZSS](reverse-lzp.md)
 
+- OOS: [Lip sync files](reverse-oos.md)
+
 # Unknown formats
 
 - DAT/BIN: binary data about game logic, present in older games Very sparse. Variations for TV and Arcade modes that have different difficulty. Seems to be made of blocks of 12 bytes, no headers
