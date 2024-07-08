@@ -1,1 +1,3 @@
 ffmpeg.exe
+.idea/
+__pycache__/

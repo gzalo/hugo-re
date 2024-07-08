@@ -1,259 +1,140 @@
 import pygame
-import win32gui
-import win32con
-import subprocess
-import pygame.freetype 
-import os
+import pygame.freetype
 import keyboard
-import random
-import time
-from enum import Enum
 from pyvidplayer2 import Video
-from PIL import ImageGrab, ImageChops
 
-class GameState(Enum):
-    ATTRACT_DEMO = 0
-    INITIAL_VIDEO = 1
-    PRESS_5_VIDEO = 2
-    HAVE_LUCK = 3
-    PLAYING_HUGO = 4
-    YOU_LOST = 5
+from hugo_launcher import HugoLauncher
+from game_state import GameState
 
-def stop_all():
-    global vid_a
-    global vid_b
-    global vid_c
-    global vid_d
-    global vid_e
-    vid_a.stop()
-    vid_b.stop()
-    vid_c.stop()
-    vid_d.stop()
-    vid_e.stop()
 
-def write_config(file_path):
-    game_options = [
-        "Plane",
-        "Forest",
-        #"Mountain", NO ANDA POR FREEZEFRAME
-        # "LumberJack", CRASH UNKNOWN
-        "IceCavern",
-        # "Labyrinth", TOO COMPLEX
-        "SkateBoard",
-        "Scuba",
-        "Train"
-    ]
+class Game:
+    BTN_OFF_HOOK = "q"
+    BTN_HUNG_UP = "w"
+    BTN_END = "e"
+    BTN_PLAY = "5"
+    BTN_EXIT = "r"
+    TITLE = "A jugar con Hugo!"
 
-    new_line = f"AutoStart = {random.choice(game_options)};"
+    state = GameState.ATTRACT
+    hugo_launcher = HugoLauncher(TITLE)
 
-    with open(file_path, 'r') as file:
-        lines = file.readlines()
+    videos = {
+        GameState.ATTRACT: Video("videos/attract_demo.mp4"),
+        GameState.INITIAL: Video("videos/initial.mp4"),
+        GameState.PRESS_5: Video("videos/press_5.mp4"),
+        GameState.YOU_LOST: Video("videos/you_lost.mp4"),
+        GameState.HAVE_LUCK: Video("videos/have_luck.mp4"),
+    }
 
-    if len(lines) >= 2:
-        lines[1] = new_line + '\n'
-    else:
-        lines.append(new_line + '\n')
+    def switch_to(self, new_state: GameState | None):
+        for videoKey, video in self.videos.items():
+            video.stop()
+        if new_state is not None and new_state in self.videos:
+            self.videos[new_state].restart()
+        self.state = new_state
 
-    with open(file_path, 'w') as file:
-        file.writelines(lines)
+    def reloop(self):
+        if self.state in self.videos and not self.videos[self.state].active:
+            self.videos[self.state].restart()
 
-def play_hugo():
-    HUGO_DIR = "C:\\Users\\Gzalo\\Desktop\\HugoGoldFlashparty\\"
-    HUGO_EXECUTABLE = HUGO_DIR + "hugo.exe"
-    HUGO_CONFIG = HUGO_DIR + "Machine.cnf"
-    write_config(HUGO_CONFIG)
+    def hasEnded(self):
+        return self.state in self.videos and not self.videos[self.state].active
 
-    return subprocess.Popen(HUGO_EXECUTABLE, cwd = HUGO_DIR)
+    def run(self):
+        pygame.init()
 
-def capture_screen():
-    return ImageGrab.grab()
+        screen = pygame.display.set_mode((640, 480), pygame.FULLSCREEN)
+        pygame.mouse.set_visible(False)
+        pygame.display.set_caption(self.TITLE)
+        pygame.font.init()
+        game_font = pygame.freetype.SysFont("Arial", 10)
+        overlay = pygame.image.load("overlay.png").convert()
 
-def images_are_equal(img1, img2):
-    return ImageChops.difference(img1, img2).getbbox() is None
+        running = True
+        while running:
+            offhook_event = False
+            hung_up_event = False
+            end_event = False
+            play_event = False
 
-def is_screen_black():
-    screen = ImageGrab.grab()
-    screen_np = screen.load()
-    for x in range(screen.width):
-        for y in range(screen.height):
-            if screen_np[x, y] != (0, 0, 0):
-                return False
-    return True
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT or keyboard.is_pressed(self.BTN_EXIT):
+                    self.switch_to(None)
+                    running = False
 
-def kill_process(proc):
-    try:
-        proc.terminate()
-        proc.wait(timeout=1)
-    except Exception as e:
-        print(f"Failed to terminate the process: {e}")
+            if keyboard.is_pressed(self.BTN_OFF_HOOK):
+                offhook_event = True
+            if keyboard.is_pressed(self.BTN_HUNG_UP):
+                hung_up_event = True
+            if keyboard.is_pressed(self.BTN_PLAY):
+                play_event = True
+            if keyboard.is_pressed(self.BTN_END):
+                end_event = True
 
-pygame.init()
+            if self.hugo_launcher.process():
+                end_event = True
 
-BTN_OFF_HOOK = "q"
-BTN_HUNG_UP = "w"
-BTN_END = "e"
-BTN_PLAY = "5"
-TITLE = "A jugar con Hugo!"
+            if self.state == GameState.ATTRACT:
+                self.reloop()
 
-screen = pygame.display.set_mode((640, 480), pygame.FULLSCREEN)
-pygame.mouse.set_visible(False)
-pygame.display.set_caption(TITLE)
-pygame.font.init()
-GAME_FONT = pygame.freetype.SysFont("Arial", 10)
-overlay = pygame.image.load("overlay.png").convert()
+                if offhook_event:
+                    self.switch_to(GameState.INITIAL)
 
-vid_a = Video("videos/a.mp4")
-vid_b = Video("videos/b.mp4")
-vid_c = Video("videos/c.mp4")
-vid_d = Video("videos/d.mp4")
-vid_e = Video("videos/e.mp4")
+                if play_event:
+                    self.switch_to(GameState.PLAYING_HUGO)
+                    self.hugo_launcher.start()
 
-state = GameState.ATTRACT_DEMO
+            elif self.state == GameState.INITIAL:
+                if self.hasEnded():
+                    self.switch_to(GameState.PRESS_5)
 
-vid_draw = None
-hugo_proc = None
-proc_start_time = None
-same_image_counter = 0
-last_image = capture_screen()
-initial_pressed = False
+                if hung_up_event:
+                    self.switch_to(GameState.ATTRACT)
 
-running = True
-while running:
-    offhook_event = False
-    hung_up_event = False
-    end_event = False
-    play_event = False
+            elif self.state == GameState.PRESS_5:
+                self.reloop()
 
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            stop_all()
-            running = False
+                if play_event:
+                    self.switch_to(GameState.HAVE_LUCK)
 
-    if keyboard.is_pressed(BTN_OFF_HOOK):
-        offhook_event = True
-    if keyboard.is_pressed(BTN_HUNG_UP):
-        hung_up_event = True
-    if keyboard.is_pressed(BTN_PLAY):
-        play_event = True
-    if keyboard.is_pressed(BTN_END):
-        end_event = True
+                if hung_up_event:
+                    self.switch_to(GameState.ATTRACT)
 
-    if hugo_proc != None:
-        if hugo_proc.poll() != None:
-            end_event = True
-            hugo_proc = None
-            handle = win32gui.FindWindow(0, TITLE)
-            win32gui.ShowWindow(handle, win32con.SW_RESTORE)
+            elif self.state == GameState.HAVE_LUCK:
+                if self.hasEnded():
+                    self.switch_to(GameState.PLAYING_HUGO)
+                    self.hugo_launcher.start()
 
-        current_image = capture_screen()
-        if images_are_equal(last_image, current_image):
-            same_image_counter += 1
-        else:
-            same_image_counter = 0
-            last_image = current_image
+                if hung_up_event:
+                    self.switch_to(GameState.ATTRACT)
 
-        if same_image_counter > 50 and initial_pressed == False:
-            keyboard.press_and_release('enter')
-            initial_pressed = True
+            elif self.state == GameState.PLAYING_HUGO:
+                if hung_up_event:
+                    self.hugo_launcher.end()
+                    self.switch_to(GameState.ATTRACT)
 
-        if same_image_counter > 100:
-            kill_process(hugo_proc)
+                if end_event:
+                    self.switch_to(GameState.YOU_LOST)
 
-    if state == GameState.ATTRACT_DEMO:
-        vid_draw = vid_a
+            elif self.state == GameState.YOU_LOST:
+                self.reloop()
 
-        if vid_a.active == False:
-            vid_a.restart()
-        
-        if offhook_event:
-            state = GameState.INITIAL_VIDEO
-            stop_all()
-            vid_b.restart()
+                if hung_up_event:
+                    self.switch_to(GameState.ATTRACT)
 
-        if play_event:
-            stop_all()
-            state = GameState.PLAYING_HUGO
-            hugo_proc = play_hugo()
-            proc_start_time = time.time()
-            initial_pressed = False
+            screen.fill((255, 255, 255))
 
-    elif state == GameState.INITIAL_VIDEO:
-        vid_draw = vid_b
+            vid_draw = self.videos[self.state] if self.state in self.videos else None
+            if vid_draw and vid_draw.draw(screen, (0, 0), force_draw=False):
+                text_surface, rect = game_font.render(str(self.state), (0, 0, 0))
+                screen.blit(text_surface, (10, 460))
+                screen.blit(overlay, (520, 15))
+                pygame.display.update()
 
-        if vid_b.active == False:
-            state = GameState.PRESS_5_VIDEO
-            stop_all()
-            vid_c.restart()
+            pygame.time.wait(16)
 
-        if hung_up_event:
-            state = GameState.ATTRACT_DEMO
-            stop_all()
-            vid_a.restart()
+        pygame.quit()
 
-    elif state == GameState.PRESS_5_VIDEO:
-        vid_draw = vid_c
 
-        if vid_c.active == False:
-            vid_c.restart()
-
-        if play_event:
-            state = GameState.HAVE_LUCK
-            stop_all()
-            vid_e.restart()            
-
-        if hung_up_event:
-            state = GameState.ATTRACT_DEMO
-            stop_all()
-            vid_a.restart()
-
-    elif state == GameState.HAVE_LUCK:
-        vid_draw = vid_e
-
-        if vid_e.active == False:
-            state = GameState.PLAYING_HUGO
-            stop_all()         
-            hugo_proc = play_hugo()
-            proc_start_time = time.time()
-            initial_pressed = False
-
-        if hung_up_event:
-            state = GameState.ATTRACT_DEMO
-            stop_all()
-            vid_a.restart()            
-
-    elif state == GameState.PLAYING_HUGO:
-        vid_draw = None
-
-        if hung_up_event:
-            state = GameState.ATTRACT_DEMO
-            kill_process(hugo_proc)
-            stop_all()
-            vid_a.restart()
-
-        if end_event:
-            state = GameState.YOU_LOST
-            stop_all()
-            vid_d.restart()            
-
-    elif state == GameState.YOU_LOST:
-        vid_draw = vid_d
-
-        if hung_up_event:
-            state = GameState.ATTRACT_DEMO
-            stop_all()
-            vid_a.restart()
-
-        if vid_d.active == False:
-            vid_d.restart()
-
-    screen.fill((255,255,255))
-
-    if vid_draw and vid_draw.draw(screen, (0, 0), force_draw=False):
-        text_surface, rect = GAME_FONT.render(str(state), (0, 0, 0))
-        screen.blit(text_surface, (10, 460))
-        screen.blit(overlay, (520, 15))
-        pygame.display.update()
-    
-    pygame.time.wait(16)
-
-pygame.quit()
+if __name__ == "__main__":
+    Game().run()
