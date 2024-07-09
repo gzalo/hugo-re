@@ -3,3 +3,6 @@ pyvidplayer2
 pillow
 keyboard
 pywin32
+SpeechRecognition
+SpeechRecognition[whisper-local]
+easyocr

@@ -3,10 +3,10 @@ import pygame.freetype
 import keyboard
 import time
 from pyvidplayer2 import Video
+import speech_recognition as sr
 
 from hugo_launcher import HugoLauncher
 from game_state import GameState
-
 
 class Game:
     BTN_OFF_HOOK = "q"
@@ -17,10 +17,14 @@ class Game:
     BTN_EXIT = "r"
     TITLE = "A jugar con Hugo!"
     INSTRUCTIONS_TIMEOUT = 5
+    SCR_WIDTH = 640
+    SCR_HEIGHT = 480
 
     state = GameState.ATTRACT
     state_start = time.time()
     hugo_launcher = HugoLauncher(TITLE)
+    user_name = "TEST"
+    name_font = None
 
     videos = {
         GameState.ATTRACT: Video("videos/attract_demo.mp4"),
@@ -57,11 +61,12 @@ class Game:
     def run(self):
         pygame.init()
 
-        screen = pygame.display.set_mode((640, 480), pygame.FULLSCREEN)
+        screen = pygame.display.set_mode((self.SCR_WIDTH, self.SCR_HEIGHT), pygame.FULLSCREEN)
         pygame.mouse.set_visible(False)
         pygame.display.set_caption(self.TITLE)
         pygame.font.init()
-        game_font = pygame.freetype.SysFont("Arial", 10)
+        debug_font = pygame.freetype.SysFont("Arial", 8)
+        self.name_font = pygame.freetype.SysFont("Arial", 45)
         overlay = pygame.image.load("overlay.png").convert()
 
         instructions = {game_name:pygame.image.load("instructions/" + game_name + ".png").convert() for game_name in self.hugo_launcher.get_games()}
@@ -112,8 +117,23 @@ class Game:
             elif self.state == GameState.INITIAL:
                 if self.hasEnded():
                     self.switch_to(GameState.YOUR_NAME)
+                    self.user_name = ""
 
             elif self.state == GameState.YOUR_NAME:
+                if self.hasEnded():
+
+                    r = sr.Recognizer()
+                    with sr.AudioFile("hola_gonzalo.wav") as source:
+                        audio = r.record(source)
+
+                    try:
+                        words = r.recognize_whisper(audio, language="es")
+                        self.user_name = words.split(" ")[-1]
+                    except sr.UnknownValueError:
+                        print("Sphinx could not understand audio")
+                    except sr.RequestError as e:
+                        print("Sphinx error; {0}".format(e))
+
                 if press_5_event:
                     self.switch_to(GameState.NICE_NAME)
 
@@ -146,8 +166,7 @@ class Game:
                     self.switch_to(GameState.GOING_SCYLLA)
 
             elif self.state == GameState.GOING_SCYLLA:
-                if end_proc_event:
-                    self.switch_to(GameState.GOING_SCYLLA)
+                pass
 
             elif self.state == GameState.PLAYING_SCYLLA:
                 if end_proc_event:
@@ -156,23 +175,34 @@ class Game:
             elif self.state == GameState.YOU_LOST:
                 pass
 
-            screen.fill((255, 255, 255))
-
             vid_draw = self.videos[self.state] if self.state in self.videos else None
             if vid_draw and vid_draw.draw(screen, (0, 0), force_draw=False):
-                text_surface, rect = game_font.render(str(self.state), (0, 0, 0))
+                text_surface, rect = debug_font.render(str(self.state), (0, 0, 0))
                 screen.blit(text_surface, (10, 460))
                 screen.blit(overlay, (520, 15))
-                pygame.display.update()
 
             if self.state == GameState.INSTRUCTIONS:
                 screen.blit(instructions[self.hugo_launcher.get_game()], (0,0))
-                pygame.display.update()
 
+            if self.state == GameState.YOUR_NAME:
+                self.render_name(screen)
+
+            pygame.display.update()
             pygame.time.wait(16)
             prev_next_game_event = next_game_event
 
         pygame.quit()
+
+    def render_name(self, screen):
+        text_surface_bg, rect = self.name_font.render(self.user_name, (0, 0, 0))
+        text_surface_fg, rect = self.name_font.render(self.user_name, (255, 255, 255))
+        xpos = self.SCR_WIDTH / 2 - rect.width / 2
+        ypos = self.SCR_HEIGHT / 2 - rect.height / 2
+        screen.blit(text_surface_bg, (xpos - 1, ypos - 1))
+        screen.blit(text_surface_bg, (xpos + 1, ypos - 1))
+        screen.blit(text_surface_bg, (xpos - 1, ypos + 1))
+        screen.blit(text_surface_bg, (xpos + 1, ypos + 1))
+        screen.blit(text_surface_fg, (xpos, ypos))
 
 
 if __name__ == "__main__":

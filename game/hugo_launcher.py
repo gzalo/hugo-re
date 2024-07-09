@@ -1,9 +1,13 @@
 import random
 import subprocess
+import time
+
 import win32gui
 import keyboard
 import win32con
 from PIL import ImageGrab, ImageChops
+import easyocr
+import numpy
 
 
 def write_config(file_path, game):
@@ -25,16 +29,6 @@ def images_are_equal(img1, img2):
     return ImageChops.difference(img1, img2).getbbox() is None
 
 
-def is_screen_black():
-    screen = ImageGrab.grab()
-    screen_np = screen.load()
-    for x in range(screen.width):
-        for y in range(screen.height):
-            if screen_np[x, y] != (0, 0, 0):
-                return False
-    return True
-
-
 class HugoLauncher:
     hugo_proc = None
     same_image_counter = 0
@@ -42,6 +36,9 @@ class HugoLauncher:
     initial_pressed = False
     title = None
     current_game = None
+    reader = easyocr.Reader(['en'])
+    last_read_time = None
+    score = 0
 
     game_options = [
         "Plane",
@@ -56,6 +53,7 @@ class HugoLauncher:
     ]
 
     def __init__(self, title):
+        self.last_read_time = time.time()
         self.title = title
 
     def start(self):
@@ -63,6 +61,7 @@ class HugoLauncher:
         hugo_exe = hugo_dir + "hugo.exe"
         hugo_config = hugo_dir + "Machine.cnf"
         write_config(hugo_config, self.current_game)
+        self.score = 0
 
         self.hugo_proc = subprocess.Popen(hugo_exe, cwd=hugo_dir)
 
@@ -97,6 +96,14 @@ class HugoLauncher:
             if self.same_image_counter > 100:
                 self.end()
 
+            if time.time() - self.last_read_time > 2:
+                results = self.reader.readtext(numpy.array(current_image), allowlist='0123456789')
+                for result in results:
+                    if result[2] > 0.8:
+                        self.score = int(result[1])
+
+                self.last_read_time = time.time()
+
         return False
 
     def set_random_game(self):
@@ -110,3 +117,6 @@ class HugoLauncher:
 
     def get_games(self):
         return self.game_options
+
+    def get_score(self):
+        return self.score
