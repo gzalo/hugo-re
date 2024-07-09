@@ -1,4 +1,3 @@
-import time
 import random
 import subprocess
 import win32gui
@@ -7,20 +6,8 @@ import win32con
 from PIL import ImageGrab, ImageChops
 
 
-def write_config(file_path):
-    game_options = [
-        "Plane",
-        "Forest",
-        # "Mountain", NO ANDA POR FREEZEFRAME
-        # "LumberJack", CRASH UNKNOWN
-        "IceCavern",
-        # "Labyrinth", TOO COMPLEX
-        "SkateBoard",
-        "Scuba",
-        "Train"
-    ]
-
-    new_line = f"AutoStart = {random.choice(game_options)};"
+def write_config(file_path, game):
+    new_line = f"AutoStart = {game};"
 
     with open(file_path, 'r') as file:
         lines = file.readlines()
@@ -49,12 +36,24 @@ def is_screen_black():
 
 
 class HugoLauncher:
-    proc_start_time = None
     hugo_proc = None
     same_image_counter = 0
     last_image = ImageGrab.grab()
     initial_pressed = False
     title = None
+    current_game = None
+
+    game_options = [
+        "Plane",
+        "Forest",
+        # "Mountain", NO ANDA POR FREEZEFRAME
+        # "LumberJack", CRASH UNKNOWN
+        "IceCavern",
+        # "Labyrinth", TOO COMPLEX
+        "SkateBoard",
+        "Scuba",
+        "Train"
+    ]
 
     def __init__(self, title):
         self.title = title
@@ -63,12 +62,13 @@ class HugoLauncher:
         hugo_dir = "C:\\Users\\Gzalo\\Desktop\\HugoGoldFlashparty\\"
         hugo_exe = hugo_dir + "hugo.exe"
         hugo_config = hugo_dir + "Machine.cnf"
-        write_config(hugo_config)
+        write_config(hugo_config, self.current_game)
 
-        self.proc_start_time = time.time()
         self.hugo_proc = subprocess.Popen(hugo_exe, cwd=hugo_dir)
 
     def end(self):
+        if self.hugo_proc is None:
+            return
         try:
             self.hugo_proc.terminate()
             self.hugo_proc.wait(timeout=1)
@@ -98,3 +98,15 @@ class HugoLauncher:
                 self.end()
 
         return False
+
+    def set_random_game(self):
+        new_game = random.choice(self.game_options)
+        while new_game == self.current_game:
+            new_game = random.choice(self.game_options)
+        self.current_game = new_game
+
+    def get_game(self):
+        return self.current_game
+
+    def get_games(self):
+        return self.game_options
