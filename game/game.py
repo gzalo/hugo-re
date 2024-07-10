@@ -3,10 +3,13 @@ import pygame.freetype
 import keyboard
 import time
 from pyvidplayer2 import Video
+import random
 import speech_recognition as sr
 
 from hugo_launcher import HugoLauncher
 from game_state import GameState
+from scores import Scores
+
 
 class Game:
     BTN_OFF_HOOK = "q"
@@ -23,8 +26,12 @@ class Game:
     state = GameState.ATTRACT
     state_start = time.time()
     hugo_launcher = HugoLauncher(TITLE)
+    scores = Scores()
     user_name = "TEST"
     name_font = None
+    score_font = None
+    time_score = time.time()
+    score_game = "Forest"
 
     videos = {
         GameState.ATTRACT: Video("videos/attract_demo.mp4"),
@@ -36,6 +43,21 @@ class Game:
         GameState.GOING_SCYLLA: Video("videos/scylla_cave.mp4"),
         GameState.HAVE_LUCK: Video("videos/have_luck.mp4"),
     }
+
+    game_names = {
+        "Plane": "Avión",
+        "Forest": "Selva",
+        "IceCavern": "Cueva de hielo",
+        "SkateBoard": "Skate",
+        "Scuba": "Buceo",
+        "Train": "Tren"
+    }
+
+    def set_random_score_game(self):
+        new_game = random.choice(self.hugo_launcher.game_options)
+        while new_game == self.score_game:
+            new_game = random.choice(self.hugo_launcher.game_options)
+        self.score_game = new_game
 
     def switch_to(self, new_state: GameState | None):
         for videoKey, video in self.videos.items():
@@ -67,7 +89,9 @@ class Game:
         pygame.font.init()
         debug_font = pygame.freetype.SysFont("Arial", 8)
         self.name_font = pygame.freetype.SysFont("Arial", 45)
-        overlay = pygame.image.load("overlay.png").convert()
+        self.score_font = pygame.freetype.SysFont("Arial", 28, bold=True)
+        overlay = pygame.image.load("images/overlay.png").convert()
+        name_ask = pygame.image.load("images/name_ask.png").convert()
 
         instructions = {game_name:pygame.image.load("instructions/" + game_name + ".png").convert() for game_name in self.hugo_launcher.get_games()}
         prev_next_game_event = False
@@ -117,25 +141,29 @@ class Game:
             elif self.state == GameState.INITIAL:
                 if self.hasEnded():
                     self.switch_to(GameState.YOUR_NAME)
-                    self.user_name = ""
 
             elif self.state == GameState.YOUR_NAME:
                 if self.hasEnded():
+                    self.switch_to(GameState.SAY_YOUR_NAME)
+                    self.user_name = ""
 
-                    r = sr.Recognizer()
-                    with sr.AudioFile("hola_gonzalo.wav") as source:
-                        audio = r.record(source)
-
-                    try:
-                        words = r.recognize_whisper(audio, language="es")
-                        self.user_name = words.split(" ")[-1]
-                    except sr.UnknownValueError:
-                        print("Sphinx could not understand audio")
-                    except sr.RequestError as e:
-                        print("Sphinx error; {0}".format(e))
-
+            elif self.state == GameState.SAY_YOUR_NAME:
                 if press_5_event:
                     self.switch_to(GameState.NICE_NAME)
+
+                self.user_name = "Gonzalo"
+
+                # r = sr.Recognizer()
+                # with sr.AudioFile("hola_gonzalo.wav") as source:
+                #     audio = r.record(source)
+                #
+                # try:
+                #     words = r.recognize_whisper(audio, language="es")
+                #     self.user_name = words.split(" ")[-1]
+                # except sr.UnknownValueError:
+                #     print("Sphinx could not understand audio")
+                # except sr.RequestError as e:
+                #     print("Sphinx error; {0}".format(e))
 
             elif self.state == GameState.NICE_NAME:
                 if self.hasEnded():
@@ -169,25 +197,40 @@ class Game:
                 pass
 
             elif self.state == GameState.PLAYING_SCYLLA:
+                self.scores.insert_score(self.hugo_launcher.current_game, self.user_name, self.hugo_launcher.score)
+
                 if end_proc_event:
                     self.switch_to(GameState.YOU_LOST)
 
             elif self.state == GameState.YOU_LOST:
                 pass
 
+            screen.fill((255,255,255))
+
             vid_draw = self.videos[self.state] if self.state in self.videos else None
             if vid_draw and vid_draw.draw(screen, (0, 0), force_draw=False):
                 text_surface, rect = debug_font.render(str(self.state), (0, 0, 0))
                 screen.blit(text_surface, (10, 460))
-                screen.blit(overlay, (520, 15))
+                if self.state == GameState.ATTRACT:
 
-            if self.state == GameState.INSTRUCTIONS:
+                    if time.time() - self.time_score > 4:
+                        self.set_random_score_game()
+                        self.time_score = time.time()
+
+                    self.render_highscores(screen, self.score_game)
+                else:
+                    screen.blit(overlay, (520, 15))
+                pygame.display.update()
+
+            elif self.state == GameState.INSTRUCTIONS:
                 screen.blit(instructions[self.hugo_launcher.get_game()], (0,0))
+                pygame.display.update()
 
-            if self.state == GameState.YOUR_NAME:
+            elif self.state == GameState.SAY_YOUR_NAME:
+                screen.blit(name_ask, (0,0))
                 self.render_name(screen)
+                pygame.display.update()
 
-            pygame.display.update()
             pygame.time.wait(16)
             prev_next_game_event = next_game_event
 
@@ -203,6 +246,26 @@ class Game:
         screen.blit(text_surface_bg, (xpos - 1, ypos + 1))
         screen.blit(text_surface_bg, (xpos + 1, ypos + 1))
         screen.blit(text_surface_fg, (xpos, ypos))
+
+    def render_outline(self, screen, text, xpos, ypos):
+        text_surface_bg, rect = self.score_font.render(text, (0, 0, 0))
+        text_surface_fg, rect = self.score_font.render(text, (255, 255, 255))
+        screen.blit(text_surface_bg, (xpos - 1, ypos - 1))
+        screen.blit(text_surface_bg, (xpos + 1, ypos - 1))
+        screen.blit(text_surface_bg, (xpos - 1, ypos + 1))
+        screen.blit(text_surface_bg, (xpos + 1, ypos + 1))
+        screen.blit(text_surface_bg, (xpos - 2, ypos - 2))
+        screen.blit(text_surface_bg, (xpos + 2, ypos - 2))
+        screen.blit(text_surface_bg, (xpos - 2, ypos + 2))
+        screen.blit(text_surface_bg, (xpos + 2, ypos + 2))
+        screen.blit(text_surface_fg, (xpos, ypos))
+
+    def render_highscores(self, screen, game_name):
+        self.render_outline(screen, "PUNTAJES " + self.game_names[game_name], 30, 30)
+
+        top_scores = self.scores.get_top_scores(game_name, 5)
+        for rank, (name, score) in enumerate(top_scores, start=1):
+            self.render_outline(screen, f"{rank}. {name} - {score}", 30, 30 + rank * 30)
 
 
 if __name__ == "__main__":

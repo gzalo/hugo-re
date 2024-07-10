@@ -52,6 +52,16 @@ class HugoLauncher:
         "Train"
     ]
 
+    # left, top, right, bottom
+    score_rect_per_game = {
+        "Plane": (327,10,460,64),
+        "Forest": (380,388,579,461),
+        "IceCavern": (445,0,639,67),
+        "SkateBoard": (479,17,614,70),
+        "Scuba": (0,0,195,70),
+        "Train": (367,17,505,71)
+    }
+
     def __init__(self, title):
         self.last_read_time = time.time()
         self.title = title
@@ -97,10 +107,12 @@ class HugoLauncher:
                 self.end()
 
             if time.time() - self.last_read_time > 2:
+                score_image = ImageGrab.grab(bbox=self.score_rect_per_game[self.current_game])
                 results = self.reader.readtext(numpy.array(current_image), allowlist='0123456789')
                 for result in results:
                     if result[2] > 0.8:
                         self.score = int(result[1])
+                        print(self.score)
 
                 self.last_read_time = time.time()
 
