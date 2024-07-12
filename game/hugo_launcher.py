@@ -108,11 +108,10 @@ class HugoLauncher:
 
             if time.time() - self.last_read_time > 2:
                 score_image = ImageGrab.grab(bbox=self.score_rect_per_game[self.current_game])
-                results = self.reader.readtext(numpy.array(current_image), allowlist='0123456789')
+                results = self.reader.readtext(numpy.array(score_image), allowlist='0123456789')
                 for result in results:
                     if result[2] > 0.8:
                         self.score = int(result[1])
-                        print(self.score)
 
                 self.last_read_time = time.time()
 

@@ -157,6 +157,8 @@ class Game:
                 if hung_up_event:
                     self.switch_to(GameState.ATTRACT)
                     self.hugo_launcher.end()
+                    if self.user_name != "":
+                        self.scores.insert_score(self.hugo_launcher.current_game, self.user_name, self.hugo_launcher.score)
 
             if self.state == GameState.ATTRACT:
                 self.reloop()
@@ -165,16 +167,16 @@ class Game:
                     self.switch_to(GameState.INITIAL)
 
                 if press_5_event:
-                    self.switch_to(GameState.SAY_YOUR_NAME)
+                    self.switch_to(GameState.HAVE_LUCK)
 
             elif self.state == GameState.INITIAL:
                 if self.hasEnded():
                     self.switch_to(GameState.YOUR_NAME)
+                    self.user_name = ""
 
             elif self.state == GameState.YOUR_NAME:
                 if self.hasEnded():
                     self.switch_to(GameState.SAY_YOUR_NAME)
-                    self.user_name = ""
 
             elif self.state == GameState.SAY_YOUR_NAME:
                 if self.user_name == "":
@@ -220,16 +222,13 @@ class Game:
 
             elif self.state == GameState.PLAYING_HUGO:
                 if end_proc_event:
-                    self.switch_to(GameState.GOING_SCYLLA)
+                    self.switch_to(GameState.YOU_LOST)
 
             elif self.state == GameState.GOING_SCYLLA:
                 pass
 
             elif self.state == GameState.PLAYING_SCYLLA:
-                self.scores.insert_score(self.hugo_launcher.current_game, self.user_name, self.hugo_launcher.score)
-
-                if end_proc_event:
-                    self.switch_to(GameState.YOU_LOST)
+                pass
 
             elif self.state == GameState.YOU_LOST:
                 pass
