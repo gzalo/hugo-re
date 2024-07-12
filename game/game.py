@@ -16,7 +16,9 @@ class Game:
     BTN_HUNG_UP = "w"
     BTN_END = "e"
     BTN_PLAY = "5"
-    BTN_NEXT_GAME = "1"
+    BTN_NEXT_GAME = "6"
+    BTN_UP = "8"
+    BTN_DOWN = "2"
     BTN_EXIT = "r"
     TITLE = "A jugar con Hugo!"
     INSTRUCTIONS_TIMEOUT = 5
@@ -27,7 +29,7 @@ class Game:
     state_start = time.time()
     hugo_launcher = HugoLauncher(TITLE)
     scores = Scores()
-    user_name = "TEST"
+    user_name = ""
     name_font = None
     score_font = None
     time_score = time.time()
@@ -52,6 +54,8 @@ class Game:
         "Scuba": "Buceo",
         "Train": "Tren"
     }
+
+    user_name_len = 3
 
     def set_random_score_game(self):
         new_game = random.choice(self.hugo_launcher.game_options)
@@ -80,6 +84,13 @@ class Game:
     def reset_state_timeout(self):
         self.state_start = time.time()
 
+    # def callback(self, recognizer, audio):
+    #     try:
+    #         data = recognizer.recognize_google(audio, language="es-ES")
+    #         self.user_name = data
+    #     except LookupError:
+    #         print("Oops! Didn't catch that")
+
     def run(self):
         pygame.init()
 
@@ -92,9 +103,22 @@ class Game:
         self.score_font = pygame.freetype.SysFont("Arial", 28, bold=True)
         overlay = pygame.image.load("images/overlay.png").convert()
         name_ask = pygame.image.load("images/name_ask.png").convert()
+        keyboard_surface = [
+            pygame.image.load("images/keyboard_0.png").convert(),
+            pygame.image.load("images/keyboard_1.png").convert(),
+            pygame.image.load("images/keyboard_2.png").convert()
+        ]
 
         instructions = {game_name:pygame.image.load("instructions/" + game_name + ".png").convert() for game_name in self.hugo_launcher.get_games()}
         prev_next_game_event = False
+        prev_up_event = False
+        prev_down_event = False
+
+        # r = sr.Recognizer()
+        # m = sr.Microphone()
+        # with m as source:
+        #     r.adjust_for_ambient_noise(source)  # we only need to calibrate once, before we start listening
+        # stop_listening = r.listen_in_background(m, self.callback)
 
         running = True
         while running:
@@ -103,6 +127,8 @@ class Game:
             end_proc_event = False
             press_5_event = False
             next_game_event = False
+            up_event = False
+            down_event = False
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT or keyboard.is_pressed(self.BTN_EXIT):
@@ -117,9 +143,12 @@ class Game:
                 press_5_event = True
             if keyboard.is_pressed(self.BTN_END):
                 end_proc_event = True
-
             if keyboard.is_pressed(self.BTN_NEXT_GAME):
                 next_game_event = True
+            if keyboard.is_pressed(self.BTN_UP):
+                up_event = True
+            if keyboard.is_pressed(self.BTN_DOWN):
+                down_event = True
 
             if self.hugo_launcher.process():
                 end_proc_event = True
@@ -136,7 +165,7 @@ class Game:
                     self.switch_to(GameState.INITIAL)
 
                 if press_5_event:
-                    self.switch_to(GameState.HAVE_LUCK)
+                    self.switch_to(GameState.SAY_YOUR_NAME)
 
             elif self.state == GameState.INITIAL:
                 if self.hasEnded():
@@ -148,22 +177,22 @@ class Game:
                     self.user_name = ""
 
             elif self.state == GameState.SAY_YOUR_NAME:
-                if press_5_event:
-                    self.switch_to(GameState.NICE_NAME)
+                if self.user_name == "":
+                    self.user_name = "A"
 
-                self.user_name = "Gonzalo"
+                if up_event and not prev_up_event:
+                    last_char = ord(self.user_name[-1])
+                    self.user_name = self.user_name[:-1] + chr((last_char - 65 + 1) % 26 + 65)
 
-                # r = sr.Recognizer()
-                # with sr.AudioFile("hola_gonzalo.wav") as source:
-                #     audio = r.record(source)
-                #
-                # try:
-                #     words = r.recognize_whisper(audio, language="es")
-                #     self.user_name = words.split(" ")[-1]
-                # except sr.UnknownValueError:
-                #     print("Sphinx could not understand audio")
-                # except sr.RequestError as e:
-                #     print("Sphinx error; {0}".format(e))
+                if down_event and not prev_down_event:
+                    last_char = ord(self.user_name[-1])
+                    self.user_name = self.user_name[:-1] + chr((last_char - 65 - 1) % 26 + 65)
+
+                if next_game_event and not prev_next_game_event:
+                    if len(self.user_name) == self.user_name_len:
+                        self.switch_to(GameState.NICE_NAME)
+                    else:
+                        self.user_name += "A"
 
             elif self.state == GameState.NICE_NAME:
                 if self.hasEnded():
@@ -227,25 +256,32 @@ class Game:
                 pygame.display.update()
 
             elif self.state == GameState.SAY_YOUR_NAME:
-                screen.blit(name_ask, (0,0))
+                screen.blit(keyboard_surface[len(self.user_name)-1], (0,0))
                 self.render_name(screen)
                 pygame.display.update()
 
             pygame.time.wait(16)
             prev_next_game_event = next_game_event
+            prev_up_event = up_event
+            prev_down_event = down_event
 
         pygame.quit()
 
     def render_name(self, screen):
-        text_surface_bg, rect = self.name_font.render(self.user_name, (0, 0, 0))
-        text_surface_fg, rect = self.name_font.render(self.user_name, (255, 255, 255))
-        xpos = self.SCR_WIDTH / 2 - rect.width / 2
-        ypos = self.SCR_HEIGHT / 2 - rect.height / 2
-        screen.blit(text_surface_bg, (xpos - 1, ypos - 1))
-        screen.blit(text_surface_bg, (xpos + 1, ypos - 1))
-        screen.blit(text_surface_bg, (xpos - 1, ypos + 1))
-        screen.blit(text_surface_bg, (xpos + 1, ypos + 1))
-        screen.blit(text_surface_fg, (xpos, ypos))
+        for i in range(len(self.user_name)):
+            text_surface_bg, rect = self.name_font.render(self.user_name[i], (0, 0, 0))
+            text_surface_fg, rect = self.name_font.render(self.user_name[i], (255, 255, 255))
+            xpos = 106 + i * 56 - rect.width/2
+            ypos = 202
+            screen.blit(text_surface_bg, (xpos - 1, ypos - 1))
+            screen.blit(text_surface_bg, (xpos + 1, ypos - 1))
+            screen.blit(text_surface_bg, (xpos - 1, ypos + 1))
+            screen.blit(text_surface_bg, (xpos + 1, ypos + 1))
+            screen.blit(text_surface_bg, (xpos - 2, ypos - 2))
+            screen.blit(text_surface_bg, (xpos + 2, ypos - 2))
+            screen.blit(text_surface_bg, (xpos - 2, ypos + 2))
+            screen.blit(text_surface_bg, (xpos + 2, ypos + 2))
+            screen.blit(text_surface_fg, (xpos, ypos))
 
     def render_outline(self, screen, text, xpos, ypos):
         text_surface_bg, rect = self.score_font.render(text, (0, 0, 0))
