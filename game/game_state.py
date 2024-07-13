@@ -4,7 +4,6 @@ class GameState(Enum):
     ATTRACT = 0
     INITIAL = 1
     YOUR_NAME = 2
-    SAY_YOUR_NAME = 3
     NICE_NAME = 4
     PRESS_5 = 5
     HAVE_LUCK = 6

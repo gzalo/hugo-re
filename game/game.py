@@ -104,9 +104,9 @@ class Game:
         overlay = pygame.image.load("images/overlay.png").convert()
         name_ask = pygame.image.load("images/name_ask.png").convert()
         keyboard_surface = [
-            pygame.image.load("images/keyboard_0.png").convert(),
-            pygame.image.load("images/keyboard_1.png").convert(),
-            pygame.image.load("images/keyboard_2.png").convert()
+            pygame.image.load("images/keyboard_0.png").convert_alpha(),
+            pygame.image.load("images/keyboard_1.png").convert_alpha(),
+            pygame.image.load("images/keyboard_2.png").convert_alpha()
         ]
 
         instructions = {game_name:pygame.image.load("instructions/" + game_name + ".png").convert() for game_name in self.hugo_launcher.get_games()}
@@ -167,7 +167,7 @@ class Game:
                     self.switch_to(GameState.INITIAL)
 
                 if press_5_event:
-                    self.switch_to(GameState.HAVE_LUCK)
+                    self.switch_to(GameState.YOUR_NAME)
 
             elif self.state == GameState.INITIAL:
                 if self.hasEnded():
@@ -175,10 +175,8 @@ class Game:
                     self.user_name = ""
 
             elif self.state == GameState.YOUR_NAME:
-                if self.hasEnded():
-                    self.switch_to(GameState.SAY_YOUR_NAME)
+                self.reloop()
 
-            elif self.state == GameState.SAY_YOUR_NAME:
                 if self.user_name == "":
                     self.user_name = "A"
 
@@ -246,17 +244,15 @@ class Game:
                         self.time_score = time.time()
 
                     self.render_highscores(screen, self.score_game)
+                elif self.state == GameState.YOUR_NAME:
+                    screen.blit(keyboard_surface[len(self.user_name) - 1], (0, 0))
+                    self.render_name(screen)
                 else:
                     screen.blit(overlay, (520, 15))
                 pygame.display.update()
 
             elif self.state == GameState.INSTRUCTIONS:
                 screen.blit(instructions[self.hugo_launcher.get_game()], (0,0))
-                pygame.display.update()
-
-            elif self.state == GameState.SAY_YOUR_NAME:
-                screen.blit(keyboard_surface[len(self.user_name)-1], (0,0))
-                self.render_name(screen)
                 pygame.display.update()
 
             pygame.time.wait(16)
