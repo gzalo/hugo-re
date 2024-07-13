@@ -35,7 +35,7 @@ class HugoLauncher:
     last_image = ImageGrab.grab()
     initial_pressed = False
     title = None
-    current_game = None
+    current_game = "Forest"
     reader = easyocr.Reader(['en'])
     last_read_time = None
     score = 0
