@@ -73,6 +73,8 @@ class HugoLauncher:
         write_config(hugo_config, self.current_game)
         self.score = 0
 
+        handle = win32gui.FindWindow(0, self.title)
+        win32gui.ShowWindow(handle, win32con.SW_MINIMIZE)
         self.hugo_proc = subprocess.Popen(hugo_exe, cwd=hugo_dir)
 
     def end(self):
@@ -110,8 +112,12 @@ class HugoLauncher:
                 score_image = ImageGrab.grab(bbox=self.score_rect_per_game[self.current_game])
                 results = self.reader.readtext(numpy.array(score_image), allowlist='0123456789')
                 for result in results:
-                    if result[2] > 0.8:
-                        self.score = int(result[1])
+                    if result[2] > 0.65:
+                        score = int(result[1])
+                        if self.score < score < 9999:
+                            self.score = score
+                    else:
+                        print(result[2])
 
                 self.last_read_time = time.time()
 

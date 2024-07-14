@@ -187,9 +187,8 @@ class Game:
                 if offhook_event:
                     self.switch_to(GameState.INITIAL)
 
-                #if press_5_event:
-                    #self.hugo_launcher.score = 100
-                    #self.switch_to(GameState.PLAYING_SCYLLA_0)
+                if press_5_event:
+                    self.switch_to(GameState.PRESS_5)
 
             elif self.state == GameState.INITIAL:
                 if self.has_ended():
@@ -215,6 +214,9 @@ class Game:
                         self.switch_to(GameState.NICE_NAME)
                     else:
                         self.user_name += "A"
+
+                if press_5_event:
+                    self.switch_to(GameState.NICE_NAME)
 
             elif self.state == GameState.NICE_NAME:
                 if self.has_ended():
