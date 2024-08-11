@@ -10,6 +10,10 @@ Eventually we'll have some AI-generated voices for Hugo and the host (Gaby in Ar
 
 **Phase 2**: As seen in Cybercirujas event June 2024, introduced a wrapper with full-motion videos and random game selector
 
+**Phase 3**: As seen in Cybercirujas CCK July 2024, introduced a high score tracker, name recognizer and more
+
+**Phase 4**: As seen in Punkware Cyberzine Aug 2024, introduced 4 player mode using a reimplementation of the game
+
 ![Remake](docs/hugoremake.drawio.png)
 
 - [Game wrapper with full-motion videos](game/)
@@ -22,15 +26,11 @@ Eventually we'll have some AI-generated voices for Hugo and the host (Gaby in Ar
 
 I'm looking for contributors! If you are interested in:
 - AI/LLM
-- Reverse engineering old DOS/WIN32 games
+- Reverse engineering or reimplementing old DOS/WIN32 games
 - Speech recognition
 - 3d modeling and gamedev
 
 ...you can join the team and help the project advance!
-
-## Todo: 
-- Add subtitles to videos
-- After losing game, stop looping again and ask the user to hang up
 
 ## Original Hugo Landline phone numbers
 - 4317-8501
