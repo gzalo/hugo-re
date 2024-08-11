@@ -26,8 +26,21 @@ public class Main implements Callable<Integer> {
         try(Stream<Path> inputs = Files.walk(inputRoot)
                 .filter(Files::isRegularFile)){
             inputs.forEach(input -> {
-                final String extension = FilenameUtils.getExtension(input.getFileName().toString());
-                final FileType type = FileType.valueOf(extension.toUpperCase());
+                final String extension = FilenameUtils.getExtension(input.getFileName().toString()).toUpperCase();
+
+                final FileType type;
+                if(extension.equals("")){
+                    if(input.getFileName().toString().equals("main")){
+                        type = FileType.PAL;
+                    } else if(input.getFileName().toString().equals("font")){
+                        type = FileType.CGF;
+                    } else {
+                        System.out.println("Unknown mapping for " + input.getFileName());
+                        return;
+                    }
+                } else {
+                    type = FileType.valueOf(extension);
+                }
                 final Path output = outputRoot.resolve(inputRoot.relativize(input));
                 try {
                     if(type.getConverter().convert(input, output) != 0){

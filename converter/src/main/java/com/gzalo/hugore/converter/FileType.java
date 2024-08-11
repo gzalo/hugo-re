@@ -17,7 +17,10 @@ public enum FileType {
     BAK(NoOpConverter.class),
     PCX(NoOpConverter.class), // Not really used
     PAL(NoOpConverter.class),  // Only used for menu
-    FLC(NoOpConverter.class); // Used just once
+    FLC(NoOpConverter.class), // Used just once
+    CEP(NoOpConverter.class), // ITE CORE EXPLORER PROJECT
+    SCC(NoOpConverter.class), // Visual SourceSafe
+    AL(NoOpConverter.class); // Text palettes
 
     private final Class<? extends Converter> converter;
 

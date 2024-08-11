@@ -7,6 +7,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
 
 public class CgfConverter implements Converter {
 
@@ -77,16 +78,34 @@ public class CgfConverter implements Converter {
     ){
     };
 
+    private Path siblingTilFile(Path path) throws IOException {
+        Path parentDir = path.getParent();
+
+        try (Stream<Path> files = Files.list(parentDir)) {
+            return files
+                    .filter(file -> file.getFileName().toString().toLowerCase().endsWith(".til"))
+                    .findFirst()
+                    .orElse(null);
+        }
+    }
+
 
     @Override
     public int convert(Path input, Path output) throws IOException {
         byte[] fileContent = Files.readAllBytes(input);
 
-        if(fileContent.length < 0x400) {
-            System.out.println(input + " is too short");
-            return 1;
+        Palette palette;
+        Path siblingTilFilePath = siblingTilFile(input);
+        if (siblingTilFilePath == null) {
+            if (fileContent.length < 0x400) {
+                System.out.println("Cannot find feasible palette for file " + input);
+                return 1;
+            }
+            palette = Palette.fromAlphaData(fileContent, fileContent.length-0x400);
+        } else {
+            byte[] siblingTilFile = Files.readAllBytes(siblingTilFilePath);
+            palette = Palette.fromData(siblingTilFile, 0x20);
         }
-        Palette palette = Palette.fromAlphaData(fileContent, fileContent.length-0x400);
 
         int totalFrames = BinUtils.getInt(fileContent, 8);
         List<Integer> xOffsets = new ArrayList<>();
@@ -100,11 +119,18 @@ public class CgfConverter implements Converter {
             int height = BinUtils.getInt(fileContent, frameMetaOffset+12);
             int payloadOffset = BinUtils.getInt(fileContent, frameMetaOffset+20);
 
+            if(width < 0 || height < 0) {
+                System.out.println("Invalid frame size: " + width + "x" + height);
+                return 1;
+            }
+
             xOffsets.add(xOffset);
             yOffsets.add(yOffset);
 
             if(height == 0 || width == 0) {
-                System.out.println("Frame size is zero in " + input + " at " + currentFrame);
+                final Path outputWithPngExtension = output.resolveSibling(output.getFileName() + "_" + currentFrame + ".png");
+                outputWithPngExtension.toFile().getParentFile().mkdirs();
+                PngUtils.convertARGBToPng(new int[]{0x00000000}, 1, 1, outputWithPngExtension.toFile());
                 continue;
             }
             int[] data = new int[width*height];
