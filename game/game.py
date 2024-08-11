@@ -1,10 +1,8 @@
 import pygame
 import pygame.freetype
-import keyboard
 import time
 from pyvidplayer2 import Video
 import random
-import speech_recognition as sr
 
 from hugo_launcher import HugoLauncher
 from game_state import GameState
@@ -12,22 +10,23 @@ from scores import Scores
 
 
 class Game:
-    BTN_OFF_HOOK = "q"
-    BTN_HUNG_UP = "w"
-    BTN_END = "e"
-    BTN_PLAY = "5"
-    BTN_NEXT_GAME = "6"
-    BTN_UP = "8"
-    BTN_DOWN = "2"
-    BTN_EXIT = "r"
+    BTN_OFF_HOOK = pygame.K_q
+    BTN_HUNG_UP = pygame.K_w
+    BTN_END = pygame.K_e
+    BTN_PLAY = pygame.K_5
+    BTN_NEXT_GAME = pygame.K_6
+    BTN_UP = pygame.K_8
+    BTN_DOWN = pygame.K_2
+    BTN_EXIT = pygame.K_r
     TITLE = "A jugar con Hugo!"
     INSTRUCTIONS_TIMEOUT = 5
     SCR_WIDTH = 640
     SCR_HEIGHT = 480
+    SCR_FULLSCREEN = False
 
     state = GameState.ATTRACT
     state_start = time.time()
-    hugo_launcher = HugoLauncher(TITLE)
+    hugo_launcher = HugoLauncher()
     scores = Scores()
     user_name = ""
     name_font = None
@@ -94,17 +93,11 @@ class Game:
     def reset_state_timeout(self):
         self.state_start = time.time()
 
-    # def callback(self, recognizer, audio):
-    #     try:
-    #         data = recognizer.recognize_google(audio, language="es-ES")
-    #         self.user_name = data
-    #     except LookupError:
-    #         print("Oops! Didn't catch that")
-
     def run(self):
         pygame.init()
 
-        screen = pygame.display.set_mode((self.SCR_WIDTH, self.SCR_HEIGHT), pygame.FULLSCREEN)
+        fs = pygame.FULLSCREEN if self.SCR_FULLSCREEN else 0
+        screen = pygame.display.set_mode((self.SCR_WIDTH, self.SCR_HEIGHT), fs)
         pygame.mouse.set_visible(False)
         pygame.display.set_caption(self.TITLE)
         pygame.font.init()
@@ -125,12 +118,6 @@ class Game:
         prev_up_event = False
         prev_down_event = False
 
-        # r = sr.Recognizer()
-        # m = sr.Microphone()
-        # with m as source:
-        #     r.adjust_for_ambient_noise(source)  # we only need to calibrate once, before we start listening
-        # stop_listening = r.listen_in_background(m, self.callback)
-
         running = True
         updated_score = False
         while running:
@@ -146,29 +133,32 @@ class Game:
             press_3_event = False
 
             for event in pygame.event.get():
-                if event.type == pygame.QUIT or keyboard.is_pressed(self.BTN_EXIT):
+                if event.type == pygame.QUIT or (event.type == pygame.KEYDOWN and event.key == self.BTN_EXIT):
                     self.switch_to(None)
                     running = False
 
-            if keyboard.is_pressed(self.BTN_OFF_HOOK):
+
+            keys = pygame.key.get_pressed()
+
+            if keys[self.BTN_OFF_HOOK]:
                 offhook_event = True
-            if keyboard.is_pressed(self.BTN_HUNG_UP):
+            if keys[self.BTN_HUNG_UP]:
                 hung_up_event = True
-            if keyboard.is_pressed(self.BTN_PLAY):
+            if keys[self.BTN_PLAY]:
                 press_5_event = True
-            if keyboard.is_pressed(self.BTN_END):
+            if keys[self.BTN_END]:
                 end_proc_event = True
-            if keyboard.is_pressed(self.BTN_NEXT_GAME):
+            if keys[self.BTN_NEXT_GAME]:
                 next_game_event = True
-            if keyboard.is_pressed(self.BTN_UP):
+            if keys[self.BTN_UP]:
                 up_event = True
-            if keyboard.is_pressed(self.BTN_DOWN):
+            if keys[self.BTN_DOWN]:
                 down_event = True
-            if keyboard.is_pressed("1"):
+            if keys[pygame.K_1]:
                 press_1_event = True
-            if keyboard.is_pressed("2"):
+            if keys[pygame.K_2]:
                 press_2_event = True
-            if keyboard.is_pressed("3"):
+            if keys[pygame.K_3]:
                 press_3_event = True
 
             if self.hugo_launcher.process():
