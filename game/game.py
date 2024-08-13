@@ -7,6 +7,7 @@ import random
 from hugo_launcher import HugoLauncher
 from game_state import GameState
 from scores import Scores
+from cave import Cave
 
 
 class Game:
@@ -41,27 +42,17 @@ class Game:
         GameState.NICE_NAME: Video("videos/nice_name.mp4"),
         GameState.PRESS_5: Video("videos/press_5.mp4"),
         GameState.ENDING: Video("videos/you_lost.mp4"),
-        GameState.GOING_SCYLLA: Video("videos/scylla_cave.mp4"),
-        GameState.PLAYING_SCYLLA_0: Video("rope/0.mp4"),
-        GameState.PLAYING_SCYLLA_1_BAD: Video("rope/1_bad.mp4"),
-        GameState.PLAYING_SCYLLA_1_GOOD: Video("rope/1_good.mp4"),
-        GameState.PLAYING_SCYLLA_1_BEST: Video("rope/1_best.mp4"),
-        GameState.PLAYING_SCYLLA_2_BAD: Video("rope/2_bad.mp4"),
-        GameState.PLAYING_SCYLLA_2_GOOD: Video("rope/2_good.mp4"),
-        GameState.PLAYING_SCYLLA_2_BEST: Video("rope/2_best.mp4"),
-        GameState.PLAYING_SCYLLA_3_BAD: Video("rope/3_bad.mp4"),
-        GameState.PLAYING_SCYLLA_3_GOOD: Video("rope/3_good.mp4"),
-        GameState.PLAYING_SCYLLA_3_BEST: Video("rope/3_best.mp4"),
         GameState.HAVE_LUCK: Video("videos/have_luck.mp4"),
     }
 
     game_names = {
-        "Plane": "Avión",
-        "Forest": "Selva",
-        "IceCavern": "Cueva de hielo",
-        "SkateBoard": "Skate",
-        "Scuba": "Buceo",
-        "Train": "Tren"
+        # Complexity: vids, sfx, speech, syncs
+        "Plane": "Avión", # 1437, 36, 10, 7
+        "Forest": "Selva", # 640, 26, 14, 10
+        "IceCavern": "Cueva de hielo", # 870, 31, 10, 7
+        "SkateBoard": "Skate", # 4212, 27, 8, 5
+        "Scuba": "Buceo", # 1270, 27, 11, 8
+        "Train": "Tren" # 3933, 29, 9, 7
     }
 
     user_name_len = 3
@@ -106,20 +97,20 @@ class Game:
         self.score_font = pygame.freetype.SysFont("Arial", 28, bold=True)
         self.big_score_font = pygame.freetype.SysFont("Arial", 55, bold=True)
         overlay = pygame.image.load("images/overlay.png").convert()
-        name_ask = pygame.image.load("images/name_ask.png").convert()
         keyboard_surface = [
             pygame.image.load("images/keyboard_0.png").convert_alpha(),
             pygame.image.load("images/keyboard_1.png").convert_alpha(),
             pygame.image.load("images/keyboard_2.png").convert_alpha()
         ]
 
+        self.cave = None
+
         instructions = {game_name:pygame.image.load("instructions/" + game_name + ".png").convert() for game_name in self.hugo_launcher.get_games()}
         prev_next_game_event = False
         prev_up_event = False
         prev_down_event = False
-
         running = True
-        updated_score = False
+
         while running:
             offhook_event = False
             hung_up_event = False
@@ -128,9 +119,9 @@ class Game:
             next_game_event = False
             up_event = False
             down_event = False
-            press_1_event = False
-            press_2_event = False
             press_3_event = False
+            press_6_event = False
+            press_9_event = False
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT or (event.type == pygame.KEYDOWN and event.key == self.BTN_EXIT):
@@ -154,12 +145,12 @@ class Game:
                 up_event = True
             if keys[self.BTN_DOWN]:
                 down_event = True
-            if keys[pygame.K_1]:
-                press_1_event = True
-            if keys[pygame.K_2]:
-                press_2_event = True
             if keys[pygame.K_3]:
                 press_3_event = True
+            if keys[pygame.K_6]:
+                press_6_event = True
+            if keys[pygame.K_9]:
+                press_9_event = True
 
             if self.hugo_launcher.process():
                 end_proc_event = True
@@ -178,7 +169,7 @@ class Game:
                     self.switch_to(GameState.INITIAL)
 
                 if press_5_event:
-                    self.switch_to(GameState.PRESS_5)
+                    self.switch_to(GameState.CAVE)
 
             elif self.state == GameState.INITIAL:
                 if self.has_ended():
@@ -238,44 +229,17 @@ class Game:
 
             elif self.state == GameState.GOING_SCYLLA:
                 if self.has_ended():
-                    self.switch_to(GameState.PLAYING_SCYLLA_0)
+                    self.switch_to(GameState.CAVE)
 
-            elif self.state == GameState.PLAYING_SCYLLA_0:
-                updated_score = False
-                random_value = random.randint(0, 2)
-                if press_1_event:
-                    if random_value == 0:
-                        self.switch_to(GameState.PLAYING_SCYLLA_1_BAD)
-                    elif random_value == 1:
-                        self.switch_to(GameState.PLAYING_SCYLLA_1_GOOD)
-                    else:
-                        self.switch_to(GameState.PLAYING_SCYLLA_1_BEST)
-                if press_2_event:
-                    if random_value == 0:
-                        self.switch_to(GameState.PLAYING_SCYLLA_2_BAD)
-                    elif random_value == 1:
-                        self.switch_to(GameState.PLAYING_SCYLLA_2_GOOD)
-                    else:
-                        self.switch_to(GameState.PLAYING_SCYLLA_2_BEST)
-                if press_3_event:
-                    if random_value == 0:
-                        self.switch_to(GameState.PLAYING_SCYLLA_3_BAD)
-                    elif random_value == 1:
-                        self.switch_to(GameState.PLAYING_SCYLLA_3_GOOD)
-                    else:
-                        self.switch_to(GameState.PLAYING_SCYLLA_3_BEST)
+            elif self.state == GameState.CAVE:
+                if self.cave is None:
+                    self.cave = Cave(1234)
 
-            elif self.is_cave() :
-                if time.time() - self.state_start > 3 and not updated_score:
-                    if self.is_good():
-                        self.hugo_launcher.score *= 2
-                    elif self.is_best():
-                        self.hugo_launcher.score *= 3
-                    self.scores.insert_score(self.hugo_launcher.current_game, self.user_name, self.hugo_launcher.score)
-                    self.user_name = ""
-                    updated_score = True
+                self.cave.process_events(press_3_event, press_6_event, press_9_event)
 
-                if self.has_ended():
+                if self.cave.ended:
+                    # TODO save score
+                    self.cave = None
                     self.switch_to(GameState.ENDING)
 
             elif self.state == GameState.ENDING:
@@ -297,12 +261,14 @@ class Game:
                 elif self.state == GameState.YOUR_NAME:
                     screen.blit(keyboard_surface[len(self.user_name) - 1], (0, 0))
                     self.render_name(screen)
-                elif self.state == GameState.PLAYING_SCYLLA_0 or self.is_cave():
-                    self.render_score(screen, str(self.hugo_launcher.score))
                 else:
                     screen.blit(overlay, (520, 15))
                 pygame.display.update()
 
+            elif self.state == GameState.CAVE:
+                if self.cave is not None:
+                    self.cave.render(screen)
+                pygame.display.update()
             elif self.state == GameState.INSTRUCTIONS:
                 screen.blit(instructions[self.hugo_launcher.get_game()], (0, 0))
                 pygame.display.update()
@@ -343,49 +309,12 @@ class Game:
         screen.blit(text_surface_bg, (xpos + 2, ypos + 2))
         screen.blit(text_surface_fg, (xpos, ypos))
 
-    def is_cave(self):
-        return self.state == GameState.PLAYING_SCYLLA_1_BAD or \
-             self.state == GameState.PLAYING_SCYLLA_1_GOOD or \
-             self.state == GameState.PLAYING_SCYLLA_1_BEST or \
-             self.state == GameState.PLAYING_SCYLLA_2_BAD or \
-             self.state == GameState.PLAYING_SCYLLA_2_GOOD or \
-             self.state == GameState.PLAYING_SCYLLA_2_BEST or \
-             self.state == GameState.PLAYING_SCYLLA_3_BAD or \
-             self.state == GameState.PLAYING_SCYLLA_3_GOOD or \
-             self.state == GameState.PLAYING_SCYLLA_3_BEST
-
     def render_highscores(self, screen, game_name):
         self.render_outline(screen, "PUNTAJES " + self.game_names[game_name], 30, 30)
 
         top_scores = self.scores.get_top_scores(game_name, 5)
         for rank, (name, score) in enumerate(top_scores, start=1):
             self.render_outline(screen, f"{rank}. {name} - {score}", 30, 30 + rank * 30)
-
-    def render_score(self, screen, score):
-        pygame.draw.rect(screen, (0, 0, 0), (453, 403, 163, 55))
-        text_surface_bg, rect = self.big_score_font.render(score, (0, 0, 0))
-        text_surface_fg, rect = self.big_score_font.render(score, (255, 255, 255))
-        xpos = 600 - rect.width
-        ypos = 410
-        screen.blit(text_surface_bg, (xpos - 1, ypos - 1))
-        screen.blit(text_surface_bg, (xpos + 1, ypos - 1))
-        screen.blit(text_surface_bg, (xpos - 1, ypos + 1))
-        screen.blit(text_surface_bg, (xpos + 1, ypos + 1))
-        screen.blit(text_surface_bg, (xpos - 2, ypos - 2))
-        screen.blit(text_surface_bg, (xpos + 2, ypos - 2))
-        screen.blit(text_surface_bg, (xpos - 2, ypos + 2))
-        screen.blit(text_surface_bg, (xpos + 2, ypos + 2))
-        screen.blit(text_surface_fg, (xpos, ypos))
-
-    def is_good(self):
-          return self.state == GameState.PLAYING_SCYLLA_1_GOOD or \
-             self.state == GameState.PLAYING_SCYLLA_2_GOOD or \
-             self.state == GameState.PLAYING_SCYLLA_3_GOOD
-
-    def is_best(self):
-          return self.state == GameState.PLAYING_SCYLLA_1_BEST or \
-             self.state == GameState.PLAYING_SCYLLA_2_BEST or \
-             self.state == GameState.PLAYING_SCYLLA_3_BEST
 
 if __name__ == "__main__":
     Game().run()
