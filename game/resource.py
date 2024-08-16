@@ -1,9 +1,13 @@
 import json
 import pygame
+import sys
 
 
 class Resource:
-    DATA_DIR = "C:/Users/Gzalo/Desktop/HugoGoldFlashparty/BigFileConverted/RopeOutroData"
+    if len(sys.argv) > 1:
+        DATA_DIR = sys.argv[1]
+    else:
+        raise Exception("Data directory needs to be specified as first argument")
 
     @staticmethod
     def load_sync(filename):
@@ -24,6 +28,6 @@ class Resource:
 
         for frame in range(start, end + 1):
             filename = Resource.DATA_DIR + "/gfx/" + name + "_" + str(frame) + ".png"
-            out.append(pygame.transform.scale_by(pygame.image.load(filename).convert_alpha(), 2))
+            out.append(pygame.image.load(filename).convert_alpha())
 
         return out

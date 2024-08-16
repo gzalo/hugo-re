@@ -16,6 +16,9 @@ class Scores:
         cursor.execute(sql_create_scores_table)
 
     def insert_score(self, game_name, player_name, score):
+        if player_name == "":
+            return
+
         sql = ''' INSERT INTO scores(game_name, player_name, score)
                   VALUES(?,?,?) '''
         cursor = self.conn.cursor()

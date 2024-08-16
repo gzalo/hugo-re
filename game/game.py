@@ -4,7 +4,6 @@ import time
 from pyvidplayer2 import Video
 import random
 
-from hugo_launcher import HugoLauncher
 from game_state import GameState
 from scores import Scores
 from cave import Cave
@@ -25,15 +24,25 @@ class Game:
     SCR_HEIGHT = 480
     SCR_FULLSCREEN = False
 
+    game_options = [
+        #"Plane",
+        "Forest",
+        #"IceCavern",
+        "SkateBoard",
+        #"Scuba",
+        #"Train"
+    ]
+
     state = GameState.ATTRACT
     state_start = time.time()
-    hugo_launcher = HugoLauncher()
     scores = Scores()
     user_name = ""
     name_font = None
     score_font = None
     time_score = time.time()
     score_game = "Forest"
+    current_game = game_options[0]
+    score = 0
 
     videos = {
         GameState.ATTRACT: Video("videos/attract_demo.mp4"),
@@ -57,10 +66,16 @@ class Game:
 
     user_name_len = 3
 
+    def set_random_game(self):
+        new_game = random.choice(self.game_options)
+        while new_game == self.current_game:
+            new_game = random.choice(self.game_options)
+        self.current_game = new_game
+
     def set_random_score_game(self):
-        new_game = random.choice(self.hugo_launcher.game_options)
+        new_game = random.choice(self.game_options)
         while new_game == self.score_game:
-            new_game = random.choice(self.hugo_launcher.game_options)
+            new_game = random.choice(self.game_options)
         self.score_game = new_game
 
     def switch_to(self, new_state: GameState | None):
@@ -105,7 +120,7 @@ class Game:
 
         self.cave = None
 
-        instructions = {game_name:pygame.image.load("instructions/" + game_name + ".png").convert() for game_name in self.hugo_launcher.get_games()}
+        instructions = {game_name:pygame.image.load("instructions/" + game_name + ".png").convert() for game_name in self.game_options}
         prev_next_game_event = False
         prev_up_event = False
         prev_down_event = False
@@ -122,12 +137,18 @@ class Game:
             press_3_event = False
             press_6_event = False
             press_9_event = False
+            event_plus = False
+            event_minus = False
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT or (event.type == pygame.KEYDOWN and event.key == self.BTN_EXIT):
                     self.switch_to(None)
                     running = False
-
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_KP_PLUS:
+                        event_plus = True
+                    if event.key == pygame.K_KP_MINUS:
+                        event_minus = True
 
             keys = pygame.key.get_pressed()
 
@@ -152,15 +173,15 @@ class Game:
             if keys[pygame.K_9]:
                 press_9_event = True
 
-            if self.hugo_launcher.process():
-                end_proc_event = True
-
             if self.state != GameState.ATTRACT:
                 if hung_up_event:
                     self.switch_to(GameState.ATTRACT)
-                    self.hugo_launcher.end()
-                    if self.user_name != "":
-                        self.scores.insert_score(self.hugo_launcher.current_game, self.user_name, self.hugo_launcher.score)
+                    if self.cave is not None:
+                        self.scores.insert_score(self.current_game, self.user_name, self.cave.score)
+                        self.cave.end()
+                        self.cave = None
+                    else:
+                        self.scores.insert_score(self.current_game, self.user_name, self.score)
 
             if self.state == GameState.ATTRACT:
                 self.reloop()
@@ -212,16 +233,16 @@ class Game:
             elif self.state == GameState.HAVE_LUCK:
                 if self.has_ended():
                     self.switch_to(GameState.INSTRUCTIONS)
-                    self.hugo_launcher.set_random_game()
+                    self.set_random_game()
 
             elif self.state == GameState.INSTRUCTIONS:
                 if next_game_event and not prev_next_game_event:
-                    self.hugo_launcher.set_random_game()
+                    self.set_random_game()
                     self.reset_state_timeout()
 
                 if press_5_event or self.state_timeout(self.INSTRUCTIONS_TIMEOUT):
                     self.switch_to(GameState.PLAYING_HUGO)
-                    self.hugo_launcher.start()
+                    # self.game.start() TODO fix
 
             elif self.state == GameState.PLAYING_HUGO:
                 if end_proc_event:
@@ -235,7 +256,7 @@ class Game:
                 if self.cave is None:
                     self.cave = Cave(1234)
 
-                self.cave.process_events(press_3_event, press_6_event, press_9_event)
+                self.cave.process_events(press_3_event, press_6_event, press_9_event, event_plus, event_minus)
 
                 if self.cave.ended:
                     # TODO save score
@@ -270,7 +291,7 @@ class Game:
                     self.cave.render(screen)
                 pygame.display.update()
             elif self.state == GameState.INSTRUCTIONS:
-                screen.blit(instructions[self.hugo_launcher.get_game()], (0, 0))
+                screen.blit(instructions[self.current_game], (0, 0))
                 pygame.display.update()
 
             pygame.time.wait(16)
