@@ -6,13 +6,14 @@ import random
 
 from game_state import GameState
 from scores import Scores
+from high_score_renderer import HighScoreRenderer
 from cave import Cave
+from forest import Forest
 
 
 class Game:
     BTN_OFF_HOOK = pygame.K_q
     BTN_HUNG_UP = pygame.K_w
-    BTN_END = pygame.K_e
     BTN_PLAY = pygame.K_5
     BTN_NEXT_GAME = pygame.K_6
     BTN_UP = pygame.K_8
@@ -28,31 +29,10 @@ class Game:
         #"Plane",
         "Forest",
         #"IceCavern",
-        "SkateBoard",
+        #"SkateBoard",
         #"Scuba",
         #"Train"
     ]
-
-    state = GameState.ATTRACT
-    state_start = time.time()
-    scores = Scores()
-    user_name = ""
-    name_font = None
-    score_font = None
-    time_score = time.time()
-    score_game = "Forest"
-    current_game = game_options[0]
-    score = 0
-
-    videos = {
-        GameState.ATTRACT: Video("videos/attract_demo.mp4"),
-        GameState.INITIAL: Video("videos/hello_hello.mp4"),
-        GameState.YOUR_NAME: Video("videos/your_name_is.mp4"),
-        GameState.NICE_NAME: Video("videos/nice_name.mp4"),
-        GameState.PRESS_5: Video("videos/press_5.mp4"),
-        GameState.ENDING: Video("videos/you_lost.mp4"),
-        GameState.HAVE_LUCK: Video("videos/have_luck.mp4"),
-    }
 
     game_names = {
         # Complexity: vids, sfx, speech, syncs
@@ -64,22 +44,41 @@ class Game:
         "Train": "Tren" # 3933, 29, 9, 7
     }
 
+    state = GameState.ATTRACT
+    state_start = time.time()
+    scores = Scores()
+    high_score_renderer = HighScoreRenderer(scores, game_options, game_names)
+    user_name = ""
+    name_font = None
+    time_score = time.time()
+    current_game = game_options[0]
+    cave = None
+    forest = None
+
+    videos = {
+        GameState.ATTRACT: Video("videos/attract_demo.mp4"),
+        GameState.INITIAL: Video("videos/hello_hello.mp4"),
+        GameState.YOUR_NAME: Video("videos/your_name_is.mp4"),
+        GameState.NICE_NAME: Video("videos/nice_name.mp4"),
+        GameState.PRESS_5: Video("videos/press_5.mp4"),
+        GameState.ENDING: Video("videos/you_lost.mp4"),
+        GameState.HAVE_LUCK: Video("videos/have_luck.mp4"),
+    }
+
     user_name_len = 3
+    pre_cave_score = 0
 
     def set_random_game(self):
+        if len(self.game_options) == 1:
+            self.current_game = self.game_options[0]
+            return
         new_game = random.choice(self.game_options)
         while new_game == self.current_game:
             new_game = random.choice(self.game_options)
         self.current_game = new_game
 
-    def set_random_score_game(self):
-        new_game = random.choice(self.game_options)
-        while new_game == self.score_game:
-            new_game = random.choice(self.game_options)
-        self.score_game = new_game
-
     def switch_to(self, new_state: GameState | None):
-        for videoKey, video in self.videos.items():
+        for video_key, video in self.videos.items():
             video.stop()
         if new_state is not None and new_state in self.videos:
             self.videos[new_state].restart()
@@ -109,16 +108,12 @@ class Game:
         pygame.font.init()
         debug_font = pygame.freetype.SysFont("Arial", 8)
         self.name_font = pygame.freetype.SysFont("Arial", 45)
-        self.score_font = pygame.freetype.SysFont("Arial", 28, bold=True)
-        self.big_score_font = pygame.freetype.SysFont("Arial", 55, bold=True)
         overlay = pygame.image.load("images/overlay.png").convert()
         keyboard_surface = [
             pygame.image.load("images/keyboard_0.png").convert_alpha(),
             pygame.image.load("images/keyboard_1.png").convert_alpha(),
             pygame.image.load("images/keyboard_2.png").convert_alpha()
         ]
-
-        self.cave = None
 
         instructions = {game_name:pygame.image.load("instructions/" + game_name + ".png").convert() for game_name in self.game_options}
         prev_next_game_event = False
@@ -129,7 +124,6 @@ class Game:
         while running:
             offhook_event = False
             hung_up_event = False
-            end_proc_event = False
             press_5_event = False
             next_game_event = False
             up_event = False
@@ -137,6 +131,8 @@ class Game:
             press_3_event = False
             press_6_event = False
             press_9_event = False
+            press_2_event = False
+            press_8_event = False
             event_plus = False
             event_minus = False
 
@@ -158,8 +154,6 @@ class Game:
                 hung_up_event = True
             if keys[self.BTN_PLAY]:
                 press_5_event = True
-            if keys[self.BTN_END]:
-                end_proc_event = True
             if keys[self.BTN_NEXT_GAME]:
                 next_game_event = True
             if keys[self.BTN_UP]:
@@ -172,6 +166,10 @@ class Game:
                 press_6_event = True
             if keys[pygame.K_9]:
                 press_9_event = True
+            if keys[pygame.K_2]:
+                press_2_event = True
+            if keys[pygame.K_8]:
+                press_8_event = True
 
             if self.state != GameState.ATTRACT:
                 if hung_up_event:
@@ -180,8 +178,10 @@ class Game:
                         self.scores.insert_score(self.current_game, self.user_name, self.cave.score)
                         self.cave.end()
                         self.cave = None
-                    else:
-                        self.scores.insert_score(self.current_game, self.user_name, self.score)
+                    elif self.forest is not None:
+                        self.scores.insert_score(self.current_game, self.user_name, self.forest.score)
+                        self.forest.end()
+                        self.forest = None
 
             if self.state == GameState.ATTRACT:
                 self.reloop()
@@ -245,7 +245,14 @@ class Game:
                     # self.game.start() TODO fix
 
             elif self.state == GameState.PLAYING_HUGO:
-                if end_proc_event:
+                if self.forest is None:
+                    self.forest = Forest()
+
+                self.forest.process_events(press_2_event, press_8_event)
+
+                if self.forest.ended:
+                    self.pre_cave_score = self.forest.score
+                    self.forest = None
                     self.switch_to(GameState.GOING_SCYLLA)
 
             elif self.state == GameState.GOING_SCYLLA:
@@ -254,31 +261,23 @@ class Game:
 
             elif self.state == GameState.CAVE:
                 if self.cave is None:
-                    self.cave = Cave(1234)
+                    self.cave = Cave(self.pre_cave_score)
 
                 self.cave.process_events(press_3_event, press_6_event, press_9_event, event_plus, event_minus)
 
                 if self.cave.ended:
-                    # TODO save score
+                    self.scores.insert_score(self.current_game, self.user_name, self.cave.score)
                     self.cave = None
                     self.switch_to(GameState.ENDING)
-
-            elif self.state == GameState.ENDING:
-                pass
 
             screen.fill((255,255,255))
 
             vid_draw = self.videos[self.state] if self.state in self.videos else None
             if vid_draw and vid_draw.draw(screen, (0, 0), force_draw=False):
-                text_surface, rect = debug_font.render(str(self.state), (0, 0, 0))
+                text_surface, _ = debug_font.render(str(self.state), (0, 0, 0))
                 screen.blit(text_surface, (10, 460))
                 if self.state == GameState.ATTRACT:
-
-                    if time.time() - self.time_score > 4:
-                        self.set_random_score_game()
-                        self.time_score = time.time()
-
-                    self.render_highscores(screen, self.score_game)
+                    self.high_score_renderer.render(screen)
                 elif self.state == GameState.YOUR_NAME:
                     screen.blit(keyboard_surface[len(self.user_name) - 1], (0, 0))
                     self.render_name(screen)
@@ -289,6 +288,10 @@ class Game:
             elif self.state == GameState.CAVE:
                 if self.cave is not None:
                     self.cave.render(screen)
+                pygame.display.update()
+            elif self.state == GameState.PLAYING_HUGO:
+                if self.forest is not None:
+                    self.forest.render(screen)
                 pygame.display.update()
             elif self.state == GameState.INSTRUCTIONS:
                 screen.blit(instructions[self.current_game], (0, 0))
@@ -316,26 +319,6 @@ class Game:
             screen.blit(text_surface_bg, (xpos - 2, ypos + 2))
             screen.blit(text_surface_bg, (xpos + 2, ypos + 2))
             screen.blit(text_surface_fg, (xpos, ypos))
-
-    def render_outline(self, screen, text, xpos, ypos):
-        text_surface_bg, rect = self.score_font.render(text, (0, 0, 0))
-        text_surface_fg, rect = self.score_font.render(text, (255, 255, 255))
-        screen.blit(text_surface_bg, (xpos - 1, ypos - 1))
-        screen.blit(text_surface_bg, (xpos + 1, ypos - 1))
-        screen.blit(text_surface_bg, (xpos - 1, ypos + 1))
-        screen.blit(text_surface_bg, (xpos + 1, ypos + 1))
-        screen.blit(text_surface_bg, (xpos - 2, ypos - 2))
-        screen.blit(text_surface_bg, (xpos + 2, ypos - 2))
-        screen.blit(text_surface_bg, (xpos - 2, ypos + 2))
-        screen.blit(text_surface_bg, (xpos + 2, ypos + 2))
-        screen.blit(text_surface_fg, (xpos, ypos))
-
-    def render_highscores(self, screen, game_name):
-        self.render_outline(screen, "PUNTAJES " + self.game_names[game_name], 30, 30)
-
-        top_scores = self.scores.get_top_scores(game_name, 5)
-        for rank, (name, score) in enumerate(top_scores, start=1):
-            self.render_outline(screen, f"{rank}. {name} - {score}", 30, 30 + rank * 30)
 
 if __name__ == "__main__":
     Game().run()

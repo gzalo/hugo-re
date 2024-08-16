@@ -1,10 +1,5 @@
 from enum import Enum
-
-import random
-import time
-
 from resource import Resource
-import pygame
 
 class ForestEnum(Enum):
     WAIT_INTRO = 0
@@ -22,11 +17,13 @@ class ForestEnum(Enum):
     TALKING_GAME_OVER = 12
     WIN_DIALOGUE = 13
 
-class Cave:
+class Forest:
     state = None
     state_start = None
 
-    def __init__(self, score):
+    def __init__(self):
+        self.score = 0
+        self.ended = False
         self.bg_hillsday = Resource.load_surfaces("hillsday.cgf", 0,0) # hills night
         self.bg_hillsnight = Resource.load_surfaces("hillsngt.cgf" ,0,0) # hills day
         self.bg_trees = Resource.load_surfaces("paratrees.cgf" ,0,0) # more background
@@ -128,3 +125,11 @@ class Cave:
         self.sfx_hugo_walk4 = Resource.load_sfx("fumle4.wav")
         self.sfx_rockroll = Resource.load_sfx("rumle-lp.wav")
 
+    def render(self, screen):
+        pass
+
+    def process_events(self, press_2_event, press_8_event):
+        pass
+
+    def end(self):
+        pass

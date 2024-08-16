@@ -38,7 +38,7 @@ class CaveState(Enum):
         return CaveState(v)
 
 class Cave:
-    state: CaveState = None
+    state: CaveState
     state_start = None
     hugo_sprite_pos = [
         (25, 105),
@@ -63,7 +63,7 @@ class Cave:
         self.hugoPuffThird = Resource.load_surfaces("casedie.TIL", 212, 256)
         self.hugoSpring = Resource.load_surfaces("casedie.TIL", 257, 295)
         self.happy = Resource.load_surfaces("happy.TIL", 0, 111)
-        self.Score = Resource.load_surfaces("score.cgf", 0, 9)
+        self.ScoreFont = Resource.load_surfaces("score.cgf", 0, 9)
         self.Hugo = Resource.load_surfaces("hugo.cgf", 0, 0)
 
         self.SyncHugoStart = Resource.load_sync("002-06.oos")
@@ -104,6 +104,7 @@ class Cave:
         self.rolling_score = self.score
 
         self.sounding_score = False
+        self.playing_music = False
         self.selected_rope = None
 
     def process_events(self, event3, event6, event9, event_plus, event_minus):
@@ -133,7 +134,7 @@ class Cave:
         self.state_start = time.time()
 
     def play(self, sound, sound_name, delay: float = 0 ):
-        if time.time() - self.state_start > delay and not sound_name in self.played:
+        if time.time() - self.state_start > delay and sound_name not in self.played:
             pygame.mixer.Sound.play(sound)
             self.played[sound_name] = True
 
@@ -147,6 +148,7 @@ class Cave:
                 self.play(self.BgMusic, "BgMusic")
             else:
                 self.play(self.Stemning, "Stemning")
+            self.playing_music = True
 
             if state_time > 2.5:
                 self.switch_to(CaveState.TALKING_BEFORE_CLIMB)
@@ -287,8 +289,7 @@ class Cave:
             self.play(self.HugolineTak, "HugolineTak", 1)
 
         elif self.state == CaveState.FAMILY_HAPPY:
-            if self.bg_music is not None:
-                self.bg_music.stop()
+            self.fadeout_music()
             self.play(self.Fanfare, "Fanfare")
 
             if frame_index >= len(self.happy):
@@ -315,10 +316,10 @@ class Cave:
         hundreds = (self.rolling_score - thousands * 1000) // 100
         tens = (self.rolling_score - thousands * 1000 - hundreds * 100) // 10
         ones = self.rolling_score - thousands * 1000 - hundreds * 100 - tens * 10
-        screen.blit(self.Score[thousands], (x_score + x_space * 0, y_score))
-        screen.blit(self.Score[hundreds], (x_score + x_space * 1, y_score))
-        screen.blit(self.Score[tens], (x_score + x_space * 2, y_score))
-        screen.blit(self.Score[ones], (x_score + x_space * 3, y_score))
+        screen.blit(self.ScoreFont[thousands], (x_score + x_space * 0, y_score))
+        screen.blit(self.ScoreFont[hundreds], (x_score + x_space * 1, y_score))
+        screen.blit(self.ScoreFont[tens], (x_score + x_space * 2, y_score))
+        screen.blit(self.ScoreFont[ones], (x_score + x_space * 3, y_score))
 
     def play_steps(self, frame_index):
         if frame_index % 8 == 0:
@@ -349,11 +350,15 @@ class Cave:
             self.sounding_score = True
 
     def end(self):
-        if self.argentine_version:
-            pygame.mixer.Sound.fadeout(self.BgMusic, 1000)
-        else:
-            pygame.mixer.Sound.fadeout(self.Stemning, 1000)
-
+        self.fadeout_music()
         pygame.mixer.Sound.stop(self.ScoreCounter)
-
+        pygame.mixer.Sound.stop(self.Fanfare)
         self.ended = True
+
+    def fadeout_music(self):
+        if self.playing_music:
+            if self.argentine_version:
+                pygame.mixer.Sound.fadeout(self.BgMusic, 1000)
+            else:
+                pygame.mixer.Sound.fadeout(self.Stemning, 1000)
+            self.playing_music = False
