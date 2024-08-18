@@ -1,7 +1,9 @@
 import pygame
 import pygame.freetype
+import moderngl
 import time
 from pyvidplayer2 import Video
+from array import array
 import random
 
 from game_state import GameState
@@ -12,46 +14,40 @@ from forest import Forest
 
 
 class Game:
-    BTN_OFF_HOOK = pygame.K_q
-    BTN_HUNG_UP = pygame.K_w
+    BTN_OFF_HOOK = pygame.K_F1
+    BTN_HUNG_UP = pygame.K_F2
+    BTN_EXIT = pygame.K_F4
+
     BTN_PLAY = pygame.K_5
     BTN_NEXT_GAME = pygame.K_6
     BTN_UP = pygame.K_8
     BTN_DOWN = pygame.K_2
-    BTN_EXIT = pygame.K_r
     TITLE = "A jugar con Hugo!"
     INSTRUCTIONS_TIMEOUT = 5
     SCR_WIDTH = 640
     SCR_HEIGHT = 480
     SCR_FULLSCREEN = False
 
-    game_options = [
+    games = {
         #"Plane",
-        "Forest",
+        "Forest": {
+            "name": "Selva",
+        }
+
         #"IceCavern",
         #"SkateBoard",
         #"Scuba",
         #"Train"
-    ]
-
-    game_names = {
-        # Complexity: vids, sfx, speech, syncs
-        "Plane": "Avión", # 1437, 36, 10, 7
-        "Forest": "Selva", # 640, 26, 14, 10
-        "IceCavern": "Cueva de hielo", # 870, 31, 10, 7
-        "SkateBoard": "Skate", # 4212, 27, 8, 5
-        "Scuba": "Buceo", # 1270, 27, 11, 8
-        "Train": "Tren" # 3933, 29, 9, 7
     }
 
     state = GameState.ATTRACT
     state_start = time.time()
     scores = Scores()
-    high_score_renderer = HighScoreRenderer(scores, game_options, game_names)
+    high_score_renderer = HighScoreRenderer(scores, games)
     user_name = ""
     name_font = None
     time_score = time.time()
-    current_game = game_options[0]
+    current_game = next(iter(games))
     cave = None
     forest = None
 
@@ -67,14 +63,21 @@ class Game:
 
     user_name_len = 3
     pre_cave_score = 0
+    start_time = time.time()
+
+    with open("shaders/main.vert", "r") as f:
+        vert_shader = f.read()
+
+    with open("shaders/main.frag", "r") as f:
+        frag_shader = f.read()
 
     def set_random_game(self):
-        if len(self.game_options) == 1:
-            self.current_game = self.game_options[0]
+        if len(self.games) == 1:
+            self.current_game = next(iter(self.games))
             return
-        new_game = random.choice(self.game_options)
+        new_game = random.choice(list(self.games.keys()))
         while new_game == self.current_game:
-            new_game = random.choice(self.game_options)
+            new_game = random.choice(list(self.games.keys()))
         self.current_game = new_game
 
     def switch_to(self, new_state: GameState | None):
@@ -98,11 +101,32 @@ class Game:
     def reset_state_timeout(self):
         self.state_start = time.time()
 
+    def surf_to_texture(self, surf):
+        tex = self.ctx.texture(surf.get_size(), 4)
+        tex.filter = (moderngl.LINEAR, moderngl.LINEAR)
+        tex.swizzle = 'BGRA'
+        tex.write(surf.get_view('1'))
+        return tex
+
     def run(self):
         pygame.init()
 
         fs = pygame.FULLSCREEN if self.SCR_FULLSCREEN else 0
-        screen = pygame.display.set_mode((self.SCR_WIDTH, self.SCR_HEIGHT), fs)
+        fs |= pygame.OPENGL | pygame.DOUBLEBUF
+        pygame.display.set_mode((self.SCR_WIDTH, self.SCR_HEIGHT), fs)
+        self.display = pygame.Surface((self.SCR_WIDTH, self.SCR_HEIGHT))
+        self.ctx = moderngl.create_context()
+
+        quad_buffer = self.ctx.buffer(data=array('f', [
+            -1.0, 1.0, 0.0, 0.0,
+            1.0, 1.0, 1.0, 0.0,
+            -1.0, -1.0, 0.0, 1.0,
+            1.0, -1.0, 1.0, 1.0,
+        ]))
+
+        self.program = self.ctx.program(vertex_shader=self.vert_shader, fragment_shader=self.frag_shader)
+        self.render_object = self.ctx.vertex_array(self.program, [(quad_buffer, '2f 2f', 'vert', 'texcoord')])
+
         pygame.mouse.set_visible(False)
         pygame.display.set_caption(self.TITLE)
         pygame.font.init()
@@ -115,7 +139,7 @@ class Game:
             pygame.image.load("images/keyboard_2.png").convert_alpha()
         ]
 
-        instructions = {game_name:pygame.image.load("instructions/" + game_name + ".png").convert() for game_name in self.game_options}
+        instructions = {game_name:pygame.image.load("instructions/" + game_name + ".png").convert() for game_name in self.games.keys()}
         prev_next_game_event = False
         prev_up_event = False
         prev_down_event = False
@@ -270,32 +294,32 @@ class Game:
                     self.cave = None
                     self.switch_to(GameState.ENDING)
 
-            screen.fill((255,255,255))
+            self.display.fill((255,255,255))
 
             vid_draw = self.videos[self.state] if self.state in self.videos else None
-            if vid_draw and vid_draw.draw(screen, (0, 0), force_draw=False):
+            if vid_draw and vid_draw.draw(self.display, (0, 0), force_draw=False):
                 text_surface, _ = debug_font.render(str(self.state), (0, 0, 0))
-                screen.blit(text_surface, (10, 460))
+                self.display.blit(text_surface, (10, 460))
                 if self.state == GameState.ATTRACT:
-                    self.high_score_renderer.render(screen)
+                    self.high_score_renderer.render(self.display)
                 elif self.state == GameState.YOUR_NAME:
-                    screen.blit(keyboard_surface[len(self.user_name) - 1], (0, 0))
-                    self.render_name(screen)
+                    self.display.blit(keyboard_surface[len(self.user_name) - 1], (0, 0))
+                    self.render_name()
                 else:
-                    screen.blit(overlay, (520, 15))
-                pygame.display.update()
+                    self.display.blit(overlay, (520, 15))
+                self.render_frame()
 
             elif self.state == GameState.CAVE:
                 if self.cave is not None:
-                    self.cave.render(screen)
-                pygame.display.update()
+                    self.cave.render(self.display)
+                self.render_frame()
             elif self.state == GameState.PLAYING_HUGO:
                 if self.forest is not None:
-                    self.forest.render(screen)
-                pygame.display.update()
+                    self.forest.render(self.display)
+                self.render_frame()
             elif self.state == GameState.INSTRUCTIONS:
-                screen.blit(instructions[self.current_game], (0, 0))
-                pygame.display.update()
+                self.display.blit(instructions[self.current_game], (0, 0))
+                self.render_frame()
 
             pygame.time.wait(16)
             prev_next_game_event = next_game_event
@@ -304,21 +328,30 @@ class Game:
 
         pygame.quit()
 
-    def render_name(self, screen):
+    def render_frame(self):
+        frame_tex = self.surf_to_texture(self.display)
+        frame_tex.use(0)
+        self.program['tex'] = 0
+        self.program['time'] = time.time() - self.start_time
+        self.render_object.render(mode=moderngl.TRIANGLE_STRIP)
+        pygame.display.flip()
+        frame_tex.release()
+
+    def render_name(self):
         for i in range(len(self.user_name)):
             text_surface_bg, rect = self.name_font.render(self.user_name[i], (0, 0, 0))
             text_surface_fg, rect = self.name_font.render(self.user_name[i], (255, 255, 255))
             xpos = 106 + i * 56 - rect.width/2
             ypos = 202
-            screen.blit(text_surface_bg, (xpos - 1, ypos - 1))
-            screen.blit(text_surface_bg, (xpos + 1, ypos - 1))
-            screen.blit(text_surface_bg, (xpos - 1, ypos + 1))
-            screen.blit(text_surface_bg, (xpos + 1, ypos + 1))
-            screen.blit(text_surface_bg, (xpos - 2, ypos - 2))
-            screen.blit(text_surface_bg, (xpos + 2, ypos - 2))
-            screen.blit(text_surface_bg, (xpos - 2, ypos + 2))
-            screen.blit(text_surface_bg, (xpos + 2, ypos + 2))
-            screen.blit(text_surface_fg, (xpos, ypos))
+            self.display.blit(text_surface_bg, (xpos - 1, ypos - 1))
+            self.display.blit(text_surface_bg, (xpos + 1, ypos - 1))
+            self.display.blit(text_surface_bg, (xpos - 1, ypos + 1))
+            self.display.blit(text_surface_bg, (xpos + 1, ypos + 1))
+            self.display.blit(text_surface_bg, (xpos - 2, ypos - 2))
+            self.display.blit(text_surface_bg, (xpos + 2, ypos - 2))
+            self.display.blit(text_surface_bg, (xpos - 2, ypos + 2))
+            self.display.blit(text_surface_bg, (xpos + 2, ypos + 2))
+            self.display.blit(text_surface_fg, (xpos, ypos))
 
 if __name__ == "__main__":
     Game().run()
