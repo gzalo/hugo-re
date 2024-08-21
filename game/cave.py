@@ -3,6 +3,7 @@ from enum import Enum
 import random
 import time
 
+from phone_events import PhoneEvents
 from resource import Resource
 import pygame
 
@@ -107,24 +108,17 @@ class Cave:
         self.playing_music = False
         self.selected_rope = None
 
-    def process_events(self, event3, event6, event9, event_plus, event_minus):
-        if event_plus:
-            self.switch_to(self.state.next())
-            self.played = {}
-        if event_minus:
-            self.switch_to(self.state.previous())
-            self.played = {}
-
+    def process_events(self, phone_events: PhoneEvents):
         if self.state == CaveState.WAITING_INPUT:
-            if event3:
+            if phone_events.press_3:
                 self.switch_to(CaveState.GOING_FIRST)
                 pygame.mixer.Sound.play(self.TastTrykket)
                 self.selected_rope = 0
-            if event6:
+            if phone_events.press_6:
                 self.switch_to(CaveState.GOING_SECOND)
                 pygame.mixer.Sound.play(self.TastTrykket)
                 self.selected_rope = 1
-            if event9:
+            if phone_events.press_9:
                 self.switch_to(CaveState.GOING_THIRD)
                 pygame.mixer.Sound.play(self.TastTrykket)
                 self.selected_rope = 2
@@ -138,7 +132,7 @@ class Cave:
             pygame.mixer.Sound.play(sound)
             self.played[sound_name] = True
 
-    def render(self, screen):
+    def render(self, screen, position):
         state_time = time.time() - self.state_start
         frame_index = int(state_time * 10)
 
@@ -298,7 +292,7 @@ class Cave:
                 self.display_surface = self.happy[frame_index]
 
         if self.display_surface is not None:
-            screen.blit(self.display_surface, (0, 0))
+            screen.blit(self.display_surface, position)
 
         if (self.state == CaveState.SCYLLA_LEAVES or self.state == CaveState.SCYLLA_BIRD or self.state == CaveState.SCYLLA_ROPES) and self.selected_rope is not None:
             screen.blit(self.Hugo[0], self.hugo_sprite_pos[self.selected_rope])

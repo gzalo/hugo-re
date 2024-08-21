@@ -128,7 +128,7 @@ class Forest:
     def render(self, screen):
         pass
 
-    def process_events(self, press_2_event, press_8_event):
+    def process_events(self, phone_events):
         pass
 
     def end(self):
