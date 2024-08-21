@@ -57,12 +57,13 @@ class TvShow:
         self.games = games
 
         prefix = f"videos/{country}/"
+        prefix_ar = f"videos/ar/"
         self.videos = {
             TvShowState.ATTRACT: Video(prefix + "attract_demo.mp4"),
-            TvShowState.INITIAL: Video(prefix + "hello_hello.mp4"),
-            TvShowState.PRESS_5: Video(prefix + "press_5.mp4"),
-            TvShowState.ENDING: Video(prefix + "you_lost.mp4"),
-            TvShowState.HAVE_LUCK: Video(prefix + "have_luck.mp4"),
+            TvShowState.INITIAL: Video(prefix_ar + "hello_hello.mp4"),
+            TvShowState.PRESS_5: Video(prefix_ar + "press_5.mp4"),
+            TvShowState.ENDING: Video(prefix_ar + "you_lost.mp4"),
+            TvShowState.HAVE_LUCK: Video(prefix_ar + "have_luck.mp4"),
         }
 
         self.state = TvShowState.ATTRACT

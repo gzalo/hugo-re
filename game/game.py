@@ -39,9 +39,9 @@ class Game:
 
     tv_shows = [
         TvShow(games, "ar"),
-        TvShow(games, "ar"),
-        TvShow(games, "ar"),
-        TvShow(games, "ar"),
+        TvShow(games, "cl"),
+        TvShow(games, "dn"),
+        TvShow(games, "fr"),
     ]
 
     scores = Scores()
