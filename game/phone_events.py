@@ -17,4 +17,22 @@ class PhoneEvents:
     press_9: bool = False
     press_0: bool = False
     press_star: bool = False
-    press_pound: bool = False 
+    press_pound: bool = False
+
+    def any_set(self):
+        return any([
+            self.offhook,
+            self.hungup,
+            self.press_1,
+            self.press_2,
+            self.press_3,
+            self.press_4,
+            self.press_5,
+            self.press_6,
+            self.press_7,
+            self.press_8,
+            self.press_9,
+            self.press_0,
+            self.press_star,
+            self.press_pound,
+        ])

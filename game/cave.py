@@ -295,7 +295,8 @@ class Cave:
             screen.blit(self.display_surface, position)
 
         if (self.state == CaveState.SCYLLA_LEAVES or self.state == CaveState.SCYLLA_BIRD or self.state == CaveState.SCYLLA_ROPES) and self.selected_rope is not None:
-            screen.blit(self.Hugo[0], self.hugo_sprite_pos[self.selected_rope])
+            pos = self.hugo_sprite_pos[self.selected_rope]
+            screen.blit(self.Hugo[0], (position[0] + pos[0], position[1] + pos[1]))
 
         if self.rolling_score < self.score:
             self.rolling_score += min(10, self.score - self.rolling_score)
@@ -303,8 +304,8 @@ class Cave:
             pygame.mixer.Sound.stop(self.ScoreCounter)
             self.sounding_score = False
 
-        x_score = 243
-        y_score = 203
+        x_score = 243 + position[0]
+        y_score = 203 + position[1]
         x_space = 16
         thousands = self.rolling_score // 1000
         hundreds = (self.rolling_score - thousands * 1000) // 100
