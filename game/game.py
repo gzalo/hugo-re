@@ -94,6 +94,7 @@ class Game:
         instructions = {game_name:pygame.image.load("instructions/" + game_name + ".png").convert() for game_name in self.games.keys()}
         phone_icons = [pygame.image.load("images/phone" + str(phone_index) + "_small.png").convert_alpha() for phone_index in range(4)]
         phone_icons_active = [pygame.image.load("images/phone" + str(phone_index) + "_small_active.png").convert_alpha() for phone_index in range(4)]
+        screens = [pygame.Surface((320, 240)) for _ in range(4)]
 
         running = True
         while running:
@@ -132,19 +133,24 @@ class Game:
 
             any_playing = False
             for tv_show in self.tv_shows:
-                tv_show.handle_events(phone_events[self.tv_shows.index(tv_show)])
-                tv_show.render(self.display, self.positions[self.tv_shows.index(tv_show)], instructions)
+                index = self.tv_shows.index(tv_show)
+                tv_show.handle_events(phone_events[index])
+                tv_show.render(screens[index], instructions)
                 if tv_show.is_playing():
                     any_playing = True
 
+            for i in range(4):
+                self.display.blit(screens[i], self.positions[i])
+
             if not any_playing:
-                self.display.blit(logo, (0, 0))
+                self.display.blit(logo, (0,0))
             else:
                 for i in range(4):
                     if phone_events[i].any_set():
                         self.display.blit(phone_icons_active[i], self.phone_positions[i])
                     else:
                         self.display.blit(phone_icons[i], self.phone_positions[i])
+
 
             self.render_frame(not any_playing)
             pygame.time.wait(16)

@@ -139,20 +139,20 @@ class TvShow:
                 self.cave = None
                 self.switch_to(TvShowState.ENDING)
 
-    def render(self, display, position, instructions):
+    def render(self, display, instructions):
         if self.state == TvShowState.CAVE:
              if self.cave is not None:
-                 self.cave.render(display, position)
+                 self.cave.render(display)
         elif self.state == TvShowState.PLAYING_HUGO:
              if self.forest is not None:
-                 self.forest.render(display, position)
+                 self.forest.render(display)
         elif self.state == TvShowState.INSTRUCTIONS:
-             display.blit(instructions[self.current_game], position)
+             display.blit(instructions[self.current_game], (0,0))
         else:
             vid_draw = self.videos[self.state] if self.state in self.videos else None
 
             if vid_draw:
-                vid_draw.draw(display, position)
+                vid_draw.draw(display, (0, 0))
 
     def is_playing(self):
         return self.state != TvShowState.ATTRACT

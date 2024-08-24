@@ -12,13 +12,15 @@ class ForestState(Enum):
     HURT_FLYING_START = 5
     HURT_FLYING_TALKING = 6
     HURT_FLYING_FALLING = 7
-    HURT_ROCK_ANIMATION = 8
-    HURT_ROCK_TALKING = 9
-    HURT_BRANCH_ANIMATION = 10
-    HURT_BRANCH_TALKING = 11
-    TALKING_AFTER_HURT = 12
-    TALKING_GAME_OVER = 13
-    WIN_DIALOGUE = 14
+    HURT_FLYING_FALLING_HANG_ANIMATION = 8
+    HURT_FLYING_FALLING_HANG_TALKING = 9
+    HURT_ROCK_ANIMATION = 10
+    HURT_ROCK_TALKING = 11
+    HURT_BRANCH_ANIMATION = 12
+    HURT_BRANCH_TALKING = 13
+    TALKING_AFTER_HURT = 14
+    TALKING_GAME_OVER = 15
+    WIN_DIALOGUE = 16
 
 class Forest:
     state = None
@@ -34,7 +36,7 @@ class Forest:
         self.scylla_affected = False
 
         self.bg_hillsday = Resource.load_surfaces("ForestData", "hillsday.cgf", 0,0) # hills night
-        self.bg_hillsnight = Resource.load_surfaces("ForestData", "hillsngt.cgf" ,0,0) # hills day
+        # self.bg_hillsnight = Resource.load_surfaces("ForestData", "hillsngt.cgf" ,0,0) # hills day
         self.bg_trees = Resource.load_surfaces("ForestData", "paratrees.cgf" ,0,0) # more background
         self.bg_spooky_trees = Resource.load_surfaces("ForestData", "spooky.cgf", 0,0) # far background
         self.bg_ground = Resource.load_surfaces("ForestData", "paraground.cgf",0,0) # ground
@@ -70,13 +72,13 @@ class Forest:
         self.catapult_hangspeak = Resource.load_surfaces("ForestData", "hanging_mouth.cgf",0,11) # mouth parts when hanging
         self.hugohitlog = Resource.load_surfaces("ForestData", "branch-groggy.til",0,42) # hurt with branch
         self.hugohitlog_talk = Resource.load_surfaces("ForestData", "branch-speak.til", 0, 17) # talking after getting hurt
-        self.foot1 = Resource.load_surfaces("ForestData", "foot1.cgf",0,0) # normal foot in trap
-        self.foot2 = Resource.load_surfaces("ForestData", "foot2.cgf",0,0) # red foot in trap
-        self.saks_die1 = Resource.load_surfaces("ForestData", "hgsaks.cgf",0,0) # foot in trap, eyes opened
-        self.saks_die2 = Resource.load_surfaces("ForestData", "hgsaks2.cgf", 0, 0 ) # foot in trap, eyes closed
+        # self.foot1 = Resource.load_surfaces("ForestData", "foot1.cgf",0,0) # normal foot in trap
+        # self.foot2 = Resource.load_surfaces("ForestData", "foot2.cgf",0,0) # red foot in trap
+        # self.saks_die1 = Resource.load_surfaces("ForestData", "hgsaks.cgf",0,0) # foot in trap, eyes opened
+        # self.saks_die2 = Resource.load_surfaces("ForestData", "hgsaks2.cgf", 0, 0 ) # foot in trap, eyes closed
         self.hugo_traptalk = Resource.load_surfaces("ForestData", "traptalk.til", 0, 15) # hurts talking
         self.hugo_traphurt = Resource.load_surfaces("ForestData", "trap-hurts.til", 0, 9) # hurts animation
-        self.trap_stars = Resource.load_surfaces("ForestData", "hurts.cgf", 0, 3) # stars
+        # self.trap_stars = Resource.load_surfaces("ForestData", "hurts.cgf", 0, 3) # stars
         self.score_numbers = Resource.load_surfaces("ForestData", "scores.cgf",0,0) # scores spritesheet
         self.hugo_lives = Resource.load_surfaces("ForestData", "hugostat.cgf",0,0) # life indicator
         self.sculla_hand1 = Resource.load_surfaces("ForestData", "heks1.cgf",0,0) # hand pressed
@@ -109,22 +111,22 @@ class Forest:
         self.speak_levelcompleted = Resource.load_speak("ForestData", "005-13.wav") # we did it quite well
 
         self.sfx_bg_atmosphere = Resource.load_sfx("ForestData", "atmos-lp.wav") # bg music
-        self.sfx_bg_atmosphere_evil = Resource.load_sfx("ForestData", "water-lp.wav")
-        self.sfx_trap_ring = Resource.load_sfx("ForestData", "riiing-lp.wav")
-        self.sfx_lightning_warning = Resource.load_sfx("ForestData", "warning.wav")
-        self.sfx_hugo_knock = Resource.load_sfx("ForestData", "knock.wav")
-        self.sfx_hugo_hittrap = Resource.load_sfx("ForestData", "crunch.wav")
-        self.sfx_lightning = Resource.load_sfx("ForestData", "lightning.wav")
+        # self.sfx_bg_atmosphere_evil = Resource.load_sfx("ForestData", "water-lp.wav")
+        # self.sfx_trap_ring = Resource.load_sfx("ForestData", "riiing-lp.wav") # hitting trap
+        self.sfx_lightning_warning = Resource.load_sfx("ForestData", "warning.wav") # hitting sylla button
+        self.sfx_hugo_knock = Resource.load_sfx("ForestData", "knock.wav") # hitting screen
+        self.sfx_hugo_hittrap = Resource.load_sfx("ForestData", "crunch.wav")  # hitting trap
+        # self.sfx_lightning = Resource.load_sfx("ForestData", "lightning.wav")
         self.sfx_hugo_launch = Resource.load_sfx("ForestData", "skriid.wav")
         self.sfx_sack_normal = Resource.load_sfx("ForestData", "sack-norm.wav")
         self.sfx_sack_bonus = Resource.load_sfx("ForestData", "sack.wav")
         self.sfx_tree_swush = Resource.load_sfx("ForestData", "wush.wav")
         self.sfx_hugo_hitlog = Resource.load_sfx("ForestData", "bell.wav")
         self.sfx_catapult_eject = Resource.load_sfx("ForestData", "fjeder.wav")
-        self.sfx_birds = Resource.load_sfx("ForestData", "birds-lp.wav")
-        self.sfx_hugo_foothurt = Resource.load_sfx("ForestData", "timpani.wav")
-        self.sfx_hugo_hitscreen = Resource.load_sfx("ForestData", "hit_screen.wav")
-        self.sfx_hugo_screenklir = Resource.load_sfx("ForestData", "klirr.wav")
+        # self.sfx_birds = Resource.load_sfx("ForestData", "birds-lp.wav")
+        # self.sfx_hugo_foothurt = Resource.load_sfx("ForestData", "timpani.wav")
+        # self.sfx_hugo_hitscreen = Resource.load_sfx("ForestData", "hit_screen.wav")
+        # self.sfx_hugo_screenklir = Resource.load_sfx("ForestData", "klirr.wav")
         self.sfx_hugo_crash = Resource.load_sfx("ForestData", "kineser.wav")
         self.sfx_hugo_hangstart = Resource.load_sfx("ForestData", "knage-start.wav")
         self.sfx_hugo_hang = Resource.load_sfx("ForestData", "knage-lp.wav")
@@ -133,19 +135,19 @@ class Forest:
         self.sfx_hugo_walk2 = Resource.load_sfx("ForestData", "fumle2.wav")
         self.sfx_hugo_walk3 = Resource.load_sfx("ForestData", "fumle3.wav")
         self.sfx_hugo_walk4 = Resource.load_sfx("ForestData", "fumle4.wav")
-        self.sfx_rockroll = Resource.load_sfx("ForestData", "rumle-lp.wav")
+        # self.sfx_rockroll = Resource.load_sfx("ForestData", "rumle-lp.wav")
 
     def play(self, sound, sound_name, delay: float = 0 ):
         if time.time() - self.state_start > delay and sound_name not in self.played:
             pygame.mixer.Sound.play(sound)
             self.played[sound_name] = True
 
-    def render(self, screen, position):
+    def render(self, screen):
         state_time = time.time() - self.state_start
         frame_index = int(state_time * 10)
 
-        self.render_background(position, screen)
-        self.render_bottom(position, screen)
+        self.render_background(screen)
+        self.render_bottom(screen)
 
         if self.state == ForestState.WAIT_INTRO:
             self.play(self.speak_start, "speak_start")
@@ -154,11 +156,34 @@ class Forest:
                 self.switch_to(ForestState.PLAYING)
             else:
                 actual_index = self.sync_start[frame_index]
-                screen.blit(self.hugo_telllives[actual_index], position)
+                screen.blit(self.hugo_telllives[actual_index], (0,0))
+
+        elif self.state == ForestState.PLAYING:
+            # When hitting catapult
+            self.play(self.speak_catapult_hit, "speak_catapult_hit")
+            self.play(self.sfx_hugo_launch, "sfx_hugo_launch")
+            self.play(self.sfx_catapult_eject, "sfx_catapult_eject")
+            # When hitting trap
+            self.play(self.sfx_hugo_hittrap, "sfx_hugo_hittrap")
+            # When hitting stick
+            self.play(self.sfx_hugo_hitlog, "sfx_hugo_hitlog")
+            # When getting good bag
+            self.play(self.sfx_sack_normal, "sfx_sack_normal")
+            # When getting better bag
+            self.play(self.sfx_sack_bonus, "sfx_sack_bonus")
+            # When stick didn't hit
+            self.play(self.sfx_tree_swush, "sfx_tree_swush")
+            # Walking
+            self.play(self.sfx_hugo_walk0, "sfx_hugo_walk0")
+            self.play(self.sfx_hugo_walk1, "sfx_hugo_walk1")
+            self.play(self.sfx_hugo_walk2, "sfx_hugo_walk2")
+            self.play(self.sfx_hugo_walk3, "sfx_hugo_walk3")
+            self.play(self.sfx_hugo_walk4, "sfx_hugo_walk4")
+
 
         elif self.state == ForestState.SCYLLA_BUTTON:
             self.play(self.sfx_lightning_warning, "sfx_lightning_warning", 0.5)
-            screen.blit(frame_index % 2 == 0 and self.sculla_hand1[0] or self.sculla_hand2[0], position)
+            screen.blit(frame_index % 2 == 0 and self.sculla_hand1[0] or self.sculla_hand2[0])
             self.scylla_affected = True
             if state_time > 2:
                 self.switch_to(ForestState.PLAYING)
@@ -167,8 +192,8 @@ class Forest:
             if frame_index >= len(self.hugo_lookrock):
                 self.switch_to(ForestState.HURT_ROCK_TALKING)
             else:
-                screen.blit(self.hugo_lookrock[frame_index], position)
-                self.render_bottom(position, screen)
+                screen.blit(self.hugo_lookrock[frame_index], (0,0))
+                self.render_bottom( screen)
 
         elif self.state == ForestState.HURT_ROCK_TALKING:
             self.play(self.speak_rock, "speak_rock")
@@ -176,15 +201,15 @@ class Forest:
                 self.switch_to(ForestState.TALKING_AFTER_HURT)
             else:
                 actual_index = self.sync_rock[frame_index]
-                screen.blit(self.hit_rock_sync[actual_index], position)
-                self.render_bottom(position, screen)
+                screen.blit(self.hit_rock_sync[actual_index], (0,0))
+                self.render_bottom(screen)
 
         elif self.state == ForestState.HURT_BRANCH_ANIMATION:
             if frame_index >= len(self.hugohitlog):
                 self.switch_to(ForestState.HURT_BRANCH_TALKING)
             else:
-                screen.blit(self.hugohitlog[frame_index], position)
-                self.render_bottom(position, screen)
+                screen.blit(self.hugohitlog[frame_index], (0,0))
+                self.render_bottom(screen)
 
         elif self.state == ForestState.HURT_BRANCH_TALKING:
             self.play(self.speak_hitlog, "speak_hitlog")
@@ -192,14 +217,15 @@ class Forest:
                 self.switch_to(ForestState.TALKING_AFTER_HURT)
             else:
                 actual_index = self.sync_hitlog[frame_index]
-                screen.blit(self.hugohitlog_talk[actual_index], position)
-                self.render_bottom(position, screen)
+                screen.blit(self.hugohitlog_talk[actual_index], (0,0))
+                self.render_bottom(screen)
 
         elif self.state == ForestState.HURT_FLYING_START:
+            self.play(self.speak_catapult_up, "speak_catapult_up")
             if frame_index >= len(self.catapult_fly):
                 self.switch_to(ForestState.HURT_FLYING_TALKING)
             else:
-                screen.blit(self.catapult_fly[frame_index], position)
+                screen.blit(self.catapult_fly[frame_index], (0,0))
 
         elif self.state == ForestState.HURT_FLYING_TALKING:
             self.play(self.speak_catapult_talktop, "speak_catapult_talktop")
@@ -207,19 +233,38 @@ class Forest:
                 self.switch_to(ForestState.HURT_FLYING_FALLING)
             else:
                 actual_index = self.sync_catapult_talktop[frame_index]
-                screen.blit(self.catapult_airtalk[actual_index], position)
+                screen.blit(self.catapult_airtalk[actual_index], (0,0))
 
         elif self.state == ForestState.HURT_FLYING_FALLING:
+            self.play(self.speak_catapult_down, "speak_catapult_down")
+            self.play(self.sfx_hugo_crash, "sfx_hugo_crash")
             if frame_index >= len(self.catapult_fall):
+                self.switch_to(ForestState.HURT_FLYING_FALLING_HANG_ANIMATION)
+            else:
+                screen.blit(self.catapult_fall[frame_index], (0,0))
+
+        elif self.state == ForestState.HURT_FLYING_FALLING_HANG_ANIMATION:
+            self.play(self.sfx_hugo_hangstart, "sfx_hugo_hangstart")
+            if frame_index >= len(self.catapult_hang):
+                self.switch_to(ForestState.HURT_FLYING_FALLING_HANG_TALKING)
+            else:
+                screen.blit(self.catapult_hang[frame_index], (0,0))
+
+        elif self.state == ForestState.HURT_FLYING_FALLING_HANG_TALKING:
+            self.play(self.speak_catapult_hang, "speak_catapult_hang")
+            self.play(self.sfx_hugo_hang, "sfx_hugo_hang")
+            if frame_index >= len(self.sync_catapult_hang):
                 self.switch_to(ForestState.TALKING_AFTER_HURT)
             else:
-                screen.blit(self.catapult_fall[frame_index], position)
+                actual_index = self.sync_catapult_hang[frame_index]
+                screen.blit(self.catapult_hang[12], (0,0))
+                screen.blit(self.catapult_hangspeak[actual_index-1], (115, 117))
 
         elif self.state == ForestState.HURT_TRAP_ANIMATION:
             if frame_index >= len(self.hugo_traphurt):
                 self.switch_to(ForestState.HURT_TRAP_TALKING)
             else:
-                screen.blit(self.hugo_traphurt[frame_index], position)
+                screen.blit(self.hugo_traphurt[frame_index], (0,0))
 
         elif self.state == ForestState.HURT_TRAP_TALKING:
             self.play(self.speak_trap, "speak_trap")
@@ -227,15 +272,33 @@ class Forest:
                 self.switch_to(ForestState.TALKING_AFTER_HURT)
             else:
                 actual_index = self.sync_trap[frame_index]
-                screen.blit(self.hugo_traptalk[actual_index], position)
+                screen.blit(self.hugo_traptalk[actual_index], (0,0))
 
         elif self.state == ForestState.TALKING_AFTER_HURT:
-            self.play(self.speak_dieonce, "speak_dieonce")
-            if frame_index >= len(self.sync_trap):
-                self.switch_to(ForestState.PLAYING)
+            self.play(self.sfx_hugo_knock, "sfx_hugo_knock")
+            self.play(self.sfx_hugo_knock, "sfx_hugo_knock_1", 0.25)
+            self.play(self.sfx_hugo_knock, "sfx_hugo_knock_2", 0.5)
+
+            if self.lifes == 1:
+                self.play(self.speak_lastlife, "speak_lastlife")
+                if frame_index >= len(self.sync_lastlife):
+                    self.switch_to(ForestState.PLAYING)
+                else:
+                    actual_index = self.sync_lastlife[frame_index]
+                    screen.blit(self.hugo_telllives[actual_index], (128, 16))
             else:
-                actual_index = self.sync_dieonce[frame_index]
-                screen.blit(self.hugo_telllives[actual_index], position)
+                self.play(self.speak_dieonce, "speak_dieonce")
+                if frame_index >= len(self.sync_dieonce):
+                    self.switch_to(ForestState.PLAYING)
+                else:
+                    actual_index = self.sync_dieonce[frame_index]
+                    screen.blit(self.hugo_telllives[actual_index], (128, 16))
+
+            if frame_index < 8:
+                if frame_index % 2 == 0:
+                    screen.blit(self.hugo_hand1[0], (96, 83))
+                else:
+                    screen.blit(self.hugo_hand2[0], (96, 78))
 
         elif self.state == ForestState.TALKING_GAME_OVER:
             self.play(self.speak_gameover, "speak_gameover")
@@ -243,7 +306,7 @@ class Forest:
                 self.end()
             else:
                 actual_index = self.sync_gameover[frame_index]
-                screen.blit(self.hugo_telllives[actual_index], position)
+                screen.blit(self.hugo_telllives[actual_index], (0,0))
 
         elif self.state == ForestState.WIN_DIALOGUE:
             self.play(self.speak_levelcompleted, "speak_levelcompleted")
@@ -251,32 +314,50 @@ class Forest:
                 self.end()
             else:
                 actual_index = self.sync_levelcompleted[frame_index]
-                screen.blit(self.hugo_telllives[actual_index], position)
+                screen.blit(self.hugo_telllives[actual_index], (0,0))
 
-    def render_background(self, position, screen):
+    def render_background(self, screen):
         hills_speed = 0.1
         trees_speed = 0.2
         grass_speed = 0.5
+        ground_speed = 0.8
+        hills_width = self.bg_hillsday[0].get_width()
+        trees_width = self.bg_trees[0].get_width()
+        grass_width = self.grass[0].get_width()
+        ground_width = self.bg_ground[0].get_width()
 
-        hills_pos = (position[0] - self.parallax_pos * hills_speed, position[1])
-        trees_pos = (position[0] - self.parallax_pos * trees_speed, position[1] - 24)
-        grass_pos = (position[0] - self.parallax_pos * grass_speed, position[1] + 172)
+        hills_pos = (self.newMod(- self.parallax_pos * hills_speed, hills_width), 0)
+        trees_pos = (self.newMod(- self.parallax_pos * trees_speed,trees_width), -24)
+        grass_pos = (self.newMod(- self.parallax_pos * grass_speed,grass_width), 172)
+        ground_pos = (self.newMod(- self.parallax_pos * ground_speed,ground_width), 158)
+        hills_pos_next = (hills_pos[0] + hills_width, hills_pos[1])
+        tress_pos_next = (trees_pos[0] + trees_width, trees_pos[1])
 
         screen.blit(self.bg_hillsday[0], hills_pos)
-        screen.blit(self.bg_trees[0], trees_pos)
+        screen.blit(self.bg_hillsday[0], hills_pos_next)
 
-        for i in range(11):
-            grass_x = grass_pos[0] + i * 30
-            if grass_x > position[0] + 330:
-                grass_x -= 330
+        if self.scylla_affected:
+            screen.blit(self.bg_spooky_trees[0], trees_pos)
+            screen.blit(self.bg_spooky_trees[0], tress_pos_next)
+        else:
+            screen.blit(self.bg_trees[0], trees_pos)
+            screen.blit(self.bg_trees[0], tress_pos_next)
+
+        for i in range(5):
+            ground_x = ground_pos[0] + i * ground_width
+            screen.blit(self.bg_ground[0], (ground_x, ground_pos[1]))
+
+        for i in range(12):
+            grass_x = grass_pos[0] + i * grass_width
             screen.blit(self.grass[0], (grass_x, grass_pos[1]))
 
-    def render_bottom(self, position, screen):
-        screen.blit(self.scoreboard, (position[0], position[1] + 184))
+    def render_bottom(self, screen):
+        screen.blit(self.scoreboard, (0, 184))
         for i in range(self.lifes):
-            screen.blit(self.hugo_lives[0], (position[0] + (i * 40) + 32, position[1] + 188))
-        x_score = 200 + position[0]
-        y_score = 194 + position[1]
+            screen.blit(self.hugo_lives[0], (i * 40 + 32, 188))
+
+        x_score = 200
+        y_score = 194
         x_space = 24
         thousands = self.score // 1000
         hundreds = (self.score - thousands * 1000) // 100
@@ -292,13 +373,17 @@ class Forest:
         self.state = new_state
         self.state_start = time.time()
 
+    def newMod(self, a, b):
+        res = a % b
+        return res if not res else res - b if a < 0 else res
+
     def process_events(self, phone_events):
         if not self.background_music_playing:
             pygame.mixer.Sound.play(self.sfx_bg_atmosphere, loops=-1)
             self.background_music_playing = True
 
         if self.state == None:
-            self.switch_to(ForestState.HURT_ROCK_ANIMATION)
+            self.switch_to(ForestState.HURT_FLYING_START)
 
         self.parallax_pos += 1
 
