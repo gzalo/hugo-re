@@ -59,6 +59,7 @@ class Game:
 
     scores = Scores()
     start_time = time.time()
+    waviness = 0
 
     with open("shaders/main.vert", "r") as f:
         vert_shader = f.read()
@@ -145,7 +146,7 @@ class Game:
                     else:
                         self.display.blit(phone_icons[i], self.phone_positions[i])
 
-            self.render_frame()
+            self.render_frame(not any_playing)
             pygame.time.wait(16)
 
         pygame.quit()
@@ -157,11 +158,12 @@ class Game:
         tex.write(surf.get_view('1'))
         return tex
 
-    def render_frame(self):
+    def render_frame(self, wavy):
         frame_tex = self.surf_to_texture(self.display)
         frame_tex.use(0)
         self.program['tex'] = 0
         self.program['time'] = time.time() - self.start_time
+        self.program['wavyness'] = 0.01 if wavy else 0
         self.render_object.render(mode=moderngl.TRIANGLE_STRIP)
         pygame.display.flip()
         frame_tex.release()

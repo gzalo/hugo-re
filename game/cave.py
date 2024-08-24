@@ -49,51 +49,51 @@ class Cave:
     argentine_version = True
 
     def __init__(self, score):
-        self.talks = Resource.load_surfaces("STAIRS.TIL", 0, 12)
-        self.climbs = Resource.load_surfaces("STAIRS.TIL", 11, 51)
-        self.firstRope = Resource.load_surfaces("caselive.TIL", 0, 32)
-        self.secondRope = Resource.load_surfaces("caselive.TIL", 33, 72)
-        self.thirdRope = Resource.load_surfaces("caselive.TIL", 73, 121)
-        self.scyllaLeaves = Resource.load_surfaces("caselive.TIL", 122, 177)
-        self.scyllaBird = Resource.load_surfaces("caselive.TIL", 178, 240)
-        self.scyllaRopes = Resource.load_surfaces("caselive.TIL", 241, 283)
-        self.scyllaSpring = Resource.load_surfaces("caselive.TIL", 284, 318)
-        self.familyCage = Resource.load_surfaces("caselive.TIL", 319, 352)
-        self.hugoPuffFirst = Resource.load_surfaces("casedie.TIL", 122, 166)
-        self.hugoPuffSecond = Resource.load_surfaces("casedie.TIL", 167, 211)
-        self.hugoPuffThird = Resource.load_surfaces("casedie.TIL", 212, 256)
-        self.hugoSpring = Resource.load_surfaces("casedie.TIL", 257, 295)
-        self.happy = Resource.load_surfaces("happy.TIL", 0, 111)
-        self.ScoreFont = Resource.load_surfaces("score.cgf", 0, 9)
-        self.Hugo = Resource.load_surfaces("hugo.cgf", 0, 0)
+        self.talks = Resource.load_surfaces("RopeOutroData", "STAIRS.TIL", 0, 12)
+        self.climbs = Resource.load_surfaces("RopeOutroData", "STAIRS.TIL", 11, 51)
+        self.firstRope = Resource.load_surfaces("RopeOutroData", "caselive.TIL", 0, 32)
+        self.secondRope = Resource.load_surfaces("RopeOutroData", "caselive.TIL", 33, 72)
+        self.thirdRope = Resource.load_surfaces("RopeOutroData", "caselive.TIL", 73, 121)
+        self.scyllaLeaves = Resource.load_surfaces("RopeOutroData", "caselive.TIL", 122, 177)
+        self.scyllaBird = Resource.load_surfaces("RopeOutroData", "caselive.TIL", 178, 240)
+        self.scyllaRopes = Resource.load_surfaces("RopeOutroData", "caselive.TIL", 241, 283)
+        self.scyllaSpring = Resource.load_surfaces("RopeOutroData", "caselive.TIL", 284, 318)
+        self.familyCage = Resource.load_surfaces("RopeOutroData", "caselive.TIL", 319, 352)
+        self.hugoPuffFirst = Resource.load_surfaces("RopeOutroData", "casedie.TIL", 122, 166)
+        self.hugoPuffSecond = Resource.load_surfaces("RopeOutroData", "casedie.TIL", 167, 211)
+        self.hugoPuffThird = Resource.load_surfaces("RopeOutroData", "casedie.TIL", 212, 256)
+        self.hugoSpring = Resource.load_surfaces("RopeOutroData", "casedie.TIL", 257, 295)
+        self.happy = Resource.load_surfaces("RopeOutroData", "happy.TIL", 0, 111)
+        self.ScoreFont = Resource.load_surfaces("RopeOutroData", "score.cgf", 0, 9)
+        self.Hugo = Resource.load_surfaces("RopeOutroData", "hugo.cgf", 0, 0)
 
-        self.SyncHugoStart = Resource.load_sync("002-06.oos")
-        self.SyncHugoDie = Resource.load_sync("002-09.oos")
+        self.SyncHugoStart = Resource.load_sync("RopeOutroData", "002-06.oos")
+        self.SyncHugoDie = Resource.load_sync("RopeOutroData", "002-09.oos")
 
-        self.HerErVi = Resource.load_speak("002-05.wav") # Help us Hugo
-        self.TrappeSnak = Resource.load_speak("002-06.wav")  # I feel like this is dangerous
-        self.NuKommerJeg = Resource.load_speak("002-07.wav") # Hello is there anyone here
-        self.AfskyliaSnak = Resource.load_speak("002-08.wav") # Go ahead and choose
-        self.HugoKatapult = Resource.load_speak("002-09.wav") # I'll be back
-        self.HugoSkydUd = Resource.load_speak("002-10.wav") # Hugo screams on lost
-        self.AfskyliaSkydUd = Resource.load_speak("002-11.wav") # Scylla screams on win
-        self.HugolineTak = Resource.load_speak("002-12.wav") # We are free
+        self.HerErVi = Resource.load_speak("RopeOutroData", "002-05.wav") # Help us Hugo
+        self.TrappeSnak = Resource.load_speak("RopeOutroData", "002-06.wav")  # I feel like this is dangerous
+        self.NuKommerJeg = Resource.load_speak("RopeOutroData", "002-07.wav") # Hello is there anyone here
+        self.AfskyliaSnak = Resource.load_speak("RopeOutroData", "002-08.wav") # Go ahead and choose
+        self.HugoKatapult = Resource.load_speak("RopeOutroData", "002-09.wav") # I'll be back
+        self.HugoSkydUd = Resource.load_speak("RopeOutroData", "002-10.wav") # Hugo screams on lost
+        self.AfskyliaSkydUd = Resource.load_speak("RopeOutroData", "002-11.wav") # Scylla screams on win
+        self.HugolineTak = Resource.load_speak("RopeOutroData", "002-12.wav") # We are free
 
-        self.Stemning = Resource.load_sfx("ba-13.wav") # Background chimes
-        self.Fodtrin1 = Resource.load_sfx("ba-15.wav") # Step 1
-        self.Fodtrin2 = Resource.load_sfx("ba-16.wav") # Step 2
-        self.HivIReb = Resource.load_sfx("ba-17.wav") # Rope used
-        self.Fjeder = Resource.load_sfx("ba-18.wav") # Spring
-        self.PrePuf = Resource.load_sfx("ba-21.wav") # Anticipation
-        self.Puf = Resource.load_sfx("ba-22.wav") # Smoke puff
-        self.TastTrykket = Resource.load_sfx("ba-24.wav") # Waiting for you ding
-        self.PreFanfare = Resource.load_sfx("ba-101.wav") # Choose something background
-        self.Fanfare = Resource.load_sfx("ba-102.wav") # Correct ending (This was starting to ...)
-        self.FugleSkrig = Resource.load_sfx("ba-104.wav") # Scylla turned into bird
-        self.TrappeGrin = Resource.load_sfx("hexhaha.wav") # Odd laugh
-        self.Skrig = Resource.load_sfx("skrig.wav") # Scilla screams
-        self.ScoreCounter = Resource.load_sfx("counter.wav") # Score counter increase
-        self.BgMusic = Resource.load_sfx("a_party_for_me.mp3") # BG music, downloaded from https://www.youtube.com/watch?v=maJVRkefBhw
+        self.Stemning = Resource.load_sfx("RopeOutroData", "ba-13.wav") # Background chimes
+        self.Fodtrin1 = Resource.load_sfx("RopeOutroData", "ba-15.wav") # Step 1
+        self.Fodtrin2 = Resource.load_sfx("RopeOutroData", "ba-16.wav") # Step 2
+        self.HivIReb = Resource.load_sfx("RopeOutroData", "ba-17.wav") # Rope used
+        self.Fjeder = Resource.load_sfx("RopeOutroData", "ba-18.wav") # Spring
+        self.PrePuf = Resource.load_sfx("RopeOutroData", "ba-21.wav") # Anticipation
+        self.Puf = Resource.load_sfx("RopeOutroData", "ba-22.wav") # Smoke puff
+        self.TastTrykket = Resource.load_sfx("RopeOutroData", "ba-24.wav") # Waiting for you ding
+        self.PreFanfare = Resource.load_sfx("RopeOutroData", "ba-101.wav") # Choose something background
+        self.Fanfare = Resource.load_sfx("RopeOutroData", "ba-102.wav") # Correct ending (This was starting to ...)
+        self.FugleSkrig = Resource.load_sfx("RopeOutroData", "ba-104.wav") # Scylla turned into bird
+        self.TrappeGrin = Resource.load_sfx("RopeOutroData", "hexhaha.wav") # Odd laugh
+        self.Skrig = Resource.load_sfx("RopeOutroData", "skrig.wav") # Scilla screams
+        self.ScoreCounter = Resource.load_sfx("RopeOutroData", "counter.wav") # Score counter increase
+        self.BgMusic = Resource.load_sfx("RopeOutroData", "a_party_for_me.mp3") # BG music, downloaded from https://www.youtube.com/watch?v=maJVRkefBhw
 
         self.played = {}
         self.switch_to(CaveState.WAITING_BEFORE_TALKING)

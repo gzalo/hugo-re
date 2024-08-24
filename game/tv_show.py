@@ -93,7 +93,7 @@ class TvShow:
                  self.switch_to(TvShowState.INITIAL)
 
             if phone_events.press_5:
-                 self.switch_to(TvShowState.CAVE)
+                 self.switch_to(TvShowState.PLAYING_HUGO)
 
         elif self.state == TvShowState.INITIAL:
             if self.has_ended():
