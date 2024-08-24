@@ -2,7 +2,6 @@ from pyvidplayer2 import Video
 from enum import Enum
 import time
 import random
-import pygame
 
 from cave import Cave
 from forest import Forest

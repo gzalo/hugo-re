@@ -2,6 +2,8 @@ from enum import Enum
 from resource import Resource
 import time
 import pygame
+import random
+import math
 
 class ForestState(Enum):
     WAIT_INTRO = 0
@@ -15,12 +17,13 @@ class ForestState(Enum):
     HURT_FLYING_FALLING_HANG_ANIMATION = 8
     HURT_FLYING_FALLING_HANG_TALKING = 9
     HURT_ROCK_ANIMATION = 10
-    HURT_ROCK_TALKING = 11
-    HURT_BRANCH_ANIMATION = 12
-    HURT_BRANCH_TALKING = 13
-    TALKING_AFTER_HURT = 14
-    TALKING_GAME_OVER = 15
-    WIN_DIALOGUE = 16
+    HURT_ROCK_HIT_ANIMATION = 11
+    HURT_ROCK_TALKING = 12
+    HURT_BRANCH_ANIMATION = 13
+    HURT_BRANCH_TALKING = 14
+    TALKING_AFTER_HURT = 15
+    TALKING_GAME_OVER = 16
+    WIN_DIALOGUE = 17
 
 class Forest:
     state = None
@@ -34,6 +37,18 @@ class Forest:
         self.background_music_playing = False
         self.parallax_pos = 0
         self.scylla_affected = False
+        self.arrow_up_focus = False
+        self.arrow_down_focus = False
+        self.last_time = None
+        self.end_max_time = 60
+        self.ground_speed = 64
+        self.old_second = None
+        self.hugo_jumping = False
+        self.hugo_crawling = False
+
+        self.obstacles = self.generate_obstacles()
+        self.sacks = self.generate_sacks()
+        self.leaves = self.generate_leaves()
 
         self.bg_hillsday = Resource.load_surfaces("ForestData", "hillsday.cgf", 0,0) # hills night
         # self.bg_hillsnight = Resource.load_surfaces("ForestData", "hillsngt.cgf" ,0,0) # hills day
@@ -44,14 +59,15 @@ class Forest:
         self.leaves1 = Resource.load_surfaces("ForestData", "leaves1.cgf",0,0)  # bigger leaves
         self.leaves2 = Resource.load_surfaces("ForestData", "leaves2.cgf",0,0) # upper leaves
         self.scoreboard = Resource.load_surface_raw("ForestData", "scorebrd.bmp") # lower portion
+        self.bg_gradient = Resource.load_surface_raw("ForestData", "gradient.bmp")  # background gradient
         self.end_mountain = Resource.load_surfaces("ForestData", "wall.cgf",0,0) # ending wall
-        self.hugo_flyv = Resource.load_surfaces("ForestData", "hugoflyv.cgf", 0,0) # looking up preocupated
+        # self.hugo_flyv = Resource.load_surfaces("ForestData", "hugoflyv.cgf", 0,0) # looking up preocupated, hit by branch
         self.hugo_side = Resource.load_surfaces("ForestData", "hugoside.cgf", 0, 7) # hugo walking
         self.hugo_crawl = Resource.load_surfaces("ForestData", "kravle.cgf", 0, 7) # crawls
         self.hugo_jump = Resource.load_surfaces("ForestData", "hugohop.cgf", 0,2) # hugo jumps
-        self.hugo_scared = Resource.load_surfaces("ForestData", "scared.cgf", 0,7) # scared, when?
-        self.hugo_end = Resource.load_surfaces("ForestData", "hugoend.cgf", 0,0) # looks at camera after ending
-        self.hugo_intrap = Resource.load_surfaces("ForestData", "caught.cgf",0,0) # in trap
+        # self.hugo_scared = Resource.load_surfaces("ForestData", "scared.cgf", 0,7) # scared, when?
+        # self.hugo_end = Resource.load_surfaces("ForestData", "hugoend.cgf", 0,0) # looks at camera after ending
+        # self.hugo_intrap = Resource.load_surfaces("ForestData", "caught.cgf",0,0) # in trap
         self.hugo_telllives = Resource.load_surfaces("ForestData", "hugo_hello.cgf",0,15) # hugo tells remaining lives
         self.hugo_hand1 = Resource.load_surfaces("ForestData", "hand1.cgf",0,0) # hand far
         self.hugo_hand2 = Resource.load_surfaces("ForestData", "hand2.cgf",0,0) # hand closer
@@ -64,7 +80,6 @@ class Forest:
         self.hit_rock = Resource.load_surfaces("ForestData", "hgrock.til", 0, 60) # hit by ball
         self.hugo_lookrock = Resource.load_surfaces("ForestData", "hugo-rock.til", 0, 14) # almost crushed
         self.hit_rock_sync = Resource.load_surfaces("ForestData", "msyncrck.til", 0, 17) # talking after hit by ball
-
         self.catapult_fly = Resource.load_surfaces("ForestData", "hgkatfly.til", 0, 113) # flying in trap
         self.catapult_fall = Resource.load_surfaces("ForestData", "hgkatfly.til", 115, 189)  # falling in trap
         self.catapult_airtalk = Resource.load_surfaces("ForestData", "catapult-speak.til", 0, 15)  # talking in air
@@ -142,6 +157,9 @@ class Forest:
             pygame.mixer.Sound.play(sound)
             self.played[sound_name] = True
 
+    def play_now(self, sound):
+        pygame.mixer.Sound.play(sound)
+
     def render(self, screen):
         state_time = time.time() - self.state_start
         frame_index = int(state_time * 10)
@@ -159,27 +177,118 @@ class Forest:
                 screen.blit(self.hugo_telllives[actual_index], (0,0))
 
         elif self.state == ForestState.PLAYING:
-            # When hitting catapult
-            self.play(self.speak_catapult_hit, "speak_catapult_hit")
-            self.play(self.sfx_hugo_launch, "sfx_hugo_launch")
-            self.play(self.sfx_catapult_eject, "sfx_catapult_eject")
-            # When hitting trap
-            self.play(self.sfx_hugo_hittrap, "sfx_hugo_hittrap")
-            # When hitting stick
-            self.play(self.sfx_hugo_hitlog, "sfx_hugo_hitlog")
-            # When getting good bag
-            self.play(self.sfx_sack_normal, "sfx_sack_normal")
-            # When getting better bag
-            self.play(self.sfx_sack_bonus, "sfx_sack_bonus")
-            # When stick didn't hit
-            self.play(self.sfx_tree_swush, "sfx_tree_swush")
-            # Walking
-            self.play(self.sfx_hugo_walk0, "sfx_hugo_walk0")
-            self.play(self.sfx_hugo_walk1, "sfx_hugo_walk1")
-            self.play(self.sfx_hugo_walk2, "sfx_hugo_walk2")
-            self.play(self.sfx_hugo_walk3, "sfx_hugo_walk3")
-            self.play(self.sfx_hugo_walk4, "sfx_hugo_walk4")
+            self.played = {}
 
+            fract, integer = math.modf(self.parallax_pos)
+            integer = math.floor(integer) + 1
+            if integer >= self.end_max_time:
+                integer = self.end_max_time - 1
+
+            for index in range(len(self.obstacles)):
+                obstacle_pos = (index - self.parallax_pos) * self.ground_speed
+
+                if self.obstacles[index] == 1: # Catapult
+                    idx = frame_index % len(self.catapult)
+                    dy = [45,43,39,34,29,22,14,1]
+                    screen.blit(self.catapult[idx], (obstacle_pos - 8, 112 + dy[idx]))
+                if self.obstacles[index] == 2: # Trap
+                    idx = frame_index % len(self.trap)
+                    dy = [176, 173, 169, 165, 176, 176]
+                    screen.blit(self.trap[idx], (obstacle_pos - 8, dy[idx] - 24))
+                if self.obstacles[index] == 3: # Rock
+                    idx = frame_index % len(self.rock)
+                    screen.blit(self.rock[idx], (obstacle_pos - math.sin(fract*(2*math.pi)) * 15, 120))
+                if self.obstacles[index] == 4: # Tree
+                    idx = frame_index % len(self.tree)
+                    screen.blit(self.lone_tree[0], (obstacle_pos-52, -40))
+                    screen.blit(self.tree[idx], (obstacle_pos, 52+10))
+
+            for index in range(len(self.sacks)):
+                sack_pos = (index - self.parallax_pos) * self.ground_speed
+
+                if self.sacks[index] != 0:
+                    screen.blit(self.sack[0], (sack_pos, 32))
+
+            for index in range(len(self.leaves)):
+                leave_pos = (index - self.parallax_pos) * self.ground_speed
+                if self.leaves[index] == 1:
+                    screen.blit(self.leaves2[0], (leave_pos, -10))
+                elif self.leaves[index] == 2:
+                    screen.blit(self.leaves1[0], (leave_pos, -10))
+
+            if self.arrow_up_focus:
+                screen.blit(self.arrows[1], (256 ,17))
+            else:
+                screen.blit(self.arrows[0], (256+2, 16+3))
+            if self.arrow_down_focus:
+                screen.blit(self.arrows[3], (256 ,54))
+            else:
+                screen.blit(self.arrows[2], (256+2, 54+2))
+
+            if self.old_second == None:
+                self.old_second = math.floor(self.parallax_pos)
+
+            if self.old_second != math.floor(self.parallax_pos):
+                if self.hugo_jumping:
+                    self.hugo_jumping = False
+                    self.arrow_up_focus = False
+                if self.hugo_crawling:
+                    self.hugo_crawling = False
+                    self.arrow_down_focus = False
+
+                if self.arrow_up_focus:
+                    self.hugo_jumping = True
+                elif self.arrow_down_focus:
+                    self.hugo_crawling = True
+
+                if self.obstacles[integer] != 0:
+                    if self.obstacles[integer] == 1 and not self.hugo_jumping:  # Catapult
+                        self.play_now(self.speak_catapult_hit)
+                        self.play_now(self.sfx_hugo_launch)
+                        self.play_now(self.sfx_catapult_eject)
+                        self.obstacles[integer] = 0
+                        self.switch_to(ForestState.HURT_FLYING_START)
+                    elif self.obstacles[integer] == 2 and not self.hugo_jumping:  # Trap
+                        self.play_now(self.sfx_hugo_hittrap)
+                        self.obstacles[integer] = 0
+                        self.switch_to(ForestState.HURT_TRAP_ANIMATION)
+                    elif self.obstacles[integer] == 3 and not self.hugo_jumping:  # Rock
+                        self.play_now(self.sfx_hugo_hitlog)
+                        self.obstacles[integer] = 0
+                        self.switch_to(ForestState.HURT_ROCK_ANIMATION)
+                    elif self.obstacles[integer] == 4:  # Tree
+                        if self.hugo_crawling:
+                            self.play_now(self.sfx_tree_swush)
+                        else:
+                            self.play_now(self.sfx_hugo_hitlog)
+                            self.obstacles[integer] = 0
+                            self.switch_to(ForestState.HURT_BRANCH_ANIMATION)
+
+            if self.hugo_jumping:
+                dy = -250*fract**2 + 250*fract - 22.5
+                screen.blit(self.hugo_jump[frame_index % len(self.hugo_jump)], (0, 40 - dy))
+
+                if self.sacks[integer] != 0:
+                    if self.sacks[integer] == 1:
+                        self.score += 100
+                        self.play_now(self.sfx_sack_normal)
+                        self.sacks[integer] = 0
+                    elif self.sacks[integer] == 2:
+                        self.score += 250
+                        self.play_now(self.sfx_sack_bonus)
+                        self.sacks[integer] = 0
+
+            elif self.hugo_crawling:
+                screen.blit(self.hugo_crawl[frame_index % len(self.hugo_crawl)], (0, 105))
+            else:
+                screen.blit(self.hugo_side[frame_index % len(self.hugo_side)], (0, 90))
+
+            if frame_index % 8 == 0 and not self.hugo_jumping:
+                walk_sfx = [self.sfx_hugo_walk0, self.sfx_hugo_walk1, self.sfx_hugo_walk2, self.sfx_hugo_walk3,
+                            self.sfx_hugo_walk4]
+                self.play_now(walk_sfx[random.randint(0, 4)])
+
+            self.old_second = math.floor(self.parallax_pos)
 
         elif self.state == ForestState.SCYLLA_BUTTON:
             self.play(self.sfx_lightning_warning, "sfx_lightning_warning", 0.5)
@@ -190,15 +299,22 @@ class Forest:
 
         elif self.state == ForestState.HURT_ROCK_ANIMATION:
             if frame_index >= len(self.hugo_lookrock):
-                self.switch_to(ForestState.HURT_ROCK_TALKING)
+                self.switch_to(ForestState.HURT_ROCK_HIT_ANIMATION)
             else:
                 screen.blit(self.hugo_lookrock[frame_index], (0,0))
+                self.render_bottom( screen)
+
+        elif self.state == ForestState.HURT_ROCK_HIT_ANIMATION:
+            if frame_index >= len(self.hit_rock):
+                self.switch_to(ForestState.HURT_ROCK_TALKING)
+            else:
+                screen.blit(self.hit_rock[frame_index], (0,0))
                 self.render_bottom( screen)
 
         elif self.state == ForestState.HURT_ROCK_TALKING:
             self.play(self.speak_rock, "speak_rock")
             if frame_index >= len(self.sync_rock):
-                self.switch_to(ForestState.TALKING_AFTER_HURT)
+                self.reduce_lifes()
             else:
                 actual_index = self.sync_rock[frame_index]
                 screen.blit(self.hit_rock_sync[actual_index], (0,0))
@@ -214,7 +330,7 @@ class Forest:
         elif self.state == ForestState.HURT_BRANCH_TALKING:
             self.play(self.speak_hitlog, "speak_hitlog")
             if frame_index >= len(self.sync_hitlog):
-                self.switch_to(ForestState.TALKING_AFTER_HURT)
+                self.reduce_lifes()
             else:
                 actual_index = self.sync_hitlog[frame_index]
                 screen.blit(self.hugohitlog_talk[actual_index], (0,0))
@@ -254,7 +370,7 @@ class Forest:
             self.play(self.speak_catapult_hang, "speak_catapult_hang")
             self.play(self.sfx_hugo_hang, "sfx_hugo_hang")
             if frame_index >= len(self.sync_catapult_hang):
-                self.switch_to(ForestState.TALKING_AFTER_HURT)
+                self.reduce_lifes()
             else:
                 actual_index = self.sync_catapult_hang[frame_index]
                 screen.blit(self.catapult_hang[12], (0,0))
@@ -269,7 +385,7 @@ class Forest:
         elif self.state == ForestState.HURT_TRAP_TALKING:
             self.play(self.speak_trap, "speak_trap")
             if frame_index >= len(self.sync_trap):
-                self.switch_to(ForestState.TALKING_AFTER_HURT)
+                self.reduce_lifes()
             else:
                 actual_index = self.sync_trap[frame_index]
                 screen.blit(self.hugo_traptalk[actual_index], (0,0))
@@ -285,14 +401,14 @@ class Forest:
                     self.switch_to(ForestState.PLAYING)
                 else:
                     actual_index = self.sync_lastlife[frame_index]
-                    screen.blit(self.hugo_telllives[actual_index], (128, 16))
+                    screen.blit(self.hugo_telllives[actual_index], (128, -16))
             else:
                 self.play(self.speak_dieonce, "speak_dieonce")
                 if frame_index >= len(self.sync_dieonce):
                     self.switch_to(ForestState.PLAYING)
                 else:
                     actual_index = self.sync_dieonce[frame_index]
-                    screen.blit(self.hugo_telllives[actual_index], (128, 16))
+                    screen.blit(self.hugo_telllives[actual_index], (128, -16))
 
             if frame_index < 8:
                 if frame_index % 2 == 0:
@@ -306,7 +422,7 @@ class Forest:
                 self.end()
             else:
                 actual_index = self.sync_gameover[frame_index]
-                screen.blit(self.hugo_telllives[actual_index], (0,0))
+                screen.blit(self.hugo_telllives[actual_index], (128,-16))
 
         elif self.state == ForestState.WIN_DIALOGUE:
             self.play(self.speak_levelcompleted, "speak_levelcompleted")
@@ -314,25 +430,34 @@ class Forest:
                 self.end()
             else:
                 actual_index = self.sync_levelcompleted[frame_index]
-                screen.blit(self.hugo_telllives[actual_index], (0,0))
+                screen.blit(self.hugo_telllives[actual_index], (128,-16))
+
+    def reduce_lifes(self):
+        self.lifes -= 1
+        if self.lifes == 0:
+            self.switch_to(ForestState.TALKING_GAME_OVER)
+        else:
+            self.switch_to(ForestState.TALKING_AFTER_HURT)
 
     def render_background(self, screen):
-        hills_speed = 0.1
-        trees_speed = 0.2
-        grass_speed = 0.5
-        ground_speed = 0.8
+        hills_speed = 6
+        trees_speed = 12
+        grass_speed = 30
         hills_width = self.bg_hillsday[0].get_width()
         trees_width = self.bg_trees[0].get_width()
         grass_width = self.grass[0].get_width()
         ground_width = self.bg_ground[0].get_width()
 
-        hills_pos = (self.newMod(- self.parallax_pos * hills_speed, hills_width), 0)
-        trees_pos = (self.newMod(- self.parallax_pos * trees_speed,trees_width), -24)
-        grass_pos = (self.newMod(- self.parallax_pos * grass_speed,grass_width), 172)
-        ground_pos = (self.newMod(- self.parallax_pos * ground_speed,ground_width), 158)
+        hills_pos = (self.new_mod(- self.parallax_pos * hills_speed, hills_width), 0)
+        trees_pos = (self.new_mod(- self.parallax_pos * trees_speed, trees_width), -24)
+        grass_pos = (self.new_mod(- self.parallax_pos * grass_speed, grass_width), 172)
+        ground_pos = (self.new_mod(- self.parallax_pos * self.ground_speed, ground_width), 158)
         hills_pos_next = (hills_pos[0] + hills_width, hills_pos[1])
         tress_pos_next = (trees_pos[0] + trees_width, trees_pos[1])
 
+        mountain_pos = 320 - 96 - (self.parallax_pos - self.end_max_time) * self.ground_speed
+
+        screen.blit(self.bg_gradient, (0,0))
         screen.blit(self.bg_hillsday[0], hills_pos)
         screen.blit(self.bg_hillsday[0], hills_pos_next)
 
@@ -350,6 +475,8 @@ class Forest:
         for i in range(12):
             grass_x = grass_pos[0] + i * grass_width
             screen.blit(self.grass[0], (grass_x, grass_pos[1]))
+
+        screen.blit(self.end_mountain[0], (mountain_pos, -16))
 
     def render_bottom(self, screen):
         screen.blit(self.scoreboard, (0, 184))
@@ -373,7 +500,8 @@ class Forest:
         self.state = new_state
         self.state_start = time.time()
 
-    def newMod(self, a, b):
+    @staticmethod
+    def new_mod(a, b):
         res = a % b
         return res if not res else res - b if a < 0 else res
 
@@ -382,24 +510,66 @@ class Forest:
             pygame.mixer.Sound.play(self.sfx_bg_atmosphere, loops=-1)
             self.background_music_playing = True
 
-        if self.state == None:
-            self.switch_to(ForestState.HURT_FLYING_START)
+        if phone_events.press_2 and not self.arrow_down_focus:
+            self.arrow_up_focus = True
 
-        self.parallax_pos += 1
+        if phone_events.press_8 and not self.arrow_up_focus:
+            self.arrow_down_focus = True
+
+        if self.state is None:
+            self.switch_to(ForestState.PLAYING)
+
+        if self.last_time == None:
+            self.last_time = time.time()
+
+        if self.state == ForestState.PLAYING:
+            self.parallax_pos += time.time() - self.last_time
+            self.last_time = time.time()
+        else:
+            self.last_time = None
+
+        if self.parallax_pos > self.end_max_time:
+            self.parallax_pos = self.end_max_time
+            self.switch_to(ForestState.WIN_DIALOGUE)
 
 
     def end(self):
         pygame.mixer.Sound.stop(self.sfx_bg_atmosphere)
         self.ended = True
 
-    def get_spritesheet_area(self, value):
-        # Spritesheet has 01234
-        # 56789 in second row
+    @staticmethod
+    def get_spritesheet_area(value):
         width = 32
         height = 33
 
         xpos = value%5
         ypos = value//5
 
-        return (1+xpos*(width+1), 1+ypos*(height+1), width, height)
+        return 1+xpos*(width+1), 1+ypos*(height+1), width, height
+
+    def generate_obstacles(self):
+        empty_prob = 0.65
+        other_prob = (1 - empty_prob)/4
+        out = random.choices([0, 1, 2, 3, 4], weights=[empty_prob, other_prob, other_prob, other_prob, other_prob], k=self.end_max_time)
+        out[0] = 0
+        out[1] = 0
+        for idx in range(len(out)-1):
+            if out[idx] != 0:
+                out[idx+1] = 0
+
+        return out
+
+    def generate_sacks(self):
+        empty_prob = 0.7
+        other_prob = (1-empty_prob)*0.7
+        other_prob_high = (1-empty_prob)*0.3
+        return random.choices([0, 1, 2], weights=[empty_prob, other_prob, other_prob_high], k=self.end_max_time)
+
+    def generate_leaves(self):
+        arr = random.choices([1, 2], weights=[0.5, 0.5], k=self.end_max_time)
+        for idx in range(len(arr)-1):
+            if arr[idx] == 2:
+                arr[idx+1] = 0
+        return arr
+
 
