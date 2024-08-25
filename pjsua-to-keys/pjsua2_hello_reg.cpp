@@ -4,49 +4,20 @@
 
 using namespace pj;
 
-int my_snd_dev_id;
+int phoneId;
 
-void processDtmfLegacy(string digit, bool down){
-    /*'1': 79,
-    '2': 72, # 8
-    '3': 81,
-    '4': 75,
-    '5': 76,
-    '6': 77,
-    '7': 71,
-    '8': 80, # 2
-    '9': 73,
-    '0': 82,
-    '#': # Enter
-    '*': # Escape*/
-    DWORD flags = down ? 0 : KEYEVENTF_KEYUP;
-
-    if(digit == "1"){
-        keybd_event(VK_NUMPAD1, 0, flags, 0);
-    } else if (digit == "2"){
-        keybd_event(VK_NUMPAD8, 0, flags, 0);
-    } else if (digit == "3"){
-        keybd_event(VK_NUMPAD3, 0, flags, 0);
-    } else if (digit == "4"){
-        keybd_event(VK_NUMPAD4, 0, flags, 0);
-    } else if (digit == "5"){
-        keybd_event(VK_NUMPAD5, 0, flags, 0);
-    } else if (digit == "6"){
-        keybd_event(VK_NUMPAD6, 0, flags, 0);
-    } else if (digit == "7"){
-        keybd_event(VK_NUMPAD7, 0, flags, 0);
-    } else if (digit == "8"){
-        keybd_event(VK_NUMPAD2, 0, flags, 0);
-    } else if (digit == "9"){
-        keybd_event(VK_NUMPAD9, 0, flags, 0);
-    } else if (digit == "0"){
-        keybd_event(VK_NUMPAD0, 0, flags, 0);
-    } else if (digit == "#"){
-        keybd_event(VK_RETURN, 0, flags, 0);
-    } else if (digit == "*"){
-        keybd_event(VK_ESCAPE, 0, flags, 0);
-    }
-}
+int offHookId[] = {0x3b,0x3d,0x3f,0x41};
+int hungUpId[] = {0x3c,0x3e,0x40,0x42};
+int key0[] = {0x2c, 0x2d, 0x2e, 0x52};
+int key1[] = {0x02, 0x05, 0x08, 0x4f};
+int key2[] = {0x03, 0x06, 0x09, 0x50};
+int key3[] = {0x04,0x07,0x0a,0x51};
+int key4[] = {0x10,0x13,0x16,0x4b};
+int key5[] = {0x11,0x14,0x17,0x4c};
+int key6[] = {0x12,0x15,0x18,0x4d};
+int key7[] = {0x1E,0x21,0x24,0x47};
+int key8[] = {0x1F,0x22,0x25,0x48};
+int key9[] = {0x20,0x23,0x26,0x49};
 
 INPUT createScanCodeEvent(WORD scancode, bool isDown){
     INPUT input = {};
@@ -60,44 +31,28 @@ INPUT createScanCodeEvent(WORD scancode, bool isDown){
 }
 
 void processDtmf(string digit, bool down){
-    /*'1': 79,
-    '2': 72, # 8
-    '3': 81,
-    '4': 75,
-    '5': 76,
-    '6': 77,
-    '7': 71,
-    '8': 80, # 2
-    '9': 73,
-    '0': 82,
-    '#': # Enter
-    '*': # Escape*/
     INPUT input;
 
     if(digit == "1"){
-        input = createScanCodeEvent(79, down);
+        input = createScanCodeEvent(key1[phoneId], down);
     } else if (digit == "2"){
-        input = createScanCodeEvent(72, down);
+        input = createScanCodeEvent(key2[phoneId], down);
     } else if (digit == "3"){
-        input = createScanCodeEvent(81, down);
+        input = createScanCodeEvent(key3[phoneId], down);
     } else if (digit == "4"){
-        input = createScanCodeEvent(75, down);
+        input = createScanCodeEvent(key4[phoneId], down);
     } else if (digit == "5"){
-        input = createScanCodeEvent(76, down);
+        input = createScanCodeEvent(key5[phoneId], down);
     } else if (digit == "6"){
-        input = createScanCodeEvent(77, down);
+        input = createScanCodeEvent(key6[phoneId], down);
     } else if (digit == "7"){
-        input = createScanCodeEvent(71, down);
+        input = createScanCodeEvent(key7[phoneId], down);
     } else if (digit == "8"){
-        input = createScanCodeEvent(80, down);
+        input = createScanCodeEvent(key8[phoneId], down);
     } else if (digit == "9"){
-        input = createScanCodeEvent(73, down);
+        input = createScanCodeEvent(key9[phoneId], down);
     } else if (digit == "0"){
-        input = createScanCodeEvent(82, down);
-    } else if (digit == "#"){
-        input = createScanCodeEvent(28, down);
-    } else if (digit == "*"){
-        input = createScanCodeEvent(1, down);
+        input = createScanCodeEvent(key0[phoneId], down);
     }
 
     SendInput(1, &input, sizeof(INPUT));
@@ -136,28 +91,26 @@ public:
         if (ci.state == PJSIP_INV_STATE_CONFIRMED)
         {
             std::cout << "Call is confirmed. You can start receiving DTMF codes." << std::endl;
-            // Q => offhook
             {
-                INPUT input = createScanCodeEvent(0x10, true);
+                INPUT input = createScanCodeEvent(offHookId[phoneId], true);
                 SendInput(1, &input, sizeof(INPUT));
             }
             Sleep(50);
             {
-                INPUT input = createScanCodeEvent(0x10, false);
+                INPUT input = createScanCodeEvent(offHookId[phoneId], false);
                 SendInput(1, &input, sizeof(INPUT));
             }
         }
         if (ci.state == PJSIP_INV_STATE_DISCONNECTED)
         {
-            // W => hung up
             std::cout << "Call is disconnected." << std::endl;
             {
-                INPUT input = createScanCodeEvent(0x11, true);    
+                INPUT input = createScanCodeEvent(hungUpId[phoneId], true);    
                 SendInput(1, &input, sizeof(INPUT));
             }
             Sleep(50);
             {
-                INPUT input = createScanCodeEvent(0x11, false);     
+                INPUT input = createScanCodeEvent(hungUpId[phoneId], false);     
                 SendInput(1, &input, sizeof(INPUT));       
             }
         }
@@ -212,8 +165,25 @@ public:
 
 };
 
+string username[4] = {
+    "110",
+    "111",
+    "112",
+    "113"
+};
+
 int main(int argc, char **argv)
 {
+
+    if (argc != 4) {
+        std::cerr << "Usage: " << argv[0] << "<PhoneId> <CaptureDevice> <PlaybackDevice> (e.g 0 4 7)" << std::endl;
+        return -1;
+    }
+
+    phoneId = std::stoi(argv[1]);
+    int captureDev = std::stoi(argv[2]);
+    int playbackDev = std::stoi(argv[3]);
+
     Endpoint ep;
 
     ep.libCreate();
@@ -224,7 +194,7 @@ int main(int argc, char **argv)
 
     // Create SIP transport. Error handling sample is shown
     TransportConfig tcfg;
-    tcfg.port = 5060;
+    tcfg.port = 5060 + phoneId;
     try {
         ep.transportCreate(PJSIP_TRANSPORT_UDP, tcfg);
     } catch (Error &err) {
@@ -236,22 +206,14 @@ int main(int argc, char **argv)
     ep.libStart();
     std::cout << "*** PJSUA2 STARTED ***" << std::endl;
 
-    if (argc != 3) {
-        std::cerr << "Usage: " << argv[0] << " <CaptureDevice> <PlaybackDevice> (e.g 4 7)" << std::endl;
-        return -1;
-    }
-
-    int captureDev = std::stoi(argv[1]);
-    int playbackDev = std::stoi(argv[2]);
-
     ep.audDevManager().setCaptureDev(captureDev);
     ep.audDevManager().setPlaybackDev(playbackDev);
 
     // Configure an AccountConfig
     AccountConfig acfg;
-    acfg.idUri = "sip:5@10.0.0.1";
+    acfg.idUri = "sip:" + username[phoneId] + "@10.0.0.1";
     acfg.regConfig.registrarUri = "sip:10.0.0.1";
-    AuthCredInfo cred("digest", "*", "5", 0, "unsecurepassword");
+    AuthCredInfo cred("digest", "*", username[phoneId], 0, "unsecurepassword");
     acfg.sipConfig.authCreds.push_back( cred );
 
     // Create the account
