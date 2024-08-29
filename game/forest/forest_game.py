@@ -48,9 +48,9 @@ class ForestGame:
             return TalkingAfterHurt(self)
 
     def render_background(self, screen):
-        hills_speed = 6
-        trees_speed = 12
-        grass_speed = 30
+        hills_speed = 6 * Config.FOREST_BG_SPEED_MULTIPLIER
+        trees_speed = 12 * Config.FOREST_BG_SPEED_MULTIPLIER
+        grass_speed = 30 * Config.FOREST_BG_SPEED_MULTIPLIER
         hills_width = ForestResources.bg_hillsday[0].get_width()
         trees_width = ForestResources.bg_trees[0].get_width()
         grass_width = ForestResources.grass[0].get_width()

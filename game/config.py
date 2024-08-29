@@ -33,5 +33,6 @@ class Config:
         }
     }
 
+    FOREST_BG_SPEED_MULTIPLIER = 1.0
     FOREST_GROUND_SPEED = 64
     FOREST_MAX_TIME = 60

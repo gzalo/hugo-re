@@ -7,6 +7,7 @@ from array import array
 from cave.cave_resources import CaveResources
 from config import Config
 from forest.forest_resources import ForestResources
+from post_processing import PostProcessing
 from scores.scores import Scores
 from tv_show.tv_show_parent import TvShowParent
 from phone_events import PhoneEvents
@@ -65,6 +66,8 @@ class Game:
 
         tv_shows = [TvShowParent(country) for country in Config.COUNTRIES]
 
+        self.post_processing = PostProcessing()
+
         running = True
         while running:
             phone_events = [PhoneEvents() for _ in range(4)]
@@ -108,6 +111,8 @@ class Game:
                 if tv_show.is_playing():
                     any_playing = True
 
+            self.post_processing.handle_events()
+
             for i in range(4):
                 display.blit(screens[i], self.positions[i])
 
@@ -121,7 +126,7 @@ class Game:
                         display.blit(phone_icons[i], self.positions[i])
 
 
-            self.render_frame(ctx, display, program, render_object, not any_playing)
+            self.render_frame(ctx, display, program, render_object, any_playing)
             pygame.time.wait(16)
 
         pygame.quit()
@@ -134,12 +139,12 @@ class Game:
         tex.write(surf.get_view('1'))
         return tex
 
-    def render_frame(self, ctx, display, program, render_object, wavy):
+    def render_frame(self, ctx, display, program, render_object, any_playing):
         frame_tex = self.surf_to_texture(ctx, display)
         frame_tex.use(0)
         program['tex'] = 0
         program['time'] = time.time() - self.start_time
-        program['wavyness'] = 0.01 if wavy else 0
+        self.post_processing.apply(program, any_playing)
         render_object.render(mode=moderngl.TRIANGLE_STRIP)
         pygame.display.flip()
         frame_tex.release()
