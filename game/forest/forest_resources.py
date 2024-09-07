@@ -90,10 +90,10 @@ class ForestResources:
     sfx_tree_swush = None
     sfx_hugo_hitlog = None
     sfx_catapult_eject = None
-    # sfx_birds = None
+    sfx_birds = None
     # sfx_hugo_foothurt = None
-    # sfx_hugo_hitscreen = None
-    # sfx_hugo_screenklir = None
+    sfx_hugo_hitscreen = None
+    sfx_hugo_screenklir = None
     sfx_hugo_crash = None
     sfx_hugo_hangstart = None
     sfx_hugo_hang = None
@@ -204,10 +204,10 @@ class ForestResources:
         ForestResources.sfx_tree_swush = Resource.load_sfx("ForestData", "wush.wav")
         ForestResources.sfx_hugo_hitlog = Resource.load_sfx("ForestData", "bell.wav")
         ForestResources.sfx_catapult_eject = Resource.load_sfx("ForestData", "fjeder.wav")
-        # ForestResources.sfx_birds = Resource.load_sfx("ForestData", "birds-lp.wav")
+        ForestResources.sfx_birds = Resource.load_sfx("ForestData", "birds-lp.wav")
         # ForestResources.sfx_hugo_foothurt = Resource.load_sfx("ForestData", "timpani.wav")
-        # ForestResources.sfx_hugo_hitscreen = Resource.load_sfx("ForestData", "hit_screen.wav")
-        # ForestResources.sfx_hugo_screenklir = Resource.load_sfx("ForestData", "klirr.wav")
+        ForestResources.sfx_hugo_hitscreen = Resource.load_sfx("ForestData", "hit_screen.wav")
+        ForestResources.sfx_hugo_screenklir = Resource.load_sfx("ForestData", "klirr.wav")
         ForestResources.sfx_hugo_crash = Resource.load_sfx("ForestData", "kineser.wav")
         ForestResources.sfx_hugo_hangstart = Resource.load_sfx("ForestData", "knage-start.wav")
         ForestResources.sfx_hugo_hang = Resource.load_sfx("ForestData", "knage-lp.wav")

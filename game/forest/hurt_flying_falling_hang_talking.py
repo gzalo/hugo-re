@@ -16,6 +16,6 @@ class HurtFlyingFallingHangTalking(State):
 
     def render(self, screen):
         screen.blit(ForestResources.catapult_hang[12], (0, 0))
-        screen.blit(ForestResources.catapult_hangspeak[ForestResources.sync_catapult_hang[self.get_frame_index()] - 1], (0,0))
+        screen.blit(ForestResources.catapult_hangspeak[ForestResources.sync_catapult_hang[self.get_frame_index()] - 1], (115, 117))
 
 

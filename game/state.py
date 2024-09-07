@@ -30,6 +30,9 @@ class State:
     def get_frame_index(self) -> int:
         return int(self.get_state_time() * 10)
 
+    def get_frame_index_fast(self) -> int:
+        return int(self.get_state_time() * 20)
+
     def one_shot(self, delta: float, name: str) -> bool:
         if name not in self.events and time.time() - self.start_time > delta:
             self.events[name] = time.time() - self.start_time

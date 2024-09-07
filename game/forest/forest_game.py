@@ -3,6 +3,12 @@ import random
 
 from config import Config
 from forest.forest_resources import ForestResources
+from forest.hurt_branch_animation import HurtBranchAnimation
+from forest.hurt_flying_falling import HurtFlyingFalling
+from forest.hurt_flying_start import HurtFlyingStart
+from forest.hurt_rock_animation import HurtRockAnimation
+from forest.hurt_trap_animation import HurtTrapAnimation
+from forest.hurt_trap_talking import HurtTrapTalking
 from forest.talking_after_hurt import TalkingAfterHurt
 from forest.talking_game_over import TalkingGameOver
 from forest.wait_intro import WaitIntro
@@ -128,6 +134,8 @@ class ForestGame:
                              k=Config.FOREST_MAX_TIME)
         out[0] = 0
         out[1] = 0
+        out[2] = 0
+        out[3] = 0
         for idx in range(len(out) - 1):
             if out[idx] != 0:
                 out[idx + 1] = 0

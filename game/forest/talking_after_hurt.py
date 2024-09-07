@@ -11,9 +11,6 @@ class TalkingAfterHurt(State):
             (self.parent.lifes >= 1 and self.get_frame_index() >= len(ForestResources.sync_dieonce)):
             return Playing(self.parent)
 
-        if self.one_shot(0.25, "knock1"):
-            pygame.mixer.Sound.play(ForestResources.sfx_hugo_knock)
-
         if self.one_shot(0.5, "knock1"):
             pygame.mixer.Sound.play(ForestResources.sfx_hugo_knock)
 
@@ -29,12 +26,11 @@ class TalkingAfterHurt(State):
         self.parent.render_background(screen)
         self.parent.render_bottom(screen)
 
-        if self.get_frame_index() < 8:
-            if self.get_frame_index() % 2 == 0:
-                screen.blit(ForestResources.hugo_hand1[0], (96, 83))
-            else:
-                screen.blit(ForestResources.hugo_hand2[0], (96, 78))
-
         sync = ForestResources.sync_lastlife if self.parent.lifes == 1 else ForestResources.sync_dieonce
-        screen.blit(ForestResources.hugo_telllives[sync[self.get_frame_index()]], (128, -16))
+        screen.blit(ForestResources.hugo_telllives[sync[self.get_frame_index()]-1], (128, -16))
+
+        if self.get_frame_index() < 8 and self.get_frame_index() % 4 == 0:
+            screen.blit(ForestResources.hugo_hand2[0], (96, 78))
+        else:
+            screen.blit(ForestResources.hugo_hand1[0], (96, 83))
 

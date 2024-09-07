@@ -1,13 +1,14 @@
 import pygame
 
 from forest.forest_resources import ForestResources
+from forest.hurt_flying_falling import HurtFlyingFalling
 from state import State
 
 
 class HurtFlyingTalking(State):
     def process_events(self, events):
         if self.get_frame_index() >= len(ForestResources.sync_catapult_talktop):
-            return self.parent.reduce_lifes()
+            return HurtFlyingFalling(self.parent)
 
     def on_enter(self) -> None:
         super().on_enter()

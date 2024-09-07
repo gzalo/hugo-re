@@ -7,7 +7,7 @@ from state import State
 
 class HurtFlyingFallingHangAnimation(State):
     def process_events(self, events):
-        if self.get_frame_index() >= len(ForestResources.catapult_hang):
+        if self.get_frame_index_fast() >= len(ForestResources.catapult_hang):
             return HurtFlyingFallingHangTalking(self.parent)
 
     def on_enter(self) -> None:
@@ -15,6 +15,6 @@ class HurtFlyingFallingHangAnimation(State):
         pygame.mixer.Sound.play(ForestResources.sfx_hugo_hangstart)
 
     def render(self, screen):
-        screen.blit(ForestResources.catapult_hang[self.get_frame_index()], (0,0))
+        screen.blit(ForestResources.catapult_hang[self.get_frame_index_fast()], (0,0))
 
 

@@ -7,6 +7,7 @@ class VideoState(State):
         super().__init__(parent)
         self.video = video
         self.loop = loop
+        self.has_looped = False
 
     def on_enter(self) -> None:
         super().on_enter()
@@ -15,6 +16,7 @@ class VideoState(State):
     def process_events(self, phone_events: PhoneEvents):
         if self.loop and not self.video.active:
             self.video.restart()
+            self.has_looped = True
 
     def render(self, screen):
         self.video.draw(screen, (0, 0))

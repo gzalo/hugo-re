@@ -14,5 +14,6 @@ class HurtRockTalking(State):
         pygame.mixer.Sound.play(ForestResources.speak_rock)
 
     def render(self, screen):
+        screen.blit(ForestResources.hit_rock_sync[ForestResources.sync_rock[self.get_frame_index()]-1], (0,0))
         self.parent.render_bottom(screen)
-        screen.blit(ForestResources.hit_rock_sync[ForestResources.sync_rock[self.get_frame_index()]], (0,0))
+

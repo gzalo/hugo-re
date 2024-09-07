@@ -16,3 +16,9 @@ class Press5(VideoState):
 
         if phone_events.press_5:
             return HaveLuck(self.parent)
+
+    def render(self, screen):
+        super().render(screen)
+
+        if self.has_looped:
+            screen.blit(TvShowResources.press_5, (0, 0))

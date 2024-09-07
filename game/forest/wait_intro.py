@@ -17,4 +17,4 @@ class WaitIntro(State):
     def render(self, screen):
         self.parent.render_background(screen)
         self.parent.render_bottom(screen)
-        screen.blit(ForestResources.hugo_telllives[ForestResources.sync_start[self.get_frame_index()]], (128, -16))
+        screen.blit(ForestResources.hugo_telllives[ForestResources.sync_start[self.get_frame_index()]-1], (128, -16))

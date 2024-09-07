@@ -12,9 +12,11 @@ class TvShowResources:
     videos_going_scylla = {}
     videos_ending = {}
     videos_have_luck = {}
+    press_5 = None
 
     @staticmethod
     def init():
+        TvShowResources.press_5 = pygame.image.load("resources/images/press_5.png").convert_alpha()
         TvShowResources.instructions = {game_name: pygame.image.load("resources/images/instruction_" + game_name + ".png").convert() for
                     game_name in Config.GAMES.keys()}
 

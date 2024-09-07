@@ -14,4 +14,4 @@ class HurtTrapTalking(State):
         pygame.mixer.Sound.play(ForestResources.speak_trap)
 
     def render(self, screen):
-        screen.blit(ForestResources.hugo_traptalk[ForestResources.sync_trap[self.get_frame_index()]], (0,0))
+        screen.blit(ForestResources.hugo_traptalk[ForestResources.sync_trap[self.get_frame_index()]-1], (0,0))

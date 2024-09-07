@@ -24,6 +24,7 @@ class Playing(State):
         self.hugo_crawling = False
         self.last_time = time.time()
         self.old_second = None
+        self.HUGO_X_POS = 16
 
     def process_events(self, phone_events: PhoneEvents):
         if phone_events.press_2 and not self.arrow_down_focus:
@@ -63,7 +64,6 @@ class Playing(State):
 
             if self.parent.obstacles[integer] != 0:
                 if self.parent.obstacles[integer] == 1 and not self.hugo_jumping:  # Catapult
-                    pygame.mixer.Sound.play(ForestResources.speak_catapult_hit)
                     pygame.mixer.Sound.play(ForestResources.sfx_hugo_launch)
                     pygame.mixer.Sound.play(ForestResources.sfx_catapult_eject)
                     self.parent.obstacles[integer] = 0
@@ -149,8 +149,8 @@ class Playing(State):
 
         if self.hugo_jumping:
             dy = -250 * fract ** 2 + 250 * fract - 22.5
-            screen.blit(ForestResources.hugo_jump[self.get_frame_index() % len(ForestResources.hugo_jump)], (0, 40 - dy))
+            screen.blit(ForestResources.hugo_jump[self.get_frame_index() % len(ForestResources.hugo_jump)], (self.HUGO_X_POS, 40 - dy))
         elif self.hugo_crawling:
-            screen.blit(ForestResources.hugo_crawl[self.get_frame_index() % len(ForestResources.hugo_crawl)], (0, 105))
+            screen.blit(ForestResources.hugo_crawl[self.get_frame_index() % len(ForestResources.hugo_crawl)], (self.HUGO_X_POS, 105))
         else:
-            screen.blit(ForestResources.hugo_side[self.get_frame_index() % len(ForestResources.hugo_side)], (0, 90))
+            screen.blit(ForestResources.hugo_side[self.get_frame_index() % len(ForestResources.hugo_side)], (self.HUGO_X_POS, 90))
