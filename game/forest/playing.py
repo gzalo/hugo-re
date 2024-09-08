@@ -129,14 +129,14 @@ class Playing(State):
             sack_pos = (index - self.parent.parallax_pos) * Config.FOREST_GROUND_SPEED
 
             if self.parent.sacks[index] != 0:
-                screen.blit(ForestResources.sack[0], (sack_pos, 32))
+                screen.blit(ForestResources.sack[0], (sack_pos-16, 32))
 
         for index in range(len(self.parent.leaves)):
             leave_pos = (index - self.parent.parallax_pos) * Config.FOREST_GROUND_SPEED
             if self.parent.leaves[index] == 1:
-                screen.blit(ForestResources.leaves2[0], (leave_pos, -10))
+                screen.blit(ForestResources.leaves2[0], (leave_pos-16, -10))
             elif self.parent.leaves[index] == 2:
-                screen.blit(ForestResources.leaves1[0], (leave_pos, -10))
+                screen.blit(ForestResources.leaves1[0], (leave_pos-16, -10))
 
         if self.arrow_up_focus:
             screen.blit(ForestResources.arrows[1], (256, 17))

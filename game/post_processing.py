@@ -1,3 +1,5 @@
+import math
+
 import pygame
 
 from config import Config
@@ -16,41 +18,14 @@ class PostProcessing:
         if len(self.joysticks) == 0:
             return
 
-        if self.joysticks[0].get_button(0):
-            self.wavyness -= 0.01
-        if self.joysticks[0].get_button(1):
-            self.wavyness += 0.01
+        if self.joysticks[0].get_numaxes() != 6:
+            return
 
-        if self.joysticks[0].get_button(2):
-            Config.FOREST_BG_SPEED_MULTIPLIER -= 0.1
-        if self.joysticks[0].get_button(3):
-            Config.FOREST_BG_SPEED_MULTIPLIER += 0.1
-
-        if self.joysticks[0].get_button(4):
-            self.bitcrush *= 2
-        if self.joysticks[0].get_button(5):
-            self.bitcrush /= 2
-
-        if self.joysticks[0].get_button(6):
-            self.hue_shift += 0.01
-        if self.joysticks[0].get_button(7):
-            self.hue_shift -= 0.01
-
-        if self.joysticks[0].get_button(8):
-            self.scale += 0.1
-        if self.joysticks[0].get_button(9):
-            self.scale -= 0.1
-
-        self.bitcrush = max(4, min(256, self.bitcrush))
-        self.wavyness = max(0, min(0.1, self.wavyness))
-        self.scale = max(1, min(2, self.scale))
-
-        if self.hue_shift < 0:
-            self.hue_shift += 1
-        if self.hue_shift > 1:
-            self.hue_shift -= 1
-
-        Config.FOREST_BG_SPEED_MULTIPLIER = max(1, min(5, Config.FOREST_BG_SPEED_MULTIPLIER))
+        self.scale = self.map(self.joysticks[0].get_axis(0), -1, 1, 1, 4)
+        Config.FOREST_BG_SPEED_MULTIPLIER = self.map(self.joysticks[0].get_axis(1), -1, 1, 1, 5)
+        self.wavyness = self.map(self.joysticks[0].get_axis(2), -1, 1, 0, 0.1)
+        self.hue_shift = self.map(self.joysticks[0].get_axis(3), -1, 1, 0, 1)
+        self.bitcrush = self.map(self.joysticks[0].get_axis(4), -1, 1, 256, 4)
 
     def apply(self, program, any_playing):
         if any_playing:
@@ -63,3 +38,6 @@ class PostProcessing:
             program['bitcrush'] = 256
             program['hue_shift'] = 0
             program['scale'] = 1
+
+    def map(self, value, in_min, in_max, out_min, out_max):
+        return (value - in_min) * (out_max - out_min) / (in_max - in_min) + out_min

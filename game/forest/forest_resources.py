@@ -1,3 +1,5 @@
+import pygame
+
 from resource import Resource
 
 
@@ -116,7 +118,7 @@ class ForestResources:
         ForestResources.leaves1 = Resource.load_surfaces("ForestData", "leaves1.cgf", 0, 0)  # bigger leaves
         ForestResources.leaves2 = Resource.load_surfaces("ForestData", "leaves2.cgf", 0, 0)  # upper leaves
         ForestResources.scoreboard = Resource.load_surface_raw("ForestData", "scorebrd.bmp")  # lower portion
-        ForestResources.bg_gradient = Resource.load_surface_raw("ForestData", "gradient.bmp")  # background gradient
+        ForestResources.bg_gradient = pygame.image.load("resources/fixed_assets/gradient.bmp")  # background gradient
         ForestResources.end_mountain = Resource.load_surfaces("ForestData", "wall.cgf", 0, 0)  # ending wall
         # ForestResources.hugo_flyv = Resource.load_surfaces("ForestData", "hugoflyv.cgf", 0,0) # looking up preocupated, hit by branch
         ForestResources.hugo_side = Resource.load_surfaces("ForestData", "hugoside.cgf", 0, 7)  # hugo walking
@@ -163,7 +165,7 @@ class ForestResources:
         ForestResources.hugo_lives = Resource.load_surfaces("ForestData", "hugostat.cgf", 0, 0)  # life indicator
         ForestResources.sculla_hand1 = Resource.load_surfaces("ForestData", "heks1.cgf", 0, 0)  # hand pressed
         ForestResources.sculla_hand2 = Resource.load_surfaces("ForestData", "heks2.cgf", 0, 0)  # hand not pressed
-        ForestResources.arrows = Resource.load_surfaces("ForestData", "arrows.cgf", 0, 4)  # 2, 2 pressed, 8, 8 pressed
+        ForestResources.arrows = [pygame.image.load("resources/fixed_assets/arrows.cgf_" + str(i) + ".png") for i in range(4)] # 2, 2 pressed, 8, 8 pressed
 
         ForestResources.sync_start = Resource.load_sync("ForestData", "005-01.oos")
         ForestResources.sync_rock = Resource.load_sync("ForestData", "005-02.oos")
