@@ -13,7 +13,7 @@ Using an IP phone (or an analog phone with a FXS gateway) you can play the Hugo 
 
 **Phase 3**: As seen in Cybercirujas CCK July 2024, introduced a high score tracker, name recognizer and more
 
-**Phase 4**: As seen in Punkware Cyberzine Aug 2024, introduced 4 player mode using a reimplementation of the game
+**Phase 4**: As seen in Punkware Cyberzine Aug 2024 and Cybercirujas federal event 2024, introduced 4 player mode using a reimplementation of the game
 
 ![Remake](docs/hugoremake.drawio.png)
 
