@@ -1,7 +1,10 @@
+import time
+
 import pygame
 import random
 
 from config import Config
+from effect_type import EffectType
 from forest.forest_resources import ForestResources
 from forest.hurt_branch_animation import HurtBranchAnimation
 from forest.hurt_flying_falling import HurtFlyingFalling
@@ -9,15 +12,19 @@ from forest.hurt_flying_start import HurtFlyingStart
 from forest.hurt_rock_animation import HurtRockAnimation
 from forest.hurt_trap_animation import HurtTrapAnimation
 from forest.hurt_trap_talking import HurtTrapTalking
+from forest.playing import Playing
 from forest.talking_after_hurt import TalkingAfterHurt
 from forest.talking_game_over import TalkingGameOver
 from forest.wait_intro import WaitIntro
 from null_state import NullState
+from phone_events import PhoneEvents
 
 
 class ForestGame:
 
-    def __init__(self):
+    def __init__(self, parent):
+        self.parent = parent
+
         self.score = 0
         self.ended = False
         self.lifes = 3
@@ -30,11 +37,21 @@ class ForestGame:
         self.obstacles = self.generate_obstacles()
         self.sacks = self.generate_sacks()
         self.leaves = self.generate_leaves()
+        self.effect_status = None
+        self.effect_start = None
 
         pygame.mixer.Sound.play(ForestResources.sfx_bg_atmosphere, loops=-1)
 
-    def process_events(self, phone_events):
+    def process_events(self, phone_events: PhoneEvents):
+        if self.effect_status == EffectType.INVERT:
+            [phone_events.press_2, phone_events.press_8] = [phone_events.press_8, phone_events.press_2]
+
         next_state = self._state.process_events(phone_events)
+
+        if self.effect_status == EffectType.FLASH and time.time() - self.effect_start > Config.EFFECT_DURATION_FLASH:
+            self.effect_status = None
+        if self.effect_status == EffectType.INVERT and time.time() - self.effect_start > Config.EFFECT_DURATION_INVERT:
+            self.effect_status = None
 
         if next_state is not None:
             self._state.on_exit()
@@ -46,12 +63,24 @@ class ForestGame:
     def render(self, screen):
         self._state.render(screen)
 
+        if self.effect_status == EffectType.FLASH:
+            screen.fill((255, 255, 255))
+
+        if self.effect_status == EffectType.INVERT and isinstance(self._state, Playing):
+            screen.blit(ForestResources.inverted_arrows, (0, 0))
+
     def reduce_lifes(self):
         self.lifes -= 1
         if self.lifes == 0:
             return TalkingGameOver(self)
         else:
             return TalkingAfterHurt(self)
+
+    def external_effect(self, effect):
+        if self.effect_status is not None:
+            return
+        self.effect_status = effect
+        self.effect_start = time.time()
 
     def render_background(self, screen):
         hills_speed = 6 * Config.FOREST_BG_SPEED_MULTIPLIER
@@ -156,3 +185,4 @@ class ForestGame:
             if arr[idx] == 2:
                 arr[idx + 1] = 0
         return arr
+

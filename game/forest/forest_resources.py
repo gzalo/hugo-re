@@ -107,6 +107,8 @@ class ForestResources:
 
     # sfx_rockroll = None
 
+    inverted_arrows = None
+
     @staticmethod
     def init():
         ForestResources.bg_hillsday = Resource.load_surfaces("ForestData", "hillsday.cgf", 0, 0)  # hills night
@@ -219,3 +221,5 @@ class ForestResources:
         ForestResources.sfx_hugo_walk3 = Resource.load_sfx("ForestData", "fumle3.wav")
         ForestResources.sfx_hugo_walk4 = Resource.load_sfx("ForestData", "fumle4.wav")
         # ForestResources.sfx_rockroll = Resource.load_sfx("ForestData", "rumle-lp.wav")
+
+        ForestResources.inverted_arrows = pygame.image.load("resources/fixed_assets/inverted_arrows.png").convert_alpha()

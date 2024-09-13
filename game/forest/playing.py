@@ -5,6 +5,7 @@ import time
 import pygame
 
 from config import Config
+from effect_type import EffectType
 from forest.forest_resources import ForestResources
 from forest.hurt_branch_animation import HurtBranchAnimation
 from forest.hurt_flying_start import HurtFlyingStart
@@ -89,10 +90,16 @@ class Playing(State):
                     self.parent.score += 100
                     pygame.mixer.Sound.play(ForestResources.sfx_sack_normal)
                     self.parent.sacks[integer] = 0
+                    # TODO improve this ugly hack
+                    tv_show = self.parent.parent.parent
+                    tv_show.parent.queue_effect_to_random_player(EffectType.FLASH, tv_show)
                 elif self.parent.sacks[integer] == 2:
                     self.parent.score += 250
                     pygame.mixer.Sound.play(ForestResources.sfx_sack_bonus)
                     self.parent.sacks[integer] = 0
+                    # TODO improve this ugly hack
+                    tv_show = self.parent.parent.parent
+                    tv_show.parent.queue_effect_to_random_player(EffectType.INVERT, tv_show)
 
         if self.get_frame_index() % 8 == 0 and not self.hugo_jumping:
             walk_sfx = [ForestResources.sfx_hugo_walk0, ForestResources.sfx_hugo_walk1, ForestResources.sfx_hugo_walk2,

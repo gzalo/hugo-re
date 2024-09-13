@@ -1,3 +1,5 @@
+import random
+
 import pygame
 import pygame.freetype
 import moderngl
@@ -6,6 +8,7 @@ from array import array
 
 from cave.cave_resources import CaveResources
 from config import Config
+from effect_type import EffectType
 from forest.forest_resources import ForestResources
 from post_processing import PostProcessing
 from scores.scores import Scores
@@ -25,6 +28,8 @@ class Game:
     scores = Scores()
     start_time = time.time()
     waviness = 0
+    tv_shows = []
+    post_processing = None
 
     with open("resources/shaders/main.vert", "r") as f:
         vert_shader = f.read()
@@ -64,8 +69,7 @@ class Game:
         ForestResources.init()
         TvShowResources.init()
 
-        tv_shows = [TvShowParent(country) for country in Config.COUNTRIES]
-
+        self.tv_shows = [TvShowParent(country, self) for country in Config.COUNTRIES]
         self.post_processing = PostProcessing()
 
         running = True
@@ -104,8 +108,8 @@ class Game:
                             phone_events[i].press_9 = True
 
             any_playing = False
-            for tv_show in tv_shows:
-                index = tv_shows.index(tv_show)
+            for tv_show in self.tv_shows:
+                index = self.tv_shows.index(tv_show)
                 tv_show.handle_events(phone_events[index])
                 tv_show.render(screens[index])
                 if tv_show.is_playing():
@@ -148,6 +152,13 @@ class Game:
         render_object.render(mode=moderngl.TRIANGLE_STRIP)
         pygame.display.flip()
         frame_tex.release()
+
+    def queue_effect_to_random_player(self, effect: EffectType, current_show):
+        valid_shows = [tv_show for tv_show in self.tv_shows if tv_show != current_show and tv_show.is_playing()]
+        if len(valid_shows) == 0:
+            return
+        random_player = random.choice(valid_shows)
+        random_player.external_effect(effect)
 
 if __name__ == "__main__":
     Game().run()
