@@ -6,6 +6,8 @@ uniform float wavyness;
 uniform float bitcrush;
 uniform float hue_shift;
 uniform float scale;
+uniform float chromatic_aberration;
+uniform float line_glitch;
 
 in vec2 uvs;
 out vec4 f_color;
@@ -26,12 +28,29 @@ vec3 hsv2rgb(vec3 c) {
     return c.z * mix(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y);
 }
 
+float rand(vec2 co){
+    return fract(sin(dot(co, vec2(12.9898, 78.233))) * 43758.5453);
+}
+
 void main() {
+    float redOffset   =  -chromatic_aberration * 0.015;
+    float greenOffset =  0;
+    float blueOffset  =  chromatic_aberration * 0.02;
+
     vec2 centered_uvs = uvs - 0.5;
     vec2 sample_pos = (centered_uvs * scale) + 0.5;
     sample_pos.x += sin(uvs.y * 10.0 + time) * wavyness * scale;
 
-    vec3 color = texture(tex, sample_pos).rgb;
+    if (rand(vec2(time, floor(sample_pos.y * 480) / 480)) < line_glitch) {
+        discard;
+    }
+
+    vec2 direction = vec2(sin(time), cos(time));
+    vec3 color = vec3(0,0,0);
+    color.r  = texture(tex, sample_pos + (direction * vec2(redOffset  ))).r;
+    color.g  = texture(tex, sample_pos + (direction * vec2(greenOffset))).g;
+    color.b = texture(tex, sample_pos + (direction * vec2(blueOffset ))).b;
+
     vec3 hsv = rgb2hsv(color);
     hsv.x = fract(hsv.x + hue_shift);
     color = hsv2rgb(hsv);
