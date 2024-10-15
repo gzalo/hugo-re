@@ -1,4 +1,5 @@
-#version 330 core
+#version 300 es
+precision mediump float;
 
 uniform sampler2D tex;
 uniform float time;
@@ -34,14 +35,14 @@ float rand(vec2 co){
 
 void main() {
     float redOffset   =  -chromatic_aberration * 0.015;
-    float greenOffset =  0;
+    float greenOffset =  0.0;
     float blueOffset  =  chromatic_aberration * 0.02;
 
     vec2 centered_uvs = uvs - 0.5;
     vec2 sample_pos = (centered_uvs * scale) + 0.5;
     sample_pos.x += sin(uvs.y * 10.0 + time) * wavyness * scale;
 
-    if (rand(vec2(time, floor(sample_pos.y * 480) / 480)) < line_glitch) {
+    if (rand(vec2(time, floor(sample_pos.y * 480.0) / 480.0)) < line_glitch) {
         discard;
     }
 

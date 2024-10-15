@@ -44,7 +44,7 @@ class Game:
         fs |= pygame.OPENGL | pygame.DOUBLEBUF
         pygame.display.set_mode((Config.SCR_WIDTH, Config.SCR_HEIGHT), fs)
         display = pygame.Surface((Config.SCR_WIDTH, Config.SCR_HEIGHT))
-        ctx = moderngl.create_context()
+        ctx = moderngl.create_context(310)
 
         quad_buffer = ctx.buffer(data=array('f', [
             -1.0, 1.0, 0.0, 0.0,

@@ -2,8 +2,8 @@ from resource import Resource
 
 
 class CaveResources:
-    caselive_til = "caselive.TIL"
-    casedie_til = "casedie.TIL"
+    caselive_til = "CASELIVE.TIL"
+    casedie_til = "CASEDIE.TIL"
 
     her_er_vi = None
     talks = None
@@ -69,8 +69,8 @@ class CaveResources:
         CaveResources.hugo_puff_second = Resource.load_surfaces("RopeOutroData", CaveResources.casedie_til, 167, 211)
         CaveResources.hugo_puff_third = Resource.load_surfaces("RopeOutroData", CaveResources.casedie_til, 212, 256)
         CaveResources.hugo_spring = Resource.load_surfaces("RopeOutroData", CaveResources.casedie_til, 257, 295)
-        CaveResources.happy = Resource.load_surfaces("RopeOutroData", "happy.TIL", 0, 111)
-        CaveResources.score_font = Resource.load_surfaces("RopeOutroData", "score.cgf", 0, 9)
+        CaveResources.happy = Resource.load_surfaces("RopeOutroData", "HAPPY.TIL", 0, 111)
+        CaveResources.score_font = Resource.load_surfaces("RopeOutroData", "SCORE.cgf", 0, 9)
         CaveResources.hugo = Resource.load_surfaces("RopeOutroData", "hugo.cgf", 0, 0)
 
         CaveResources.sync_hugo_start = Resource.load_sync("RopeOutroData", "002-06.oos")
@@ -84,18 +84,18 @@ class CaveResources:
         CaveResources.afskylia_skyd_ud = Resource.load_speak("RopeOutroData", "002-11.wav")  # Scylla screams on win
         CaveResources.hugoline_tak = Resource.load_speak("RopeOutroData", "002-12.wav")  # We are free
 
-        CaveResources.stemning = Resource.load_sfx("RopeOutroData", "ba-13.wav")  # Background chimes
-        CaveResources.fodtrin1 = Resource.load_sfx("RopeOutroData", "ba-15.wav")  # Step 1
-        CaveResources.fodtrin2 = Resource.load_sfx("RopeOutroData", "ba-16.wav")  # Step 2
-        CaveResources.hiv_i_reb = Resource.load_sfx("RopeOutroData", "ba-17.wav")  # Rope used
-        CaveResources.fjeder = Resource.load_sfx("RopeOutroData", "ba-18.wav")  # Spring
-        CaveResources.pre_puf = Resource.load_sfx("RopeOutroData", "ba-21.wav")  # Anticipation
-        CaveResources.puf = Resource.load_sfx("RopeOutroData", "ba-22.wav")  # Smoke puff
-        CaveResources.tast_trykket = Resource.load_sfx("RopeOutroData", "ba-24.wav")  # Waiting for you ding
-        CaveResources.pre_fanfare = Resource.load_sfx("RopeOutroData", "ba-101.wav")  # Choose something background
-        CaveResources.fanfare = Resource.load_sfx("RopeOutroData", "ba-102.wav")  # Correct ending (This was starting to ...)
-        CaveResources.fugle_skrig = Resource.load_sfx("RopeOutroData", "ba-104.wav")  # Scylla turned into bird
-        CaveResources.trappe_grin = Resource.load_sfx("RopeOutroData", "hexhaha.wav")  # Odd laugh
-        CaveResources.skrig = Resource.load_sfx("RopeOutroData", "skrig.wav")  # Scilla screams
-        CaveResources.score_counter = Resource.load_sfx("RopeOutroData", "counter.wav")  # Score counter increase
+        CaveResources.stemning = Resource.load_sfx("RopeOutroData", "BA-13.WAV")  # Background chimes
+        CaveResources.fodtrin1 = Resource.load_sfx("RopeOutroData", "BA-15.WAV")  # Step 1
+        CaveResources.fodtrin2 = Resource.load_sfx("RopeOutroData", "BA-16.WAV")  # Step 2
+        CaveResources.hiv_i_reb = Resource.load_sfx("RopeOutroData", "BA-17.WAV")  # Rope used
+        CaveResources.fjeder = Resource.load_sfx("RopeOutroData", "BA-18.WAV")  # Spring
+        CaveResources.pre_puf = Resource.load_sfx("RopeOutroData", "BA-21.WAV")  # Anticipation
+        CaveResources.puf = Resource.load_sfx("RopeOutroData", "BA-22.WAV")  # Smoke puff
+        CaveResources.tast_trykket = Resource.load_sfx("RopeOutroData", "BA-24.WAV")  # Waiting for you ding
+        CaveResources.pre_fanfare = Resource.load_sfx("RopeOutroData", "BA-101.WAV")  # Choose something background
+        CaveResources.fanfare = Resource.load_sfx("RopeOutroData", "BA-102.WAV")  # Correct ending (This was starting to ...)
+        CaveResources.fugle_skrig = Resource.load_sfx("RopeOutroData", "BA-104.WAV")  # Scylla turned into bird
+        CaveResources.trappe_grin = Resource.load_sfx("RopeOutroData", "HEXHAHA.WAV")  # Odd laugh
+        CaveResources.skrig = Resource.load_sfx("RopeOutroData", "SKRIG.WAV")  # Scilla screams
+        CaveResources.score_counter = Resource.load_sfx("RopeOutroData", "COUNTER.WAV")  # Score counter increase
         CaveResources.bg_music = Resource.load_sfx("RopeOutroData",  "a_party_for_me.mp3")  # BG music, downloaded from https://www.youtube.com/watch?v=maJVRkefBhw

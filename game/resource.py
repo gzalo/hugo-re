@@ -13,7 +13,7 @@ class Resource:
 
     @staticmethod
     def load_sync(game, filename):
-        with open(Resource.DATA_DIR + "/" + game + "/syncs/" + filename + ".json") as f:
+        with open(Resource.DATA_DIR + "/" + game + "/Syncs/" + filename + ".json") as f:
             return json.load(f)["frameIndices"]
 
     @staticmethod
@@ -29,11 +29,16 @@ class Resource:
 
     @staticmethod
     def load_sfx(game, filename):
+        if game == "RopeOutroData":
+            sfx = "SFX"
+        else:
+            sfx = "sfx"
+
         cache_key = f"sfx_{game}_{filename}"
         if cache_key in Resource.resources:
             return Resource.resources[cache_key]
         else:
-            sfx = pygame.mixer.Sound(Resource.DATA_DIR + "/" + game + "/sfx/" + filename)
+            sfx = pygame.mixer.Sound(Resource.DATA_DIR + "/" + game + "/" + sfx + "/" + filename)
             Resource.resources[cache_key] = sfx
             return sfx
 
@@ -41,13 +46,18 @@ class Resource:
     def load_surfaces(game, name, start, end):
         out = []
 
+        if game == "RopeOutroData":
+            gfx = "GFX"
+        else:
+            gfx = "gfx"
+
         for frame in range(start, end + 1):
             cache_key = f"surface_{game}_{name}_{frame}"
 
             if cache_key in Resource.resources:
                 out.append(Resource.resources[cache_key])
             else:
-                filename = Resource.DATA_DIR + "/" + game + "/gfx/" + name + "_" + str(frame) + ".png"
+                filename = Resource.DATA_DIR + "/" + game + "/" + gfx + "/" + name + "_" + str(frame) + ".png"
                 surf = pygame.image.load(filename).convert_alpha()
                 Resource.resources[cache_key] = surf
                 out.append(surf)

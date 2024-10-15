@@ -116,12 +116,12 @@ class ForestResources:
         ForestResources.bg_trees = Resource.load_surfaces("ForestData", "paratrees.cgf", 0, 0)  # more background
         ForestResources.bg_spooky_trees = Resource.load_surfaces("ForestData", "spooky.cgf", 0, 0)  # far background
         ForestResources.bg_ground = Resource.load_surfaces("ForestData", "paraground.cgf", 0, 0)  # ground
-        ForestResources.grass = Resource.load_surfaces("ForestData", "grass.cgf", 0, 0)  # near glass
-        ForestResources.leaves1 = Resource.load_surfaces("ForestData", "leaves1.cgf", 0, 0)  # bigger leaves
-        ForestResources.leaves2 = Resource.load_surfaces("ForestData", "leaves2.cgf", 0, 0)  # upper leaves
-        ForestResources.scoreboard = Resource.load_surface_raw("ForestData", "scorebrd.bmp")  # lower portion
+        ForestResources.grass = Resource.load_surfaces("ForestData", "GRASS.cgf", 0, 0)  # near glass
+        ForestResources.leaves1 = Resource.load_surfaces("ForestData", "LEAVES1.cgf", 0, 0)  # bigger leaves
+        ForestResources.leaves2 = Resource.load_surfaces("ForestData", "LEAVES2.cgf", 0, 0)  # upper leaves
+        ForestResources.scoreboard = Resource.load_surface_raw("ForestData", "SCOREBRD.bmp")  # lower portion
         ForestResources.bg_gradient = pygame.image.load("resources/fixed_assets/gradient.bmp")  # background gradient
-        ForestResources.end_mountain = Resource.load_surfaces("ForestData", "wall.cgf", 0, 0)  # ending wall
+        ForestResources.end_mountain = Resource.load_surfaces("ForestData", "WALL.cgf", 0, 0)  # ending wall
         # ForestResources.hugo_flyv = Resource.load_surfaces("ForestData", "hugoflyv.cgf", 0,0) # looking up preocupated, hit by branch
         ForestResources.hugo_side = Resource.load_surfaces("ForestData", "hugoside.cgf", 0, 7)  # hugo walking
         ForestResources.hugo_crawl = Resource.load_surfaces("ForestData", "kravle.cgf", 0, 7)  # crawls
@@ -139,34 +139,34 @@ class ForestResources:
         ForestResources.sack = Resource.load_surfaces("ForestData", "saek.cgf", 0, 3)  # bags
         ForestResources.trap = Resource.load_surfaces("ForestData", "faelde.cgf", 0, 5)  # trap in floor
         ForestResources.catapult = Resource.load_surfaces("ForestData", "catapult.cgf", 0, 7)  # catapult in floor
-        ForestResources.hit_rock = Resource.load_surfaces("ForestData", "hgrock.til", 0, 60)  # hit by ball
+        ForestResources.hit_rock = Resource.load_surfaces("ForestData", "HGROCK.TIL", 0, 60)  # hit by ball
         ForestResources.hugo_lookrock = Resource.load_surfaces("ForestData", "hugo-rock.til", 0, 14)  # almost crushed
-        ForestResources.hit_rock_sync = Resource.load_surfaces("ForestData", "msyncrck.til", 0,
+        ForestResources.hit_rock_sync = Resource.load_surfaces("ForestData", "MSYNCRCK.TIL", 0,
                                                                17)  # talking after hit by ball
-        ForestResources.catapult_fly = Resource.load_surfaces("ForestData", "hgkatfly.til", 0, 113)  # flying in trap
-        ForestResources.catapult_fall = Resource.load_surfaces("ForestData", "hgkatfly.til", 115,
+        ForestResources.catapult_fly = Resource.load_surfaces("ForestData", "HGKATFLY.til", 0, 113)  # flying in trap
+        ForestResources.catapult_fall = Resource.load_surfaces("ForestData", "HGKATFLY.til", 115,
                                                                189)  # falling in trap
-        ForestResources.catapult_airtalk = Resource.load_surfaces("ForestData", "catapult-speak.til", 0,
+        ForestResources.catapult_airtalk = Resource.load_surfaces("ForestData", "CATAPULT-SPEAK.til", 0,
                                                                   15)  # talking in air
-        ForestResources.catapult_hang = Resource.load_surfaces("ForestData", "hgkathng.til", 0,
+        ForestResources.catapult_hang = Resource.load_surfaces("ForestData", "HGKATHNG.TIL", 0,
                                                                12)  # hanging from branch
         ForestResources.catapult_hangspeak = Resource.load_surfaces("ForestData", "hanging_mouth.cgf", 0,
                                                                     11)  # mouth parts when hanging
-        ForestResources.hugohitlog = Resource.load_surfaces("ForestData", "branch-groggy.til", 0,
+        ForestResources.hugohitlog = Resource.load_surfaces("ForestData", "BRANCH-GROGGY.til", 0,
                                                             42)  # hurt with branch
-        ForestResources.hugohitlog_talk = Resource.load_surfaces("ForestData", "branch-speak.til", 0,
+        ForestResources.hugohitlog_talk = Resource.load_surfaces("ForestData", "BRANCH-SPEAK.til", 0,
                                                                  17)  # talking after getting hurt
         # ForestResources.foot1 = Resource.load_surfaces("ForestData", "foot1.cgf",0,0) # normal foot in trap
         # ForestResources.foot2 = Resource.load_surfaces("ForestData", "foot2.cgf",0,0) # red foot in trap
         # ForestResources.saks_die1 = Resource.load_surfaces("ForestData", "hgsaks.cgf",0,0) # foot in trap, eyes opened
         # ForestResources.saks_die2 = Resource.load_surfaces("ForestData", "hgsaks2.cgf", 0, 0 ) # foot in trap, eyes closed
         ForestResources.hugo_traptalk = Resource.load_surfaces("ForestData", "traptalk.til", 0, 15)  # hurts talking
-        ForestResources.hugo_traphurt = Resource.load_surfaces("ForestData", "trap-hurts.til", 0, 9)  # hurts animation
+        ForestResources.hugo_traphurt = Resource.load_surfaces("ForestData", "TRAP-HURTS.til", 0, 9)  # hurts animation
         # ForestResources.trap_stars = Resource.load_surfaces("ForestData", "hurts.cgf", 0, 3) # stars
-        ForestResources.score_numbers = Resource.load_surfaces("ForestData", "scores.cgf", 0, 0)  # scores spritesheet
-        ForestResources.hugo_lives = Resource.load_surfaces("ForestData", "hugostat.cgf", 0, 0)  # life indicator
-        ForestResources.sculla_hand1 = Resource.load_surfaces("ForestData", "heks1.cgf", 0, 0)  # hand pressed
-        ForestResources.sculla_hand2 = Resource.load_surfaces("ForestData", "heks2.cgf", 0, 0)  # hand not pressed
+        ForestResources.score_numbers = Resource.load_surfaces("ForestData", "SCORES.cgf", 0, 0)  # scores spritesheet
+        ForestResources.hugo_lives = Resource.load_surfaces("ForestData", "HUGOSTAT.cgf", 0, 0)  # life indicator
+        ForestResources.sculla_hand1 = Resource.load_surfaces("ForestData", "HEKS1.cgf", 0, 0)  # hand pressed
+        ForestResources.sculla_hand2 = Resource.load_surfaces("ForestData", "HEKS2.cgf", 0, 0)  # hand not pressed
         ForestResources.arrows = [pygame.image.load("resources/fixed_assets/arrows.cgf_" + str(i) + ".png") for i in range(4)] # 2, 2 pressed, 8, 8 pressed
 
         ForestResources.sync_start = Resource.load_sync("ForestData", "005-01.oos")
