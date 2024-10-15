@@ -10,10 +10,10 @@ class Attract(VideoState):
     def process_events(self, phone_events: PhoneEvents):
         super().process_events(phone_events)
         from tv_show.initial import Initial
-        from tv_show.playing import Playing
+        from tv_show.in_cave import InCave
 
         if phone_events.offhook:
             return Initial(self.parent)
 
         if phone_events.press_5:
-            return Playing(self.parent)
+            return InCave(self.parent)

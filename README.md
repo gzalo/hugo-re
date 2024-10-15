@@ -13,12 +13,10 @@ Multiplayer reimplementation of Hugo minigames using the original resources.
 If you want to play with actual phones (or IP phones):
 - [PJSUA tool (converts SIP tones to keys)](pjsua-to-keys/)
 - [Asterisk config](asterisk-config/)
-- [DTMF tones to key converter (no longer used)](dtmf-to-keys/)
 
 ### Other resources
 - [Project phases, improvements and future ideas](docs/phases.md)
 - [Reverse engineered format documentation](docs/reverse.md)
-- [Hugo resource viewer and repacker (no longer used)](viewer/)
 
 ### Contribution
 I'm looking for contributors! If you are interested in:

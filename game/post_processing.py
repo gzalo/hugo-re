@@ -1,5 +1,3 @@
-import math
-
 import pygame
 
 from config import Config
@@ -47,7 +45,8 @@ class PostProcessing:
             program['chromatic_aberration'] = 0
             program['line_glitch'] = 0
 
-    def map(self, value, in_min, in_max, out_min, out_max):
+    @staticmethod
+    def map(value, in_min, in_max, out_min, out_max):
         return (value - in_min) * (out_max - out_min) / (in_max - in_min) + out_min
 
     def map_bitcrush(self, value, in_min, in_max, out_min, out_max):

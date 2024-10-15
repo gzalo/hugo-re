@@ -6,12 +6,6 @@ import random
 from config import Config
 from effect_type import EffectType
 from forest.forest_resources import ForestResources
-from forest.hurt_branch_animation import HurtBranchAnimation
-from forest.hurt_flying_falling import HurtFlyingFalling
-from forest.hurt_flying_start import HurtFlyingStart
-from forest.hurt_rock_animation import HurtRockAnimation
-from forest.hurt_trap_animation import HurtTrapAnimation
-from forest.hurt_trap_talking import HurtTrapTalking
 from forest.playing import Playing
 from forest.talking_after_hurt import TalkingAfterHurt
 from forest.talking_game_over import TalkingGameOver
