@@ -21,7 +21,7 @@ class ForestGame:
 
         self.score = 0
         self.ended = False
-        self.lifes = 3
+        self.lives = 3
 
         self._state = WaitIntro(self)
         self._state.on_enter()
@@ -63,9 +63,9 @@ class ForestGame:
         if self.effect_status == EffectType.INVERT and isinstance(self._state, Playing):
             screen.blit(ForestResources.inverted_arrows, (0, 0))
 
-    def reduce_lifes(self):
-        self.lifes -= 1
-        if self.lifes == 0:
+    def reduce_lives(self):
+        self.lives -= 1
+        if self.lives == 0:
             return TalkingGameOver(self)
         else:
             return TalkingAfterHurt(self)
@@ -113,7 +113,7 @@ class ForestGame:
 
     def render_bottom(self, screen):
         screen.blit(ForestResources.scoreboard, (0, 184))
-        for i in range(self.lifes):
+        for i in range(self.lives):
             screen.blit(ForestResources.hugo_lives[0], (i * 40 + 32, 188))
 
         x_score = 200

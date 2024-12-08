@@ -7,7 +7,7 @@ from state import State
 class HurtFlyingFallingHangTalking(State):
     def process_events(self, events):
         if self.get_frame_index() >= len(ForestResources.sync_catapult_hang):
-            return self.parent.reduce_lifes()
+            return self.parent.reduce_lives()
 
     def on_enter(self) -> None:
         super().on_enter()
