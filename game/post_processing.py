@@ -1,6 +1,7 @@
 import pygame
 
 from config import Config
+from tween import Tween
 
 
 class PostProcessing:
@@ -21,13 +22,13 @@ class PostProcessing:
         if self.joysticks[0].get_numaxes() != 6:
             return
 
-        self.scale = self.map(self.joysticks[0].get_axis(0), -1, 1, 1, 4)
-        Config.FOREST_BG_SPEED_MULTIPLIER = self.map(self.joysticks[0].get_axis(1), -1, 1, 1, 5)
-        self.wavyness = self.map(self.joysticks[0].get_axis(2), -1, 1, 0, 0.1)
-        self.hue_shift = self.map(self.joysticks[0].get_axis(3), -1, 1, 0, 1)
-        self.bitcrush = self.map_bitcrush(self.joysticks[0].get_axis(4), -1, 1, 2, 256)
-        self.line_glitch = self.map(self.joysticks[0].get_axis(4), -1, 1, 0, 0.5)
-        self.chromatic_aberration = self.map(self.joysticks[0].get_axis(5), -1, 1, 0, 1)
+        self.scale = Tween.map(self.joysticks[0].get_axis(0), -1, 1, 1, 4)
+        Config.FOREST_BG_SPEED_MULTIPLIER = Tween.map(self.joysticks[0].get_axis(1), -1, 1, 1, 5)
+        self.wavyness = Tween.map(self.joysticks[0].get_axis(2), -1, 1, 0, 0.1)
+        self.hue_shift = Tween.map(self.joysticks[0].get_axis(3), -1, 1, 0, 1)
+        self.bitcrush = Tween.map_bitcrush(self.joysticks[0].get_axis(4), -1, 1, 2, 256)
+        self.line_glitch = Tween.map(self.joysticks[0].get_axis(4), -1, 1, 0, 0.5)
+        self.chromatic_aberration = Tween.map(self.joysticks[0].get_axis(5), -1, 1, 0, 1)
 
     def apply(self, program, any_playing):
         if any_playing:
@@ -45,16 +46,3 @@ class PostProcessing:
             program['chromatic_aberration'] = 0
             program['line_glitch'] = 0
 
-    @staticmethod
-    def map(value, in_min, in_max, out_min, out_max):
-        return (value - in_min) * (out_max - out_min) / (in_max - in_min) + out_min
-
-    def map_bitcrush(self, value, in_min, in_max, out_min, out_max):
-        value = self.map(value, in_min, in_max, 0, 1)
-        if value > 0.75:
-            return out_min
-        elif value > 0.5:
-            return out_min * 2
-        elif value > 0.25:
-            return out_min * 4
-        return out_max

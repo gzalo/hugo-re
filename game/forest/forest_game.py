@@ -5,6 +5,7 @@ import random
 
 from config import Config
 from effect_type import EffectType
+from effects.splat import Splat
 from forest.forest_resources import ForestResources
 from forest.playing import Playing
 from forest.talking_after_hurt import TalkingAfterHurt
@@ -37,12 +38,12 @@ class ForestGame:
         pygame.mixer.Sound.play(ForestResources.sfx_bg_atmosphere, loops=-1)
 
     def process_events(self, phone_events: PhoneEvents):
-        if self.effect_status == EffectType.INVERT:
+        if self.effect_status == EffectType.INVERT and time.time() - self.effect_start > Config.EFFECT_DURATION_ORB:
             [phone_events.press_2, phone_events.press_8] = [phone_events.press_8, phone_events.press_2]
 
         next_state = self._state.process_events(phone_events)
 
-        if self.effect_status == EffectType.FLASH and time.time() - self.effect_start > Config.EFFECT_DURATION_FLASH:
+        if self.effect_status == EffectType.SPLAT and time.time() - self.effect_start > Config.EFFECT_DURATION_SPLAT:
             self.effect_status = None
         if self.effect_status == EffectType.INVERT and time.time() - self.effect_start > Config.EFFECT_DURATION_INVERT:
             self.effect_status = None
@@ -57,11 +58,17 @@ class ForestGame:
     def render(self, screen):
         self._state.render(screen)
 
-        if self.effect_status == EffectType.FLASH:
-            screen.fill((255, 255, 255))
+        if self.effect_start:
+            dt = time.time() - self.effect_start
 
-        if self.effect_status == EffectType.INVERT and isinstance(self._state, Playing):
-            screen.blit(ForestResources.inverted_arrows, (0, 0))
+            if dt < Config.EFFECT_DURATION_ORB:
+                return
+
+            if self.effect_status == EffectType.SPLAT:
+                Splat.render_splat(screen, time.time() - self.effect_start)
+
+            if self.effect_status == EffectType.INVERT and isinstance(self._state, Playing):
+                screen.blit(ForestResources.inverted_arrows, (0, 0))
 
     def reduce_lives(self):
         self.lives -= 1

@@ -62,7 +62,7 @@ class Playing(State):
 
         if self.old_second != math.floor(self.parent.parallax_pos):
 
-            if self.parent.obstacles[integer] != 0:
+            if self.parent.obstacles[integer] != 0 and not Config.GOD_MODE:
                 if self.parent.obstacles[integer] == 1 and not self.arrow_up_focus:  # Catapult
                     pygame.mixer.Sound.play(ForestResources.sfx_hugo_launch)
                     pygame.mixer.Sound.play(ForestResources.sfx_catapult_eject)
@@ -91,7 +91,7 @@ class Playing(State):
                     self.parent.sacks[integer] = 0
                     # TODO improve this ugly hack
                     tv_show = self.parent.parent.parent
-                    tv_show.parent.queue_effect_to_random_player(EffectType.FLASH, tv_show)
+                    tv_show.parent.queue_effect_to_random_player(EffectType.SPLAT, tv_show)
                 elif self.parent.sacks[integer] == 2:
                     self.parent.score += 250
                     pygame.mixer.Sound.play(ForestResources.sfx_sack_bonus)

@@ -9,12 +9,14 @@ from array import array
 from cave.cave_resources import CaveResources
 from config import Config
 from effect_type import EffectType
+from effects.splat import Splat
 from forest.forest_resources import ForestResources
 from post_processing import PostProcessing
 from scores.scores import Scores
 from tv_show.tv_show_parent import TvShowParent
 from phone_events import PhoneEvents
 from tv_show.tv_show_resources import TvShowResources
+from tween import Tween
 
 
 class Game:
@@ -30,6 +32,8 @@ class Game:
     waviness = 0
     tv_shows = []
     post_processing = None
+    pos_by_country = {}
+    attacks = []
 
     with open("resources/shaders/main.vert", "r") as f:
         vert_shader = f.read()
@@ -68,8 +72,10 @@ class Game:
         CaveResources.init()
         ForestResources.init()
         TvShowResources.init()
+        Splat.init()
 
         self.tv_shows = [TvShowParent(country, self) for country in Config.COUNTRIES]
+        self.pos_by_country = {tv_show.country: self.positions[idx] for idx, tv_show in enumerate(self.tv_shows)}
         self.post_processing = PostProcessing()
 
         running = True
@@ -129,6 +135,19 @@ class Game:
                     else:
                         display.blit(phone_icons[i], self.positions[i])
 
+                # Render orbs
+                if self.attacks:
+                    curr_time = time.time()
+
+                    for attack in self.attacks:
+                        pos_0 = self.pos_by_country[attack[0]]
+                        pos_1 = self.pos_by_country[attack[1]]
+                        dt = curr_time - attack[2]
+                        orb_x = Tween.map_ease_in(dt, 0, Config.EFFECT_DURATION_ORB, pos_0[0]+70, pos_1[0]+70)
+                        orb_y = Tween.map_ease_in(dt, 0, Config.EFFECT_DURATION_ORB, pos_0[1]+70, pos_1[1]+70)
+                        display.blit(Splat.orb, (orb_x, orb_y))
+                        if dt > Config.EFFECT_DURATION_ORB:
+                            self.attacks.remove(attack)
 
             self.render_frame(ctx, display, program, render_object, any_playing)
             pygame.time.wait(16)
@@ -159,6 +178,7 @@ class Game:
             return
         random_player = random.choice(valid_shows)
         random_player.external_effect(effect)
+        self.attacks.append((current_show.country, random_player.country, time.time()))
 
 if __name__ == "__main__":
     Game().run()
