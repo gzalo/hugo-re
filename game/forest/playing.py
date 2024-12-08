@@ -21,18 +21,21 @@ class Playing(State):
         super().__init__(parent)
         self.arrow_up_focus = False
         self.arrow_down_focus = False
-        self.hugo_jumping = False
-        self.hugo_crawling = False
+        self.hugo_jumping_time = None
+        self.hugo_crawling_time = None
         self.last_time = time.time()
         self.old_second = None
         self.HUGO_X_POS = 16
 
     def process_events(self, phone_events: PhoneEvents):
-        if phone_events.press_2 and not self.arrow_down_focus:
-            self.arrow_up_focus = True
+        if not self.arrow_up_focus and not self.arrow_down_focus:
+            if phone_events.press_2:
+                self.arrow_up_focus = True
+                self.hugo_jumping_time = time.time()
 
-        if phone_events.press_8 and not self.arrow_up_focus:
-            self.arrow_down_focus = True
+            if phone_events.press_8:
+                self.arrow_down_focus = True
+                self.hugo_crawling_time = time.time()
 
         if self.parent.parallax_pos > Config.FOREST_MAX_TIME:
             self.parent.parallax_pos = Config.FOREST_MAX_TIME
@@ -50,42 +53,38 @@ class Playing(State):
         if self.old_second is None:
             self.old_second = math.floor(self.parent.parallax_pos)
 
-        if self.old_second != math.floor(self.parent.parallax_pos):
-            if self.hugo_jumping:
-                self.hugo_jumping = False
-                self.arrow_up_focus = False
-            if self.hugo_crawling:
-                self.hugo_crawling = False
-                self.arrow_down_focus = False
+        if self.arrow_up_focus and time.time() - self.hugo_jumping_time > 0.75:
+            self.hugo_jumping_time = None
+            self.arrow_up_focus = False
+        if self.arrow_down_focus and time.time() - self.hugo_crawling_time > 0.75:
+            self.hugo_crawling_time = None
+            self.arrow_down_focus = False
 
-            if self.arrow_up_focus:
-                self.hugo_jumping = True
-            elif self.arrow_down_focus:
-                self.hugo_crawling = True
+        if self.old_second != math.floor(self.parent.parallax_pos):
 
             if self.parent.obstacles[integer] != 0:
-                if self.parent.obstacles[integer] == 1 and not self.hugo_jumping:  # Catapult
+                if self.parent.obstacles[integer] == 1 and not self.arrow_up_focus:  # Catapult
                     pygame.mixer.Sound.play(ForestResources.sfx_hugo_launch)
                     pygame.mixer.Sound.play(ForestResources.sfx_catapult_eject)
                     self.parent.obstacles[integer] = 0
                     return HurtFlyingStart(self.parent)
-                elif self.parent.obstacles[integer] == 2 and not self.hugo_jumping:  # Trap
+                elif self.parent.obstacles[integer] == 2 and not self.arrow_up_focus:  # Trap
                     pygame.mixer.Sound.play(ForestResources.sfx_hugo_hittrap)
                     self.parent.obstacles[integer] = 0
                     return HurtTrapAnimation(self.parent)
-                elif self.parent.obstacles[integer] == 3 and not self.hugo_jumping:  # Rock
+                elif self.parent.obstacles[integer] == 3 and not self.arrow_up_focus:  # Rock
                     pygame.mixer.Sound.play(ForestResources.sfx_hugo_hitlog)
                     self.parent.obstacles[integer] = 0
                     return HurtRockAnimation(self.parent)
                 elif self.parent.obstacles[integer] == 4:  # Tree
-                    if self.hugo_crawling:
+                    if self.arrow_down_focus:
                         pygame.mixer.Sound.play(ForestResources.sfx_tree_swush)
                     else:
                         pygame.mixer.Sound.play(ForestResources.sfx_hugo_hitlog)
                         self.parent.obstacles[integer] = 0
                         return HurtBranchAnimation(self.parent)
 
-            if self.hugo_jumping and self.parent.sacks[integer] != 0:
+            if self.arrow_up_focus and self.parent.sacks[integer] != 0:
                 if self.parent.sacks[integer] == 1:
                     self.parent.score += 100
                     pygame.mixer.Sound.play(ForestResources.sfx_sack_normal)
@@ -101,7 +100,7 @@ class Playing(State):
                     tv_show = self.parent.parent.parent
                     tv_show.parent.queue_effect_to_random_player(EffectType.INVERT, tv_show)
 
-        if self.get_frame_index() % 8 == 0 and not self.hugo_jumping:
+        if self.get_frame_index() % 8 == 0 and not self.arrow_up_focus:
             walk_sfx = [ForestResources.sfx_hugo_walk0, ForestResources.sfx_hugo_walk1, ForestResources.sfx_hugo_walk2,
                         ForestResources.sfx_hugo_walk3, ForestResources.sfx_hugo_walk4]
             pygame.mixer.Sound.play(walk_sfx[random.randint(0, 4)])
@@ -154,10 +153,12 @@ class Playing(State):
         else:
             screen.blit(ForestResources.arrows[2], (256 + 2, 54 + 2))
 
-        if self.hugo_jumping:
-            dy = -250 * fract ** 2 + 250 * fract - 22.5
+        if self.arrow_up_focus:
+            dt = (time.time() - self.hugo_jumping_time) / 0.75
+            dy = -250 * dt ** 2 + 250 * dt - 22.5
             screen.blit(ForestResources.hugo_jump[self.get_frame_index() % len(ForestResources.hugo_jump)], (self.HUGO_X_POS, 40 - dy))
-        elif self.hugo_crawling:
+        elif self.arrow_down_focus:
             screen.blit(ForestResources.hugo_crawl[self.get_frame_index() % len(ForestResources.hugo_crawl)], (self.HUGO_X_POS, 105))
         else:
             screen.blit(ForestResources.hugo_side[self.get_frame_index() % len(ForestResources.hugo_side)], (self.HUGO_X_POS, 90))
+
