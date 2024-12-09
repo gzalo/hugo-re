@@ -2,10 +2,59 @@
 #define PJ_IS_BIG_ENDIAN 0
 #include <pjsua2.hpp>
 #include <iostream>
+#include <fcntl.h>
+#include <unistd.h>
+#include <linux/uinput.h>
+#include <libevdev/libevdev-uinput.h>
 
 using namespace pj;
 
 int phoneId;
+struct libevdev_uinput *uidev;
+
+int offHookId[] = {KEY_F1,KEY_F3,KEY_F5,KEY_F7};
+int hungUpId[] = {KEY_F2,KEY_F4,KEY_F6,KEY_F8};
+int key0[] = {KEY_Z, KEY_X, KEY_C, KEY_KP0};
+int key1[] = {KEY_1, KEY_4, KEY_7, KEY_KP1};
+int key2[] = {KEY_2, KEY_5, KEY_8, KEY_KP2};
+int key3[] = {KEY_3,KEY_6,KEY_9,KEY_KP3};
+int key4[] = {KEY_Q,KEY_R,KEY_U,KEY_KP4};
+int key5[] = {KEY_W,KEY_T,KEY_I,KEY_KP5};
+int key6[] = {KEY_E,KEY_Y,KEY_O,KEY_KP6};
+int key7[] = {KEY_A,KEY_F,KEY_J,KEY_KP7};
+int key8[] = {KEY_S,KEY_G,KEY_K,KEY_KP8};
+int key9[] = {KEY_D,KEY_H,KEY_L,KEY_KP9};
+
+void writeScanCodeEvent(int keycode, bool isDown){
+    libevdev_uinput_write_event(uidev, EV_KEY, keycode, isDown ? 1 : 0);
+    libevdev_uinput_write_event(uidev, EV_SYN, SYN_REPORT, 0); // Synchronize
+}
+
+void processDtmf(string digit, bool down){
+    INPUT input;
+
+    if(digit == "1"){
+        input = writeScanCodeEvent(key1[phoneId], down);
+    } else if (digit == "2"){
+        input = writeScanCodeEvent(key2[phoneId], down);
+    } else if (digit == "3"){
+        input = writeScanCodeEvent(key3[phoneId], down);
+    } else if (digit == "4"){
+        input = writeScanCodeEvent(key4[phoneId], down);
+    } else if (digit == "5"){
+        input = writeScanCodeEvent(key5[phoneId], down);
+    } else if (digit == "6"){
+        input = writeScanCodeEvent(key6[phoneId], down);
+    } else if (digit == "7"){
+        input = writeScanCodeEvent(key7[phoneId], down);
+    } else if (digit == "8"){
+        input = writeScanCodeEvent(key8[phoneId], down);
+    } else if (digit == "9"){
+        input = writeScanCodeEvent(key9[phoneId], down);
+    } else if (digit == "0"){
+        input = writeScanCodeEvent(key0[phoneId], down);
+    }
+}
 
 class MyAudioMediaPort: public AudioMediaPort
 {
@@ -40,28 +89,16 @@ public:
         if (ci.state == PJSIP_INV_STATE_CONFIRMED)
         {
             std::cout << "Call is confirmed. You can start receiving DTMF codes." << std::endl;
-            {
-//                INPUT input = createScanCodeEvent(offHookId[phoneId], true);
-//                SendInput(1, &input, sizeof(INPUT));
-            }
+            writeScanCodeEvent(offHookId[phoneId], true);
             usleep(50000);
-            {
-//                INPUT input = createScanCodeEvent(offHookId[phoneId], false);
-//                SendInput(1, &input, sizeof(INPUT));
-            }
+            writeScanCodeEvent(offHookId[phoneId], false);
         }
         if (ci.state == PJSIP_INV_STATE_DISCONNECTED)
         {
             std::cout << "Call is disconnected." << std::endl;
-            {
-//                INPUT input = createScanCodeEvent(hungUpId[phoneId], true);    
-//                SendInput(1, &input, sizeof(INPUT));
-            }
+            writeScanCodeEvent(hungUpId[phoneId], true);
             usleep(50000);
-            {
-//                INPUT input = createScanCodeEvent(hungUpId[phoneId], false);     
-//                SendInput(1, &input, sizeof(INPUT));       
-            }
+            writeScanCodeEvent(hungUpId[phoneId], false);
         }
     }
 
@@ -69,11 +106,11 @@ public:
     {
         if(!(prm.flags & PJMEDIA_STREAM_DTMF_IS_UPDATE)) { // keydown
             std::cout << "DTMF digit keydown: " << prm.digit << std::endl;
-            //processDtmf(prm.digit, true);
+            processDtmf(prm.digit, true);
         } 
         if(prm.flags & PJMEDIA_STREAM_DTMF_IS_END) { // keyup
             std::cout << "DTMF digit keyup: " << prm.digit << std::endl;
-            //processDtmf(prm.digit, false);
+            processDtmf(prm.digit, false);
         }
     }
 
@@ -151,6 +188,75 @@ int main(int argc, char **argv)
         return 1;
     }
 
+    struct libevdev *dev = libevdev_new();
+    int err;
+
+    if (!dev) {
+        fprintf(stderr, "Failed to initialize libevdev\n");
+        return 1;
+    }
+
+    // Set up the device
+    libevdev_set_name(dev, "Virtual Keyboard");
+    libevdev_enable_event_type(dev, EV_KEY);
+
+    libevdev_enable_event_code(dev, EV_KEY, KEY_F1, NULL);
+    libevdev_enable_event_code(dev, EV_KEY, KEY_F3, NULL);
+    libevdev_enable_event_code(dev, EV_KEY, KEY_F5, NULL);
+    libevdev_enable_event_code(dev, EV_KEY, KEY_F7, NULL);
+    libevdev_enable_event_code(dev, EV_KEY, KEY_F2, NULL);
+    libevdev_enable_event_code(dev, EV_KEY, KEY_F4, NULL);
+    libevdev_enable_event_code(dev, EV_KEY, KEY_F6, NULL);
+    libevdev_enable_event_code(dev, EV_KEY, KEY_F8, NULL);
+    libevdev_enable_event_code(dev, EV_KEY, KEY_Z, NULL);
+    libevdev_enable_event_code(dev, EV_KEY, KEY_X, NULL);
+    libevdev_enable_event_code(dev, EV_KEY, KEY_C, NULL);
+    libevdev_enable_event_code(dev, EV_KEY, KEY_KP0, NULL);
+    libevdev_enable_event_code(dev, EV_KEY, KEY_1, NULL);
+    libevdev_enable_event_code(dev, EV_KEY, KEY_4, NULL);
+    libevdev_enable_event_code(dev, EV_KEY, KEY_7, NULL);
+    libevdev_enable_event_code(dev, EV_KEY, KEY_KP1, NULL);
+    libevdev_enable_event_code(dev, EV_KEY, KEY_2, NULL);
+    libevdev_enable_event_code(dev, EV_KEY, KEY_5, NULL);
+    libevdev_enable_event_code(dev, EV_KEY, KEY_8, NULL);
+    libevdev_enable_event_code(dev, EV_KEY, KEY_KP2, NULL);
+    libevdev_enable_event_code(dev, EV_KEY, KEY_3, NULL);
+    libevdev_enable_event_code(dev, EV_KEY, KEY_6, NULL);
+    libevdev_enable_event_code(dev, EV_KEY, KEY_9, NULL);
+    libevdev_enable_event_code(dev, EV_KEY, KEY_KP3, NULL);
+    libevdev_enable_event_code(dev, EV_KEY, KEY_Q, NULL);
+    libevdev_enable_event_code(dev, EV_KEY, KEY_R, NULL);
+    libevdev_enable_event_code(dev, EV_KEY, KEY_U, NULL);
+    libevdev_enable_event_code(dev, EV_KEY, KEY_KP4, NULL);
+    libevdev_enable_event_code(dev, EV_KEY, KEY_W, NULL);
+    libevdev_enable_event_code(dev, EV_KEY, KEY_T, NULL);
+    libevdev_enable_event_code(dev, EV_KEY, KEY_I, NULL);
+    libevdev_enable_event_code(dev, EV_KEY, KEY_KP5, NULL);
+    libevdev_enable_event_code(dev, EV_KEY, KEY_E, NULL);
+    libevdev_enable_event_code(dev, EV_KEY, KEY_Y, NULL);
+    libevdev_enable_event_code(dev, EV_KEY, KEY_O, NULL);
+    libevdev_enable_event_code(dev, EV_KEY, KEY_KP6, NULL);
+    libevdev_enable_event_code(dev, EV_KEY, KEY_A, NULL);
+    libevdev_enable_event_code(dev, EV_KEY, KEY_F, NULL);
+    libevdev_enable_event_code(dev, EV_KEY, KEY_J, NULL);
+    libevdev_enable_event_code(dev, EV_KEY, KEY_KP7, NULL);
+    libevdev_enable_event_code(dev, EV_KEY, KEY_S, NULL);
+    libevdev_enable_event_code(dev, EV_KEY, KEY_G, NULL);
+    libevdev_enable_event_code(dev, EV_KEY, KEY_K, NULL);
+    libevdev_enable_event_code(dev, EV_KEY, KEY_KP8, NULL);
+    libevdev_enable_event_code(dev, EV_KEY, KEY_D, NULL);
+    libevdev_enable_event_code(dev, EV_KEY, KEY_H, NULL);
+    libevdev_enable_event_code(dev, EV_KEY, KEY_L, NULL);
+    libevdev_enable_event_code(dev, EV_KEY, KEY_KP9, NULL);
+
+    // Create the virtual device
+    err = libevdev_uinput_create_from_device(dev, LIBEVDEV_UINPUT_OPEN_MANAGED, &uidev);
+    libevdev_free(dev);
+    if (err != 0) {
+        fprintf(stderr, "Failed to create uinput device: %s\n", strerror(-err));
+        return 1;
+    }
+
     // Start the library (worker threads etc)
     ep.libStart();
     std::cout << "*** PJSUA2 STARTED ***" << std::endl;
@@ -197,6 +303,7 @@ try {
 } catch (pj::Error& err) {
     std::cerr << "Error enumerating audio devices: " << err.info() << std::endl;
 }
+
     ep.audDevManager().setCaptureDev(captureDev);
     ep.audDevManager().setPlaybackDev(playbackDev);
 
@@ -219,6 +326,8 @@ try {
 
     // Delete the account. This will unregister from server
     delete acc;
+
+    libevdev_uinput_destroy(uidev);
 
     // This will implicitly shutdown the library
     return 0;
