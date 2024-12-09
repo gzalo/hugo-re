@@ -5,7 +5,8 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <linux/uinput.h>
-#include <libevdev/libevdev-uinput.h>
+#include <libevdev-1.0/libevdev/libevdev.h>
+#include <libevdev-1.0/libevdev/libevdev-uinput.h>
 
 using namespace pj;
 
@@ -31,28 +32,26 @@ void writeScanCodeEvent(int keycode, bool isDown){
 }
 
 void processDtmf(string digit, bool down){
-    INPUT input;
-
     if(digit == "1"){
-        input = writeScanCodeEvent(key1[phoneId], down);
+        writeScanCodeEvent(key1[phoneId], down);
     } else if (digit == "2"){
-        input = writeScanCodeEvent(key2[phoneId], down);
+        writeScanCodeEvent(key2[phoneId], down);
     } else if (digit == "3"){
-        input = writeScanCodeEvent(key3[phoneId], down);
+        writeScanCodeEvent(key3[phoneId], down);
     } else if (digit == "4"){
-        input = writeScanCodeEvent(key4[phoneId], down);
+        writeScanCodeEvent(key4[phoneId], down);
     } else if (digit == "5"){
-        input = writeScanCodeEvent(key5[phoneId], down);
+        writeScanCodeEvent(key5[phoneId], down);
     } else if (digit == "6"){
-        input = writeScanCodeEvent(key6[phoneId], down);
+        writeScanCodeEvent(key6[phoneId], down);
     } else if (digit == "7"){
-        input = writeScanCodeEvent(key7[phoneId], down);
+        writeScanCodeEvent(key7[phoneId], down);
     } else if (digit == "8"){
-        input = writeScanCodeEvent(key8[phoneId], down);
+        writeScanCodeEvent(key8[phoneId], down);
     } else if (digit == "9"){
-        input = writeScanCodeEvent(key9[phoneId], down);
+        writeScanCodeEvent(key9[phoneId], down);
     } else if (digit == "0"){
-        input = writeScanCodeEvent(key0[phoneId], down);
+        writeScanCodeEvent(key0[phoneId], down);
     }
 }
 
