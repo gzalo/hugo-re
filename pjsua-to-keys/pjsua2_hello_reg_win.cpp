@@ -1,11 +1,62 @@
-#define PJ_IS_LITTLE_ENDIAN 1
-#define PJ_IS_BIG_ENDIAN 0
 #include <pjsua2.hpp>
 #include <iostream>
+#include <windows.h>
 
 using namespace pj;
 
 int phoneId;
+
+int offHookId[] = {0x3b,0x3d,0x3f,0x41};
+int hungUpId[] = {0x3c,0x3e,0x40,0x42};
+int key0[] = {0x2c, 0x2d, 0x2e, 0x52};
+int key1[] = {0x02, 0x05, 0x08, 0x4f};
+int key2[] = {0x03, 0x06, 0x09, 0x50};
+int key3[] = {0x04,0x07,0x0a,0x51};
+int key4[] = {0x10,0x13,0x16,0x4b};
+int key5[] = {0x11,0x14,0x17,0x4c};
+int key6[] = {0x12,0x15,0x18,0x4d};
+int key7[] = {0x1E,0x21,0x24,0x47};
+int key8[] = {0x1F,0x22,0x25,0x48};
+int key9[] = {0x20,0x23,0x26,0x49};
+
+INPUT createScanCodeEvent(WORD scancode, bool isDown){
+    INPUT input = {};
+    input.type = INPUT_KEYBOARD;
+    input.ki.wVk = 0;
+    input.ki.wScan = scancode;
+    input.ki.dwFlags = (isDown ? 0 : KEYEVENTF_KEYUP) | KEYEVENTF_SCANCODE;
+    input.ki.time = 0;
+    input.ki.dwExtraInfo = 0;
+    return input;
+}
+
+void processDtmf(string digit, bool down){
+    INPUT input;
+
+    if(digit == "1"){
+        input = createScanCodeEvent(key1[phoneId], down);
+    } else if (digit == "2"){
+        input = createScanCodeEvent(key2[phoneId], down);
+    } else if (digit == "3"){
+        input = createScanCodeEvent(key3[phoneId], down);
+    } else if (digit == "4"){
+        input = createScanCodeEvent(key4[phoneId], down);
+    } else if (digit == "5"){
+        input = createScanCodeEvent(key5[phoneId], down);
+    } else if (digit == "6"){
+        input = createScanCodeEvent(key6[phoneId], down);
+    } else if (digit == "7"){
+        input = createScanCodeEvent(key7[phoneId], down);
+    } else if (digit == "8"){
+        input = createScanCodeEvent(key8[phoneId], down);
+    } else if (digit == "9"){
+        input = createScanCodeEvent(key9[phoneId], down);
+    } else if (digit == "0"){
+        input = createScanCodeEvent(key0[phoneId], down);
+    }
+
+    SendInput(1, &input, sizeof(INPUT));
+}
 
 class MyAudioMediaPort: public AudioMediaPort
 {
@@ -41,26 +92,26 @@ public:
         {
             std::cout << "Call is confirmed. You can start receiving DTMF codes." << std::endl;
             {
-//                INPUT input = createScanCodeEvent(offHookId[phoneId], true);
-//                SendInput(1, &input, sizeof(INPUT));
+                INPUT input = createScanCodeEvent(offHookId[phoneId], true);
+                SendInput(1, &input, sizeof(INPUT));
             }
-            usleep(50000);
+            Sleep(50);
             {
-//                INPUT input = createScanCodeEvent(offHookId[phoneId], false);
-//                SendInput(1, &input, sizeof(INPUT));
+                INPUT input = createScanCodeEvent(offHookId[phoneId], false);
+                SendInput(1, &input, sizeof(INPUT));
             }
         }
         if (ci.state == PJSIP_INV_STATE_DISCONNECTED)
         {
             std::cout << "Call is disconnected." << std::endl;
             {
-//                INPUT input = createScanCodeEvent(hungUpId[phoneId], true);    
-//                SendInput(1, &input, sizeof(INPUT));
+                INPUT input = createScanCodeEvent(hungUpId[phoneId], true);    
+                SendInput(1, &input, sizeof(INPUT));
             }
-            usleep(50000);
+            Sleep(50);
             {
-//                INPUT input = createScanCodeEvent(hungUpId[phoneId], false);     
-//                SendInput(1, &input, sizeof(INPUT));       
+                INPUT input = createScanCodeEvent(hungUpId[phoneId], false);     
+                SendInput(1, &input, sizeof(INPUT));       
             }
         }
     }
@@ -69,11 +120,11 @@ public:
     {
         if(!(prm.flags & PJMEDIA_STREAM_DTMF_IS_UPDATE)) { // keydown
             std::cout << "DTMF digit keydown: " << prm.digit << std::endl;
-            //processDtmf(prm.digit, true);
+            processDtmf(prm.digit, true);
         } 
         if(prm.flags & PJMEDIA_STREAM_DTMF_IS_END) { // keyup
             std::cout << "DTMF digit keyup: " << prm.digit << std::endl;
-            //processDtmf(prm.digit, false);
+            processDtmf(prm.digit, false);
         }
     }
 
@@ -143,7 +194,7 @@ int main(int argc, char **argv)
 
     // Create SIP transport. Error handling sample is shown
     TransportConfig tcfg;
-    tcfg.port = 5070 + phoneId;
+    tcfg.port = 5060 + phoneId;
     try {
         ep.transportCreate(PJSIP_TRANSPORT_UDP, tcfg);
     } catch (Error &err) {
@@ -155,48 +206,6 @@ int main(int argc, char **argv)
     ep.libStart();
     std::cout << "*** PJSUA2 STARTED ***" << std::endl;
 
-try {
-    // Get the number of audio devices
-    unsigned int devCount = ep.audDevManager().getDevCount();
-    std::cout << "Total Audio Devices: " << devCount << std::endl;
-
-    std::cout << "=== INPUT DEVICES ===" << std::endl;
-
-    // Enumerate and print input devices
-    for (unsigned int i = 0; i < devCount; ++i) {
-        pj::AudioDevInfo devInfo = ep.audDevManager().getDevInfo(i);
-        
-        // Check if it's an input device
-        if (devInfo.inputCount > 0) {
-            std::cout << "Device " << i << ":" << std::endl;
-            std::cout << "  Name: " << devInfo.name << std::endl;
-            std::cout << "  Input Channels: " << devInfo.inputCount << std::endl;
-            std::cout << std::endl;
-        }
-    }
-
-    std::cout << "=== OUTPUT DEVICES ===" << std::endl;
-
-    // Enumerate and print output devices
-    for (unsigned int i = 0; i < devCount; ++i) {
-        pj::AudioDevInfo devInfo = ep.audDevManager().getDevInfo(i);
-        
-        // Check if it's an output device
-        if (devInfo.outputCount > 0) {
-            std::cout << "Device " << i << ":" << std::endl;
-            std::cout << "  Name: " << devInfo.name << std::endl;
-            std::cout << "  Output Channels: " << devInfo.outputCount << std::endl;
-            std::cout << std::endl;
-        }
-    }
-
-    // Set capture and playback devices (as in your original code)
-    ep.audDevManager().setCaptureDev(captureDev);
-    ep.audDevManager().setPlaybackDev(playbackDev);
-
-} catch (pj::Error& err) {
-    std::cerr << "Error enumerating audio devices: " << err.info() << std::endl;
-}
     ep.audDevManager().setCaptureDev(captureDev);
     ep.audDevManager().setPlaybackDev(playbackDev);
 
