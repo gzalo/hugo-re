@@ -4,8 +4,8 @@ class Tween:
         return (value - in_min) * (out_max - out_min) / (in_max - in_min) + out_min
 
     @staticmethod
-    def map_bitcrush(self, value, in_min, in_max, out_min, out_max):
-        value = self.map(value, in_min, in_max, 0, 1)
+    def map_bitcrush(value, in_min, in_max, out_min, out_max):
+        value = Tween.map(value, in_min, in_max, 0, 1)
         if value > 0.75:
             return out_min
         elif value > 0.5:
