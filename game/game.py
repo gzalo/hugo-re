@@ -1,3 +1,4 @@
+import os
 import random
 
 import pygame
@@ -44,7 +45,7 @@ class Game:
     def run(self):
         pygame.init()
 
-        fs = pygame.FULLSCREEN if Config.SCR_FULLSCREEN else 0
+        fs = pygame.FULLSCREEN if Config.SCR_FULLSCREEN or "FULLSCREEN" in os.environ else 0
         fs |= pygame.OPENGL | pygame.DOUBLEBUF
         pygame.display.set_mode((Config.SCR_WIDTH, Config.SCR_HEIGHT), fs)
         display = pygame.Surface((Config.SCR_WIDTH, Config.SCR_HEIGHT))
@@ -59,6 +60,11 @@ class Game:
 
         program = ctx.program(vertex_shader=self.vert_shader, fragment_shader=self.frag_shader)
         render_object = ctx.vertex_array(program, [(quad_buffer, '2f 2f', 'vert', 'texcoord')])
+        self.post_processing = PostProcessing()
+
+        loading = pygame.image.load("resources/images/loading.png").convert_alpha()
+        display.blit(loading, (0, 0))
+        self.render_frame(ctx, display, program, render_object, False)
 
         pygame.mouse.set_visible(False)
         pygame.display.set_caption(Config.TITLE)
@@ -76,7 +82,6 @@ class Game:
 
         self.tv_shows = [TvShowParent(country, self) for country in Config.COUNTRIES]
         self.pos_by_country = {tv_show.country: self.positions[idx] for idx, tv_show in enumerate(self.tv_shows)}
-        self.post_processing = PostProcessing()
 
         running = True
         while running:
