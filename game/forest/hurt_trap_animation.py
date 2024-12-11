@@ -1,3 +1,4 @@
+from animation import Animation
 from forest.forest_resources import ForestResources
 from forest.hurt_trap_talking import HurtTrapTalking
 from state import State
@@ -9,5 +10,5 @@ class HurtTrapAnimation(State):
             return HurtTrapTalking(self.parent)
 
     def render(self, screen):
-        screen.blit(ForestResources.hugo_traphurt[self.get_frame_index()], (0,0))
+        screen.blit(Animation.get_frame(ForestResources.hugo_traphurt, self.get_frame_index()), (0,0))
 

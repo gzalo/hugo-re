@@ -1,5 +1,6 @@
 import pygame
 
+from animation import Animation
 from forest.forest_resources import ForestResources
 from forest.hurt_flying_falling import HurtFlyingFalling
 from state import State
@@ -15,5 +16,5 @@ class HurtFlyingTalking(State):
         pygame.mixer.Sound.play(ForestResources.speak_catapult_talktop)
 
     def render(self, screen):
-        screen.blit(ForestResources.catapult_airtalk[ForestResources.sync_catapult_talktop[self.get_frame_index()] - 1], (0,0))
+        screen.blit(Animation.get_sync_frame(ForestResources.catapult_airtalk, ForestResources.sync_catapult_talktop, self.get_frame_index()), (0,0))
 

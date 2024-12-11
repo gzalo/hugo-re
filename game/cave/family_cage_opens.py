@@ -1,5 +1,6 @@
 import pygame
 
+from animation import Animation
 from cave.cave_resources import CaveResources
 from cave.family_happy import FamilyHappy
 from config import Config
@@ -26,4 +27,4 @@ class FamilyCageOpens(State):
             pygame.mixer.Sound.play(CaveResources.hugoline_tak)
 
     def render(self, screen):
-        screen.blit(CaveResources.family_cage[self.get_frame_index()], (0, 0))
+        screen.blit(Animation.get_frame(CaveResources.family_cage, self.get_frame_index()), (0, 0))

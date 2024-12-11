@@ -1,5 +1,6 @@
 import pygame
 
+from animation import Animation
 from forest.forest_resources import ForestResources
 from forest.playing import Playing
 from state import State
@@ -17,4 +18,4 @@ class WaitIntro(State):
     def render(self, screen):
         self.parent.render_background(screen)
         self.parent.render_bottom(screen)
-        screen.blit(ForestResources.hugo_telllives[ForestResources.sync_start[self.get_frame_index()]-1], (128, -16))
+        screen.blit(Animation.get_sync_frame(ForestResources.hugo_telllives, ForestResources.sync_start, self.get_frame_index()), (128, -16))

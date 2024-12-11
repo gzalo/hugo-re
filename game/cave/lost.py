@@ -1,5 +1,6 @@
 import pygame
 
+from animation import Animation
 from cave.cave_resources import CaveResources
 from cave.lost_spring import LostSpring
 from phone_events import PhoneEvents
@@ -26,4 +27,4 @@ class Lost(State):
             pygame.mixer.Sound.play(CaveResources.puf)
 
     def render(self, screen):
-        screen.blit(self.animation[self.get_frame_index()], (0, 0))
+        screen.blit(Animation.get_frame(self.animation, self.get_frame_index()), (0, 0))

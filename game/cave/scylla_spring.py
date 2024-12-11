@@ -1,5 +1,6 @@
 import pygame
 
+from animation import Animation
 from cave.cave_resources import CaveResources
 from cave.family_cage_opens import FamilyCageOpens
 from phone_events import PhoneEvents
@@ -18,4 +19,4 @@ class ScyllaSpring(State):
             pygame.mixer.Sound.play(CaveResources.afskylia_skyd_ud)
 
     def render(self, screen):
-        screen.blit(CaveResources.scylla_spring[self.get_frame_index()], (0, 0))
+        screen.blit(Animation.get_frame(CaveResources.scylla_spring, self.get_frame_index()), (0, 0))

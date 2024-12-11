@@ -1,5 +1,6 @@
 import pygame
 
+from animation import Animation
 from forest.forest_resources import ForestResources
 from forest.hurt_branch_talking import HurtBranchTalking
 from state import State
@@ -15,5 +16,5 @@ class HurtBranchAnimation(State):
         pygame.mixer.Sound.play(ForestResources.sfx_birds)
 
     def render(self, screen):
-        screen.blit(ForestResources.hugohitlog[self.get_frame_index_fast()], (0,0))
+        screen.blit(Animation.get_frame(ForestResources.hugohitlog, self.get_frame_index_fast()), (0,0))
         self.parent.render_bottom(screen)

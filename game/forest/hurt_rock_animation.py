@@ -1,3 +1,4 @@
+from animation import Animation
 from forest.forest_resources import ForestResources
 from forest.hurt_rock_hit_animation import HurtRockHitAnimation
 from state import State
@@ -9,6 +10,6 @@ class HurtRockAnimation(State):
             return HurtRockHitAnimation(self.parent)
 
     def render(self, screen):
-        screen.blit(ForestResources.hugo_lookrock[self.get_frame_index_fast()], (0,0))
+        screen.blit(Animation.get_frame(ForestResources.hugo_lookrock, self.get_frame_index_fast()), (0,0))
         self.parent.render_bottom(screen)
 

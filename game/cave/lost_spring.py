@@ -1,5 +1,6 @@
 import pygame.mixer
 
+from animation import Animation
 from cave.cave_resources import CaveResources
 from null_state import NullState
 from phone_events import PhoneEvents
@@ -15,7 +16,7 @@ class LostSpring(State):
             pygame.mixer.Sound.play(CaveResources.hugo_skyd_ud)
 
     def render(self, screen):
-        screen.blit(CaveResources.hugo_spring[self.get_frame_index()], (0, 0))
+        screen.blit(Animation.get_frame(CaveResources.hugo_spring, self.get_frame_index()), (0, 0))
 
     def on_enter(self) -> None:
         super().on_enter()

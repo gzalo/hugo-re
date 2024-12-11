@@ -1,5 +1,6 @@
 import pygame
 
+from animation import Animation
 from forest.forest_resources import ForestResources
 from forest.playing import Playing
 from state import State
@@ -27,7 +28,7 @@ class TalkingAfterHurt(State):
         self.parent.render_bottom(screen)
 
         sync = ForestResources.sync_lastlife if self.parent.lives == 1 else ForestResources.sync_dieonce
-        screen.blit(ForestResources.hugo_telllives[sync[self.get_frame_index()]-1], (128, -16))
+        screen.blit(Animation.get_sync_frame(ForestResources.hugo_telllives, sync, self.get_frame_index()), (128, -16))
 
         if self.get_frame_index() < 8 and self.get_frame_index() % 4 == 0:
             screen.blit(ForestResources.hugo_hand2[0], (96, 78))

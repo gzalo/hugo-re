@@ -1,5 +1,6 @@
 import pygame
 
+from animation import Animation
 from forest.forest_resources import ForestResources
 from state import State
 
@@ -14,4 +15,4 @@ class HurtTrapTalking(State):
         pygame.mixer.Sound.play(ForestResources.speak_trap)
 
     def render(self, screen):
-        screen.blit(ForestResources.hugo_traptalk[ForestResources.sync_trap[self.get_frame_index()]-1], (0,0))
+        screen.blit(Animation.get_sync_frame(ForestResources.hugo_traptalk, ForestResources.sync_trap, self.get_frame_index()), (0,0))

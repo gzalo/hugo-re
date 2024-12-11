@@ -1,5 +1,6 @@
 import pygame
 
+from animation import Animation
 from cave.cave_resources import CaveResources
 from cave.climbing import Climbing
 from config import Config
@@ -17,7 +18,7 @@ class TalkingBeforeClimb(State):
             return Climbing(self.parent)
 
     def render(self, screen):
-        screen.blit(CaveResources.talks[CaveResources.sync_hugo_start[self.get_frame_index()]], (0, 0))
+        screen.blit(Animation.get_sync_frame(CaveResources.talks, CaveResources.sync_hugo_start, self.get_frame_index()), (0, 0))
 
     def on_enter(self) -> None:
         super().on_enter()

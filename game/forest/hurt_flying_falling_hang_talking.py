@@ -1,5 +1,6 @@
 import pygame
 
+from animation import Animation
 from forest.forest_resources import ForestResources
 from state import State
 
@@ -16,6 +17,6 @@ class HurtFlyingFallingHangTalking(State):
 
     def render(self, screen):
         screen.blit(ForestResources.catapult_hang[12], (0, 0))
-        screen.blit(ForestResources.catapult_hangspeak[ForestResources.sync_catapult_hang[self.get_frame_index()] - 1], (115, 117))
+        screen.blit(Animation.get_sync_frame(ForestResources.catapult_hangspeak, ForestResources.sync_catapult_hang, self.get_frame_index()), (115, 117))
 
 

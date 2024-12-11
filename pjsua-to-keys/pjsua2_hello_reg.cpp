@@ -128,7 +128,7 @@ public:
         }
 
         // And this will connect the call audio media to the sound device/speaker
-        aud_med.startTransmit(play_dev_med);
+        // aud_med.startTransmit(play_dev_med);
         record_dev_med.startTransmit(aud_med);
     }
 };

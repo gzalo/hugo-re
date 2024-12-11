@@ -1,5 +1,6 @@
 import pygame.mixer
 
+from animation import Animation
 from cave.cave_resources import CaveResources
 from cave.family_cage_opens import FamilyCageOpens
 from cave.scylla_spring import ScyllaSpring
@@ -37,6 +38,6 @@ class ScyllaLost(State):
                 pygame.mixer.Sound.play(CaveResources.puf)
 
     def render(self, screen):
-        screen.blit(self.animation[self.get_frame_index()], (0,0))
+        screen.blit(Animation.get_frame(self.animation, self.get_frame_index()), (0,0))
         screen.blit(CaveResources.hugo[0], self.hugo_sprite_pos[self.selected_rope])
 

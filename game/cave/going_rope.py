@@ -2,6 +2,7 @@ import random
 
 import pygame
 
+from animation import Animation
 from cave.cave_resources import CaveResources
 from cave.lost import Lost
 from cave.scylla_lost import ScyllaLost
@@ -30,7 +31,7 @@ class GoingRope(State):
             pygame.mixer.Sound.play(CaveResources.fodtrin2)
 
     def render(self, screen):
-        screen.blit(self.animation[self.get_frame_index()], (0, 0))
+        screen.blit(Animation.get_frame(self.animation, self.get_frame_index()), (0, 0))
 
     def calc_win_or_lose(self):
         random_value = random.randint(0, 3)

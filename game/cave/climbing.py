@@ -1,5 +1,6 @@
 import pygame
 
+from animation import Animation
 from cave.cave_resources import CaveResources
 from cave.waiting_input import WaitingInput
 from phone_events import PhoneEvents
@@ -18,4 +19,4 @@ class Climbing(State):
             pygame.mixer.Sound.play(CaveResources.pre_fanfare)
 
     def render(self, screen):
-        screen.blit(CaveResources.climbs[self.get_frame_index()], (0, 0))
+        screen.blit(Animation.get_frame(CaveResources.climbs, self.get_frame_index()), (0, 0))

@@ -1,5 +1,6 @@
 import pygame
 
+from animation import Animation
 from forest.forest_resources import ForestResources
 from forest.hurt_flying_falling_hang_talking import HurtFlyingFallingHangTalking
 from state import State
@@ -15,6 +16,6 @@ class HurtFlyingFallingHangAnimation(State):
         pygame.mixer.Sound.play(ForestResources.sfx_hugo_hangstart)
 
     def render(self, screen):
-        screen.blit(ForestResources.catapult_hang[self.get_frame_index_fast()], (0,0))
+        screen.blit(Animation.get_frame(ForestResources.catapult_hang, self.get_frame_index_fast()), (0,0))
 
 

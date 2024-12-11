@@ -1,5 +1,6 @@
 import pygame
 
+from animation import Animation
 from forest.forest_resources import ForestResources
 from state import State
 
@@ -10,7 +11,7 @@ class HurtBranchTalking(State):
             return self.parent.reduce_lives()
 
     def render(self, screen):
-        screen.blit(ForestResources.hugohitlog_talk[ForestResources.sync_hitlog[self.get_frame_index()]-1], (0, 0))
+        screen.blit(Animation.get_sync_frame(ForestResources.hugohitlog_talk, ForestResources.sync_hitlog, self.get_frame_index()), (0, 0))
         self.parent.render_bottom(screen)
 
     def on_enter(self) -> None:
