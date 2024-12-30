@@ -7,7 +7,7 @@ class Config:
     SCR_HEIGHT = 480
     SCR_FULLSCREEN = False
 
-    GOD_MODE = True
+    GOD_MODE = False
 
     EFFECT_DURATION_SPLAT = 2.5
     EFFECT_DURATION_ORB = 0.5

@@ -83,12 +83,14 @@ class Game:
         self.tv_shows = [TvShowParent(country, self) for country in Config.COUNTRIES]
         self.pos_by_country = {tv_show.country: self.positions[idx] for idx, tv_show in enumerate(self.tv_shows)}
 
+        clock = pygame.time.Clock()
+
         running = True
         while running:
             phone_events = [PhoneEvents() for _ in range(4)]
 
             for event in pygame.event.get():
-                if event.type == pygame.QUIT or (event.type == pygame.KEYDOWN and event.key == Config.BTN_EXIT):
+                if event.type == pygame.QUIT or (event.type == pygame.KEYDOWN and event.key == Config.BTN_EXIT) or (event.type == pygame.MOUSEBUTTONDOWN and event.button == 1):
                     running = False
 
                 if event.type == pygame.KEYDOWN:
@@ -119,12 +121,15 @@ class Game:
                             phone_events[i].press_9 = True
 
             any_playing = False
+            pre_render = time.time()
             for tv_show in self.tv_shows:
                 index = self.tv_shows.index(tv_show)
                 tv_show.handle_events(phone_events[index])
                 tv_show.render(screens[index])
                 if tv_show.is_playing():
                     any_playing = True
+
+            post_render = time.time()
 
             self.post_processing.handle_events()
 
@@ -155,7 +160,14 @@ class Game:
                             self.attacks.remove(attack)
 
             self.render_frame(ctx, display, program, render_object, any_playing)
-            pygame.time.wait(16)
+            post_shader = time.time()
+
+            render_time = (post_render - pre_render) * 1000
+            shader_time = (post_shader - post_render) * 1000
+            caption = f"Render: {render_time:.2f} ms, Shader: {shader_time:.2f} ms"
+            pygame.display.set_caption(caption)
+
+            clock.tick(30)
 
         pygame.quit()
 
