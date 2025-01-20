@@ -10,4 +10,4 @@
 
 **Phase 4**: As seen in Punkware Cyberzine Aug 2024 and Cybercirujas federal event 2024, introduced 4 player mode using a reimplementation of the game
 
-![Remake](docs/hugoremake.drawio.png)
+![Remake](hugoremake.drawio.png)
