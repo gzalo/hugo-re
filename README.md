@@ -33,6 +33,8 @@ Video sources:
 - DN: https://youtu.be/hBzQVuTNmB4?t=271
 - DE: https://www.youtube.com/watch?v=4upvPi4p5gA
 - FR: https://www.youtube.com/watch?v=Y7EpznT57lI
+- PT: https://www.youtube.com/watch?v=f67oNqGmAhE
+- PT-br: https://www.youtube.com/watch?v=0RLN_KilOro
 
 Similar projects:
 - https://github.com/tuomasth/Hugo_Ski_Game_Finnish_24-2-2023
