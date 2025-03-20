@@ -1,5 +1,6 @@
 import os
 import random
+import platform
 
 import pygame
 import pygame.freetype
@@ -42,6 +43,11 @@ class Game:
     with open("resources/shaders/main.frag", "r") as f:
         frag_shader = f.read()
 
+    if platform.system() == "Darwin":
+        pygame.display.gl_set_attribute(pygame.GL_CONTEXT_PROFILE_MASK, pygame.GL_CONTEXT_PROFILE_CORE)
+        vert_shader = vert_shader.replace("#version 300 es", "#version 330 core")
+        frag_shader = frag_shader.replace("#version 300 es", "#version 330 core")
+                
     def run(self):
         pygame.init()
 
