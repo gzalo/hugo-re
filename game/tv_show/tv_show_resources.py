@@ -23,8 +23,8 @@ class TvShowResources:
         for country in Config.COUNTRIES:
             prefix = f"resources/videos/{country}/"
             TvShowResources.videos_attract[country] = Video(prefix + "attract_demo.mp4", no_audio=True)
-            TvShowResources.videos_initial[country] = Video(prefix + "hello_hello.mp4", no_audio=True)
-            TvShowResources.videos_press_5[country] = Video(prefix + "press_5.mp4", no_audio=True)
-            TvShowResources.videos_going_scylla[country] = Video(prefix + "scylla_cave.mp4", no_audio=True)
-            TvShowResources.videos_ending[country] = Video(prefix + "you_lost.mp4", no_audio=True)
-            TvShowResources.videos_have_luck[country] = Video(prefix + "have_luck.mp4", no_audio=True)
+            TvShowResources.videos_initial[country] = Video(prefix + "hello_hello.mp4")
+            TvShowResources.videos_press_5[country] = Video(prefix + "press_5.mp4")
+            TvShowResources.videos_going_scylla[country] = Video(prefix + "scylla_cave.mp4")
+            TvShowResources.videos_ending[country] = Video(prefix + "you_lost.mp4")
+            TvShowResources.videos_have_luck[country] = Video(prefix + "have_luck.mp4")
