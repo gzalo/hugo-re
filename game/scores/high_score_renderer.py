@@ -1,7 +1,8 @@
-import time
 import random
 import pygame
 import pygame.freetype
+
+import global_state
 
 class HighScoreRenderer:
 
@@ -10,7 +11,7 @@ class HighScoreRenderer:
         self.score_font = pygame.freetype.SysFont("Arial", 28, bold=True)
         self.score_game = next(iter(games))
         self.games = games
-        self.time_score = time.time()
+        self.time_score = global_state.frame_time
 
     def set_random_score_game(self):
         if len(self.games) == 1:
@@ -35,9 +36,9 @@ class HighScoreRenderer:
         screen.blit(text_surface_fg, (xpos, ypos))
 
     def render(self, screen):
-        if time.time() - self.time_score > 4:
+        if global_state.frame_time - self.time_score > 4:
             self.set_random_score_game()
-            self.time_score = time.time()
+            self.time_score = global_state.frame_time
 
         self.render_outline(screen, "PUNTAJES " + self.games[self.score_game]["name"], 30, 30)
 

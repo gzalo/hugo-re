@@ -1,8 +1,7 @@
-import time
-
 import pygame
 import random
 
+import global_state
 from config import Config
 from effect_type import EffectType
 from effects.splat import Splat
@@ -38,14 +37,14 @@ class ForestGame:
         pygame.mixer.Sound.play(ForestResources.sfx_bg_atmosphere, loops=-1)
 
     def process_events(self, phone_events: PhoneEvents):
-        if self.effect_status == EffectType.INVERT and time.time() - self.effect_start > Config.EFFECT_DURATION_ORB:
+        if self.effect_status == EffectType.INVERT and global_state.frame_time - self.effect_start > Config.EFFECT_DURATION_ORB:
             [phone_events.press_2, phone_events.press_8] = [phone_events.press_8, phone_events.press_2]
 
         next_state = self._state.process_events(phone_events)
 
-        if self.effect_status == EffectType.SPLAT and time.time() - self.effect_start > Config.EFFECT_DURATION_SPLAT:
+        if self.effect_status == EffectType.SPLAT and global_state.frame_time - self.effect_start > Config.EFFECT_DURATION_SPLAT:
             self.effect_status = None
-        if self.effect_status == EffectType.INVERT and time.time() - self.effect_start > Config.EFFECT_DURATION_INVERT:
+        if self.effect_status == EffectType.INVERT and global_state.frame_time - self.effect_start > Config.EFFECT_DURATION_INVERT:
             self.effect_status = None
 
         if next_state is not None:
@@ -59,13 +58,13 @@ class ForestGame:
         self._state.render(screen)
 
         if self.effect_start:
-            dt = time.time() - self.effect_start
+            dt = global_state.frame_time - self.effect_start
 
             if dt < Config.EFFECT_DURATION_ORB:
                 return
 
             if self.effect_status == EffectType.SPLAT:
-                Splat.render_splat(screen, time.time() - self.effect_start)
+                Splat.render_splat(screen, global_state.frame_time - self.effect_start)
 
             if self.effect_status == EffectType.INVERT and isinstance(self._state, Playing):
                 screen.blit(ForestResources.inverted_arrows, (0, 0))
@@ -81,7 +80,7 @@ class ForestGame:
         if self.effect_status is not None:
             return
         self.effect_status = effect
-        self.effect_start = time.time()
+        self.effect_start = global_state.frame_time
 
     def render_background(self, screen):
         hills_speed = 6 * Config.FOREST_BG_SPEED_MULTIPLIER
@@ -154,7 +153,9 @@ class ForestGame:
     @staticmethod
     def new_mod(a, b):
         res = a % b
-        return res if not res else res - b if a < 0 else res
+        if not res:
+            return res
+        return res - b if a < 0 else res
 
     @staticmethod
     def generate_obstacles():

@@ -9,6 +9,8 @@ from state import State
 
 class Climbing(State):
     def process_events(self, phone_events: PhoneEvents):
+        self.process_events()
+
         if self.get_frame_index() >= len(CaveResources.climbs):
             return WaitingInput(self.parent)
 

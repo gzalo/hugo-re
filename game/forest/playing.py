@@ -1,9 +1,9 @@
 import math
 import random
-import time
 
 import pygame
 
+import global_state
 from config import Config
 from effect_type import EffectType
 from forest.forest_resources import ForestResources
@@ -23,7 +23,7 @@ class Playing(State):
         self.arrow_down_focus = False
         self.hugo_jumping_time = None
         self.hugo_crawling_time = None
-        self.last_time = time.time()
+        self.last_time = global_state.frame_time
         self.old_second = None
         self.HUGO_X_POS = 16
 
@@ -31,18 +31,18 @@ class Playing(State):
         if not self.arrow_up_focus and not self.arrow_down_focus:
             if phone_events.press_2:
                 self.arrow_up_focus = True
-                self.hugo_jumping_time = time.time()
+                self.hugo_jumping_time = global_state.frame_time
 
             if phone_events.press_8:
                 self.arrow_down_focus = True
-                self.hugo_crawling_time = time.time()
+                self.hugo_crawling_time = global_state.frame_time
 
         if self.parent.parallax_pos > Config.FOREST_MAX_TIME:
             self.parent.parallax_pos = Config.FOREST_MAX_TIME
             return WinTalking(self.parent)
         else:
-            self.parent.parallax_pos += time.time() - self.last_time
-            self.last_time = time.time()
+            self.parent.parallax_pos += global_state.frame_time - self.last_time
+            self.last_time = global_state.frame_time
 
         _, integer = math.modf(self.parent.parallax_pos)
         integer = math.floor(integer) + 1
@@ -53,10 +53,10 @@ class Playing(State):
         if self.old_second is None:
             self.old_second = math.floor(self.parent.parallax_pos)
 
-        if self.arrow_up_focus and time.time() - self.hugo_jumping_time > 0.75:
+        if self.arrow_up_focus and global_state.frame_time - self.hugo_jumping_time > 0.75:
             self.hugo_jumping_time = None
             self.arrow_up_focus = False
-        if self.arrow_down_focus and time.time() - self.hugo_crawling_time > 0.75:
+        if self.arrow_down_focus and global_state.frame_time - self.hugo_crawling_time > 0.75:
             self.hugo_crawling_time = None
             self.arrow_down_focus = False
 
@@ -154,7 +154,7 @@ class Playing(State):
             screen.blit(ForestResources.arrows[2], (256 + 2, 54 + 2))
 
         if self.arrow_up_focus:
-            dt = (time.time() - self.hugo_jumping_time) / 0.75
+            dt = (global_state.frame_time - self.hugo_jumping_time) / 0.75
             dy = -250 * dt ** 2 + 250 * dt - 22.5
             screen.blit(ForestResources.hugo_jump[self.get_frame_index() % len(ForestResources.hugo_jump)], (self.HUGO_X_POS, 40 - dy))
         elif self.arrow_down_focus:

@@ -10,8 +10,7 @@ from state import State
 
 class TalkingBeforeClimb(State):
     def process_events(self, phone_events: PhoneEvents):
-        if not Config.ARGENTINE_VERSION:
-            if self.one_shot(4, "TrappeGrin"):
+        if not Config.ARGENTINE_VERSION and self.one_shot(4, "TrappeGrin"):
                 pygame.mixer.Sound.play(CaveResources.trappe_grin)
 
         if self.get_frame_index() >= len(CaveResources.sync_hugo_start):

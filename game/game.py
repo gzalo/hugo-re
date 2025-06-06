@@ -19,7 +19,7 @@ from tv_show.tv_show_parent import TvShowParent
 from phone_events import PhoneEvents
 from tv_show.tv_show_resources import TvShowResources
 from tween import Tween
-
+import global_state
 
 class Game:
     positions = [
@@ -70,6 +70,7 @@ class Game:
 
         loading = pygame.image.load("resources/images/loading.png").convert_alpha()
         display.blit(loading, (0, 0))
+        global_state.frame_time = time.time()
         self.render_frame(ctx, display, program, render_object, False)
 
         pygame.mouse.set_visible(False)
@@ -128,6 +129,9 @@ class Game:
 
             any_playing = False
             pre_render = time.time()
+
+            global_state.frame_time = time.time()
+
             for tv_show in self.tv_shows:
                 index = self.tv_shows.index(tv_show)
                 tv_show.handle_events(phone_events[index])
@@ -189,7 +193,7 @@ class Game:
         frame_tex = self.surf_to_texture(ctx, display)
         frame_tex.use(0)
         program['tex'] = 0
-        program['time'] = time.time() - self.start_time
+        program['time'] = global_state.frame_time - self.start_time
         self.post_processing.apply(program, any_playing)
         render_object.render(mode=moderngl.TRIANGLE_STRIP)
         pygame.display.flip()
