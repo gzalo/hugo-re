@@ -9,7 +9,9 @@ from state import State
 class HurtFlyingTalking(State):
     def process_events(self, events):
         if self.get_frame_index() >= len(ForestResources.sync_catapult_talktop):
-            return HurtFlyingFalling(self.parent)
+            return HurtFlyingFalling
+
+        return None
 
     def on_enter(self) -> None:
         super().on_enter()

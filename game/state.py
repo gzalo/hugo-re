@@ -1,13 +1,15 @@
+from typing import Optional, Type
+
 import global_state
 from phone_events import PhoneEvents
 
 class State:
-    def __init__(self, parent):
+    def __init__(self, context):
         self.start_time = None
         self.events = {}
-        self.parent = parent
+        self.context = context
 
-    def process_events(self, phone_events: PhoneEvents):
+    def process_events(self, phone_events: PhoneEvents) -> Optional[Type['State']]:
         # Do nothing
         pass
 

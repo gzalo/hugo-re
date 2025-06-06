@@ -10,7 +10,9 @@ class ScyllaButton(State):
             pygame.mixer.Sound.play(ForestResources.sfx_lightning_warning)
 
         if self.get_state_time() > 2:
-            return Playing(self.parent)
+            return Playing
+
+        return None
 
     def render(self, screen):
         images = [

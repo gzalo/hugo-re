@@ -9,11 +9,14 @@ from tv_show.tv_show_resources import TvShowResources
 class Instructions(State):
     def process_events(self, phone_events: PhoneEvents):
         if phone_events.hungup:
-            return Attract(self.parent)
+            return Attract
 
         if self.get_state_time() > Config.INSTRUCTIONS_TIMEOUT:
-            return Playing(self.parent)
+            return Playing
+
+        return None
+
 
     def render(self, screen):
-        screen.blit(TvShowResources.instructions[self.parent.current_game], (0, 0))
+        screen.blit(TvShowResources.instructions["Forest"], (0, 0))
 

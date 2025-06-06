@@ -10,10 +10,12 @@ from state import State
 class LostSpring(State):
     def process_events(self, phone_events: PhoneEvents):
         if self.get_frame_index() >= len(CaveResources.hugo_spring):
-            return NullState(self.parent)
+            return NullState
 
         if self.one_shot(2.5, "HugoSkydUd"):
             pygame.mixer.Sound.play(CaveResources.hugo_skyd_ud)
+
+        return None
 
     def render(self, screen):
         screen.blit(Animation.get_frame(CaveResources.hugo_spring, self.get_frame_index()), (0, 0))

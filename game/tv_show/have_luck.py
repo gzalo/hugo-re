@@ -5,8 +5,8 @@ from tv_show.video_state import VideoState
 
 
 class HaveLuck(VideoState):
-    def __init__(self, parent):
-        super().__init__(parent, TvShowResources.videos_have_luck[parent.country])
+    def __init__(self, context):
+        super().__init__(context, TvShowResources.videos_have_luck[context.country])
 
     def process_events(self, phone_events: PhoneEvents):
         super().process_events(phone_events)
@@ -14,8 +14,9 @@ class HaveLuck(VideoState):
         from tv_show.attract import Attract
 
         if phone_events.hungup:
-            return Attract(self.parent)
+            return Attract
 
         if self.video_ended():
-            self.parent.set_random_game()
-            return Instructions(self.parent)
+            return Instructions
+        else:
+            return None

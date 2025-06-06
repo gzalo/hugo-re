@@ -3,8 +3,8 @@ from state import State
 
 
 class VideoState(State):
-    def __init__(self, parent, video, loop = False):
-        super().__init__(parent)
+    def __init__(self, context, video, loop = False):
+        super().__init__(context)
         self.video = video
         self.loop = loop
         self.has_looped = False

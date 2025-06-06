@@ -6,14 +6,14 @@ import pygame
 
 class CaveGame:
 
-    def __init__(self, score):
+    def __init__(self, context):
         self.ended = False
-        self.score = score
-        self.rolling_score = self.score
+        self.rolling_score = context.forest_score
+        self.context = context
+        context.cave_selected_rope = None
 
         self.sounding_score = False
-        self.selected_rope = None
-        self._state = WaitingBeforeTalking(self)
+        self._state = WaitingBeforeTalking(context)
         self._state.on_enter()
 
     def process_events(self, phone_events: PhoneEvents):
@@ -21,20 +21,21 @@ class CaveGame:
 
         if next_state is not None:
             self._state.on_exit()
-            self._state = next_state
-            self._state.on_enter()
-            if isinstance(next_state, NullState):
+            if next_state == NullState:
                 self.end()
+            else:
+                self._state = next_state(self.context)
+                self._state.on_enter()
 
-        if self.score != self.rolling_score:
+        if self.context.forest_score != self.rolling_score:
             pygame.mixer.Sound.play(CaveResources.score_counter, loops=-1)
             self.sounding_score = True
 
     def render(self, screen):
         self._state.render(screen)
 
-        if self.rolling_score < self.score:
-            self.rolling_score += min(10, self.score - self.rolling_score)
+        if self.rolling_score < self.context.forest_score:
+            self.rolling_score += min(10, self.context.forest_score - self.rolling_score)
         elif self.sounding_score:
             pygame.mixer.Sound.stop(CaveResources.score_counter)
             self.sounding_score = False
@@ -58,6 +59,3 @@ class CaveGame:
         self._state.on_exit()
         pygame.mixer.Sound.stop(CaveResources.score_counter)
         self.ended = True
-
-    def multiply_score(self, val):
-        self.score *= val

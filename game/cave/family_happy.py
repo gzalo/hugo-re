@@ -13,7 +13,8 @@ class FamilyHappy(State):
 
     def process_events(self, phone_events: PhoneEvents):
         if self.get_frame_index() >= len(CaveResources.happy):
-            return NullState(self.parent)
+            return NullState
+        return None
 
     def on_enter(self) -> None:
         super().on_enter()

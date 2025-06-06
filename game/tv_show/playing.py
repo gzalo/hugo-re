@@ -6,19 +6,18 @@ from tv_show.going_cave import GoingCave
 
 
 class Playing(State):
-    def __init__(self, parent):
-        super().__init__(parent)
-        self.forest = ForestGame(self)
+    def __init__(self, context):
+        super().__init__(context)
+        self.forest = ForestGame(context)
 
     def process_events(self, phone_events: PhoneEvents):
         if phone_events.hungup:
-            return Attract(self.parent)
+            return Attract
 
         if self.forest.ended:
-            self.parent.pre_cave_score = self.forest.score
-            return GoingCave(self.parent)
+            return GoingCave
 
-        self.forest.process_events(phone_events)
+        return self.forest.process_events(phone_events)
 
     def render(self, screen):
         self.forest.render(screen)

@@ -18,13 +18,15 @@ class FamilyCageOpens(State):
 
     def process_events(self, phone_events: PhoneEvents):
         if self.get_frame_index() >= len(CaveResources.family_cage):
-            return FamilyHappy(self.parent)
+            return FamilyHappy
 
         if self.one_shot(0.5, "HivIReb"):
             pygame.mixer.Sound.play(CaveResources.hiv_i_reb)
 
         if self.one_shot(1, "HugolineTak"):
             pygame.mixer.Sound.play(CaveResources.hugoline_tak)
+
+        return None
 
     def render(self, screen):
         screen.blit(Animation.get_frame(CaveResources.family_cage, self.get_frame_index()), (0, 0))
