@@ -10,16 +10,16 @@ from array import array
 
 from cave.cave_resources import CaveResources
 from config import Config
-from effect_type import EffectType
 from effects.splat import Splat
 from forest.forest_resources import ForestResources
+from game_state import GameData
 from post_processing import PostProcessing
 from scores.scores import Scores
 from tv_show.tv_show_parent import TvShowParent
 from phone_events import PhoneEvents
 from tv_show.tv_show_resources import TvShowResources
 from tween import Tween
-
+import global_state
 
 class Game:
     positions = [
@@ -35,7 +35,7 @@ class Game:
     tv_shows = []
     post_processing = None
     pos_by_country = {}
-    attacks = []
+    effective_attacks = []
 
     with open("resources/shaders/main.vert", "r") as f:
         vert_shader = f.read()
@@ -70,6 +70,7 @@ class Game:
 
         loading = pygame.image.load("resources/images/loading.png").convert_alpha()
         display.blit(loading, (0, 0))
+        global_state.frame_time = time.time()
         self.render_frame(ctx, display, program, render_object, False)
 
         pygame.mouse.set_visible(False)
@@ -86,7 +87,7 @@ class Game:
         TvShowResources.init()
         Splat.init()
 
-        self.tv_shows = [TvShowParent(country, self) for country in Config.COUNTRIES]
+        self.tv_shows = [TvShowParent(GameData(country, 0, 0, 0, [], [], [], 0, 0)) for country in Config.COUNTRIES]
         self.pos_by_country = {tv_show.country: self.positions[idx] for idx, tv_show in enumerate(self.tv_shows)}
 
         clock = pygame.time.Clock()
@@ -128,6 +129,9 @@ class Game:
 
             any_playing = False
             pre_render = time.time()
+
+            global_state.frame_time = time.time()
+
             for tv_show in self.tv_shows:
                 index = self.tv_shows.index(tv_show)
                 tv_show.handle_events(phone_events[index])
@@ -138,6 +142,18 @@ class Game:
             post_render = time.time()
 
             self.post_processing.handle_events()
+
+            for attack in global_state.attacks:
+                global_state.attacks.remove(attack)
+                current_country = attack[0]
+                effect = attack[1]
+                start_time = attack[2]
+                valid_shows = [tv_show for tv_show in self.tv_shows if tv_show.country != current_country and tv_show.is_playing()]
+                if len(valid_shows) == 0:
+                    continue
+                random_player = random.choice(valid_shows)
+                random_player.external_effect(effect)
+                self.effective_attacks.append((current_country, random_player.country, start_time))
 
             for i in range(4):
                 display.blit(screens[i], self.positions[i])
@@ -152,10 +168,10 @@ class Game:
                         display.blit(phone_icons[i], self.positions[i])
 
                 # Render orbs
-                if self.attacks:
+                if self.effective_attacks:
                     curr_time = time.time()
 
-                    for attack in self.attacks:
+                    for attack in self.effective_attacks:
                         pos_0 = self.pos_by_country[attack[0]]
                         pos_1 = self.pos_by_country[attack[1]]
                         dt = curr_time - attack[2]
@@ -163,7 +179,7 @@ class Game:
                         orb_y = Tween.map_ease_in(dt, 0, Config.EFFECT_DURATION_ORB, pos_0[1]+70, pos_1[1]+70)
                         display.blit(Splat.orb, (orb_x, orb_y))
                         if dt > Config.EFFECT_DURATION_ORB:
-                            self.attacks.remove(attack)
+                            self.effective_attacks.remove(attack)
 
             self.render_frame(ctx, display, program, render_object, any_playing)
             post_shader = time.time()
@@ -189,19 +205,11 @@ class Game:
         frame_tex = self.surf_to_texture(ctx, display)
         frame_tex.use(0)
         program['tex'] = 0
-        program['time'] = time.time() - self.start_time
+        program['time'] = global_state.frame_time - self.start_time
         self.post_processing.apply(program, any_playing)
         render_object.render(mode=moderngl.TRIANGLE_STRIP)
         pygame.display.flip()
         frame_tex.release()
-
-    def queue_effect_to_random_player(self, effect: EffectType, current_show):
-        valid_shows = [tv_show for tv_show in self.tv_shows if tv_show != current_show and tv_show.is_playing()]
-        if len(valid_shows) == 0:
-            return
-        random_player = random.choice(valid_shows)
-        random_player.external_effect(effect)
-        self.attacks.append((current_show.country, random_player.country, time.time()))
 
 if __name__ == "__main__":
     Game().run()

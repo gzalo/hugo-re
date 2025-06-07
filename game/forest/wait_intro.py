@@ -3,19 +3,24 @@ import pygame
 from animation import Animation
 from forest.forest_resources import ForestResources
 from forest.playing import Playing
+from render_type import RenderType
 from state import State
 
 
 class WaitIntro(State):
+    def __init__(self, context):
+        super().__init__(context)
+        self.needs_background = RenderType.PRE
+        self.needs_bottom = RenderType.PRE
+
     def process_events(self, events):
         if self.get_frame_index() >= len(ForestResources.sync_start):
-            return Playing(self.parent)
+            return Playing
+        return None
 
     def on_enter(self) -> None:
         super().on_enter()
         pygame.mixer.Sound.play(ForestResources.speak_start)
 
     def render(self, screen):
-        self.parent.render_background(screen)
-        self.parent.render_bottom(screen)
         screen.blit(Animation.get_sync_frame(ForestResources.hugo_telllives, ForestResources.sync_start, self.get_frame_index()), (128, -16))

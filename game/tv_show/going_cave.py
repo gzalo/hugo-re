@@ -6,15 +6,17 @@ from tv_show.video_state import VideoState
 
 
 class GoingCave(VideoState):
-    def __init__(self, parent):
-        super().__init__(parent, TvShowResources.videos_going_scylla[parent.country])
+    def __init__(self, context):
+        super().__init__(context, TvShowResources.videos_going_scylla[context.country])
 
     def process_events(self, phone_events: PhoneEvents):
         super().process_events(phone_events)
 
         if phone_events.hungup:
-            return Attract(self.parent)
+            return Attract
 
         if self.video_ended():
-            return InCave(self.parent)
+            return InCave
+
+        return None
 

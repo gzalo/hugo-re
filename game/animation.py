@@ -1,4 +1,4 @@
-class Animation():
+class Animation:
     @staticmethod
     def get_sync_frame(animations, syncs, frame_index):
         if frame_index >= len(syncs):

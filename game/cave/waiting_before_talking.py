@@ -7,10 +7,10 @@ from phone_events import PhoneEvents
 from state import State
 
 class WaitingBeforeTalking(State):
-
-    def process_events(self, phone_events: PhoneEvents) -> State:
+    def process_events(self, phone_events: PhoneEvents):
         if self.get_state_time() > 2.5:
-            return TalkingBeforeClimb(self.parent)
+            return TalkingBeforeClimb
+        return None
 
     def render(self, screen):
         screen.blit(CaveResources.talks[12], (0,0))

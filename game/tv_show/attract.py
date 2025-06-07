@@ -4,8 +4,8 @@ from tv_show.video_state import VideoState
 
 
 class Attract(VideoState):
-    def __init__(self, parent):
-        super().__init__(parent, TvShowResources.videos_attract[parent.country], True)
+    def __init__(self, context):
+        super().__init__(context, TvShowResources.videos_attract[context.country], True)
 
     def process_events(self, phone_events: PhoneEvents):
         super().process_events(phone_events)
@@ -13,7 +13,9 @@ class Attract(VideoState):
         from tv_show.playing import Playing
 
         if phone_events.offhook:
-            return Initial(self.parent)
+            return Initial
 
         if phone_events.press_5:
-            return Playing(self.parent)
+            return Playing
+
+        return None

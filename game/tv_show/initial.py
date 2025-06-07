@@ -5,8 +5,8 @@ from tv_show.video_state import VideoState
 
 
 class Initial(VideoState):
-    def __init__(self, parent):
-        super().__init__(parent, TvShowResources.videos_initial[parent.country])
+    def __init__(self, context):
+        super().__init__(context, TvShowResources.videos_initial[context.country])
 
     def process_events(self, phone_events: PhoneEvents):
         super().process_events(phone_events)
@@ -14,7 +14,9 @@ class Initial(VideoState):
         from tv_show.attract import Attract
 
         if phone_events.hungup:
-            return Attract(self.parent)
+            return Attract
 
         if self.video_ended():
-            return Press5(self.parent)
+            return Press5
+
+        return None

@@ -10,11 +10,14 @@ from state import State
 class WaitingInput(State):
     def process_events(self, phone_events: PhoneEvents):
         if phone_events.press_3:
-            return GoingRope(self.parent, 0)
+            self.context.cave_selected_rope = 0
+            return GoingRope
         elif phone_events.press_6:
-            return GoingRope(self.parent, 1)
+            self.context.cave_selected_rope = 1
+            return GoingRope
         elif phone_events.press_9:
-            return GoingRope(self.parent, 2)
+            self.context.cave_selected_rope = 2
+            return GoingRope
 
         if self.one_shot(0.5, "afskylia_snak"):
             pygame.mixer.Sound.play(CaveResources.afskylia_snak)

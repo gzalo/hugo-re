@@ -6,18 +6,18 @@ from tv_show.ending import Ending
 
 
 class InCave(State):
-    def __init__(self, parent):
-        super().__init__(parent)
-        self.cave = CaveGame(parent.pre_cave_score)
+    def __init__(self, context):
+        super().__init__(context)
+        self.cave = CaveGame(context)
 
     def process_events(self, phone_events: PhoneEvents):
         if phone_events.hungup:
-            return Attract(self.parent)
+            return Attract
 
         if self.cave.ended:
-            return Ending(self.parent)
+            return Ending
 
-        self.cave.process_events(phone_events)
+        return self.cave.process_events(phone_events)
 
     def render(self, screen):
         self.cave.render(screen)

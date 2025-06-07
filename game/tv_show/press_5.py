@@ -6,16 +6,18 @@ from tv_show.video_state import VideoState
 
 
 class Press5(VideoState):
-    def __init__(self, parent):
-        super().__init__(parent, TvShowResources.videos_press_5[parent.country], True)
+    def __init__(self, context):
+        super().__init__(context, TvShowResources.videos_press_5[context.country], True)
 
     def process_events(self, phone_events: PhoneEvents):
         super().process_events(phone_events)
         if phone_events.hungup:
-            return Attract(self.parent)
+            return Attract
 
         if phone_events.press_5:
-            return HaveLuck(self.parent)
+            return HaveLuck
+
+        return None
 
     def render(self, screen):
         super().render(screen)

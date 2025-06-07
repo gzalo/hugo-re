@@ -9,7 +9,8 @@ from state import State
 class HurtFlyingFalling(State):
     def process_events(self, events):
         if self.get_frame_index_fast() >= len(ForestResources.catapult_fall):
-            return HurtFlyingFallingHangAnimation(self.parent)
+            return HurtFlyingFallingHangAnimation
+        return None
 
     def on_enter(self) -> None:
         super().on_enter()
