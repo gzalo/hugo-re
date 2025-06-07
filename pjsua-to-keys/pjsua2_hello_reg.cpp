@@ -304,7 +304,6 @@ try {
 }*/
 
     ep.audDevManager().setCaptureDev(-1);
-    ep.audDevManager().setPlaybackDev(-1);
 
     // Configure an AccountConfig
     AccountConfig acfg;
