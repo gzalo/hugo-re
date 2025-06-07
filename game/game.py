@@ -186,7 +186,7 @@ class Game:
 
             render_time = (post_render - pre_render) * 1000
             shader_time = (post_shader - post_render) * 1000
-            caption = f"Render: {render_time:.2f} ms, Shader: {shader_time:.2f} ms"
+            caption = f"Render: {render_time:06.2f} ms, Shader: {shader_time:06.2f} ms"
             pygame.display.set_caption(caption)
 
             clock.tick(30)
