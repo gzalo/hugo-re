@@ -2,13 +2,14 @@ import pygame
 
 from animation import Animation
 from forest.forest_resources import ForestResources
+from game_data import GameData
 from null_state import NullState
 from render_type import RenderType
 from state import State
 
 
 class WinTalking(State):
-    def __init__(self, context):
+    def __init__(self, context: GameData):
         super().__init__(context)
         self.needs_background = RenderType.PRE
         self.needs_bottom = RenderType.PRE

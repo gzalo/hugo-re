@@ -3,12 +3,13 @@ import pygame
 from animation import Animation
 from cave.cave_resources import CaveResources
 from cave.lost_spring import LostSpring
+from game_data import GameData
 from phone_events import PhoneEvents
 from state import State
 
 
 class Lost(State):
-    def __init__(self, context):
+    def __init__(self, context: GameData):
         super().__init__(context)
         self.animation = [
             CaveResources.hugo_puff_first,

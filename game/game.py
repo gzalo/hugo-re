@@ -12,7 +12,7 @@ from cave.cave_resources import CaveResources
 from config import Config
 from effects.splat import Splat
 from forest.forest_resources import ForestResources
-from game_state import GameData
+from game_data import GameData
 from post_processing import PostProcessing
 from scores.scores import Scores
 from tv_show.tv_show_parent import TvShowParent

@@ -4,6 +4,7 @@ from animation import Animation
 from cave.cave_resources import CaveResources
 from cave.family_cage_opens import FamilyCageOpens
 from cave.scylla_spring import ScyllaSpring
+from game_data import GameData
 from phone_events import PhoneEvents
 from state import State
 
@@ -15,7 +16,7 @@ class ScyllaLost(State):
         (172, 102),
     ]
 
-    def __init__(self, context):
+    def __init__(self, context: GameData):
         super().__init__(context)
         self.animation = [CaveResources.scylla_bird, CaveResources.scylla_leaves, CaveResources.scylla_ropes][context.cave_win_type]
 

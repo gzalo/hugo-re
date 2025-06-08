@@ -12,7 +12,7 @@ from forest.hurt_flying_start import HurtFlyingStart
 from forest.hurt_rock_animation import HurtRockAnimation
 from forest.hurt_trap_animation import HurtTrapAnimation
 from forest.win_talking import WinTalking
-from game_state import GameData
+from game_data import GameData
 from phone_events import PhoneEvents
 from render_type import RenderType
 from state import State

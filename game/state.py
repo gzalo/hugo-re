@@ -1,10 +1,11 @@
 from typing import Optional, Type
 
 import global_state
+from game_data import GameData
 from phone_events import PhoneEvents
 
 class State:
-    def __init__(self, context):
+    def __init__(self, context: GameData):
         self.start_time = None
         self.events = {}
         self.context = context

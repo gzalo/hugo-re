@@ -1,13 +1,14 @@
 import random
 
 from config import Config
+from game_data import GameData
 from phone_events import PhoneEvents
 from tv_show.attract import Attract
 from tv_show.playing import Playing
 
 
 class TvShowParent:
-    def __init__(self, context):
+    def __init__(self, context: GameData):
         self.context = context
         self._state = Attract(context)
         self._state.on_enter()

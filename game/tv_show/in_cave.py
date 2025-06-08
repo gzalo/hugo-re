@@ -1,4 +1,5 @@
 from cave.cave_game import CaveGame
+from game_data import GameData
 from phone_events import PhoneEvents
 from state import State
 from tv_show.attract import Attract
@@ -6,7 +7,7 @@ from tv_show.ending import Ending
 
 
 class InCave(State):
-    def __init__(self, context):
+    def __init__(self, context: GameData):
         super().__init__(context)
         self.cave = CaveGame(context)
 

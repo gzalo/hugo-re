@@ -1,4 +1,5 @@
 from forest.forest_game import ForestGame
+from game_data import GameData
 from phone_events import PhoneEvents
 from state import State
 from tv_show.attract import Attract
@@ -6,7 +7,7 @@ from tv_show.going_cave import GoingCave
 
 
 class Playing(State):
-    def __init__(self, context):
+    def __init__(self, context: GameData):
         super().__init__(context)
         self.forest = ForestGame(context)
 

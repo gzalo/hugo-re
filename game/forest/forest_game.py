@@ -8,7 +8,7 @@ from effects.splat import Splat
 from forest.forest_resources import ForestResources
 from forest.playing import Playing
 from forest.wait_intro import WaitIntro
-from game_state import GameData
+from game_data import GameData
 from null_state import NullState
 from phone_events import PhoneEvents
 from render_type import RenderType

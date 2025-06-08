@@ -1,3 +1,4 @@
+from game_data import GameData
 from phone_events import PhoneEvents
 from tv_show.attract import Attract
 from tv_show.have_luck import HaveLuck
@@ -6,7 +7,7 @@ from tv_show.video_state import VideoState
 
 
 class Press5(VideoState):
-    def __init__(self, context):
+    def __init__(self, context: GameData):
         super().__init__(context, TvShowResources.videos_press_5[context.country], True)
 
     def process_events(self, phone_events: PhoneEvents):

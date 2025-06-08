@@ -6,12 +6,13 @@ from animation import Animation
 from cave.cave_resources import CaveResources
 from cave.lost import Lost
 from cave.scylla_lost import ScyllaLost
+from game_data import GameData
 from phone_events import PhoneEvents
 from state import State
 
 
 class GoingRope(State):
-    def __init__(self, context):
+    def __init__(self, context: GameData):
         super().__init__(context)
         self.animation = [CaveResources.first_rope, CaveResources.second_rope, CaveResources.third_rope][context.cave_selected_rope]
 

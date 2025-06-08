@@ -1,4 +1,4 @@
-from game_state import GameData
+from game_data import GameData
 
 
 class ForestUtils:

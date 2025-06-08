@@ -3,12 +3,13 @@ import pygame
 from animation import Animation
 from forest.forest_resources import ForestResources
 from forest.hurt_branch_talking import HurtBranchTalking
+from game_data import GameData
 from render_type import RenderType
 from state import State
 
 
 class HurtBranchAnimation(State):
-    def __init__(self, context):
+    def __init__(self, context: GameData):
         super().__init__(context)
         self.needs_bottom = RenderType.POST
 

@@ -1,16 +1,16 @@
 from cave.cave_resources import CaveResources
 from cave.waiting_before_talking import WaitingBeforeTalking
+from game_data import GameData
 from null_state import NullState
 from phone_events import PhoneEvents
 import pygame
 
 class CaveGame:
 
-    def __init__(self, context):
+    def __init__(self, context: GameData):
         self.ended = False
         self.rolling_score = context.forest_score
         self.context = context
-        context.cave_selected_rope = None
 
         self.sounding_score = False
         self._state = WaitingBeforeTalking(context)
