@@ -2,6 +2,8 @@
 
 A Python-based audio server that listens for JSON UDP packages to control audio playback.
 
+> **Note:** This server is designed for local use or deployment on a low-latency, low packet loss LAN. UDP is used for simplicity and low overhead, but it does not guarantee reliable delivery over unreliable networks.
+
 ## Features
 
 - Play audio files with looping support
