@@ -1,5 +1,6 @@
 import pygame
 
+from audio_helper import AudioHelper
 from cave.cave_resources import CaveResources
 from cave.going_rope import GoingRope
 from config import Config
@@ -20,7 +21,7 @@ class WaitingInput(State):
             return GoingRope
 
         if self.one_shot(0.5, "afskylia_snak"):
-            pygame.mixer.Sound.play(CaveResources.afskylia_snak)
+            AudioHelper.play(CaveResources.afskylia_snak, self.context.country)
 
         return None
 
@@ -30,8 +31,8 @@ class WaitingInput(State):
     def on_enter(self) -> None:
         super().on_enter()
         if not Config.ARGENTINE_VERSION:
-            pygame.mixer.Sound.play(CaveResources.stemning)
+            AudioHelper.play(CaveResources.stemning, self.context.country)
 
     def on_exit(self) -> None:
         super().on_exit()
-        pygame.mixer.Sound.play(CaveResources.tast_trykket)
+        AudioHelper.play(CaveResources.tast_trykket, self.context.country)

@@ -1,6 +1,7 @@
 import pygame
 
 from animation import Animation
+from audio_helper import AudioHelper
 from forest.forest_resources import ForestResources
 from forest.playing import Playing
 from game_data import GameData
@@ -20,15 +21,15 @@ class TalkingAfterHurt(State):
             return Playing
 
         if self.one_shot(0.5, "knock1"):
-            pygame.mixer.Sound.play(ForestResources.sfx_hugo_knock)
+            AudioHelper.play(ForestResources.sfx_hugo_knock, self.context.country)
 
         if self.one_shot(0, "speak"):
-            pygame.mixer.Sound.play(ForestResources.sfx_hugo_knock)
+            AudioHelper.play(ForestResources.sfx_hugo_knock, self.context.country)
 
             if self.context.forest_lives == 1:
-                pygame.mixer.Sound.play(ForestResources.speak_lastlife)
+                AudioHelper.play(ForestResources.speak_lastlife, self.context.country)
             else:
-                pygame.mixer.Sound.play(ForestResources.speak_dieonce)
+                AudioHelper.play(ForestResources.speak_dieonce, self.context.country)
 
         return None
 

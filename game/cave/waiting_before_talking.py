@@ -1,5 +1,6 @@
 import pygame
 
+from audio_helper import AudioHelper
 from cave.cave_resources import CaveResources
 from cave.talking_before_climb import TalkingBeforeClimb
 from config import Config
@@ -17,9 +18,9 @@ class WaitingBeforeTalking(State):
 
     def on_enter(self) -> None:
         super().on_enter()
-        pygame.mixer.Sound.play(CaveResources.her_er_vi)
+        AudioHelper.play(CaveResources.her_er_vi, self.context.country)
 
         if Config.ARGENTINE_VERSION:
-            pygame.mixer.Sound.play(CaveResources.bg_music)
+            AudioHelper.play(CaveResources.bg_music, self.context.country)
         else:
-            pygame.mixer.Sound.play(CaveResources.stemning)
+            AudioHelper.play(CaveResources.stemning, self.context.country)

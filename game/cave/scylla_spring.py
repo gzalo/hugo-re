@@ -1,6 +1,7 @@
 import pygame
 
 from animation import Animation
+from audio_helper import AudioHelper
 from cave.cave_resources import CaveResources
 from cave.family_cage_opens import FamilyCageOpens
 from phone_events import PhoneEvents
@@ -13,10 +14,10 @@ class ScyllaSpring(State):
             return FamilyCageOpens
 
         if self.one_shot(1.5, "Fjeder"):
-            pygame.mixer.Sound.play(CaveResources.fjeder)
+            AudioHelper.play(CaveResources.fjeder, self.context.country)
 
         if self.one_shot(2, "AfskyliaSkydUd"):
-            pygame.mixer.Sound.play(CaveResources.afskylia_skyd_ud)
+            AudioHelper.play(CaveResources.afskylia_skyd_ud, self.context.country)
 
         return None
 

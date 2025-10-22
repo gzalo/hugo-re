@@ -1,6 +1,7 @@
 import pygame
 
 from animation import Animation
+from audio_helper import AudioHelper
 from forest.forest_resources import ForestResources
 from game_data import GameData
 from null_state import NullState
@@ -21,7 +22,7 @@ class WinTalking(State):
 
     def on_enter(self) -> None:
         super().on_enter()
-        pygame.mixer.Sound.play(ForestResources.speak_levelcompleted)
+        AudioHelper.play(ForestResources.speak_levelcompleted, self.context.country)
 
     def render(self, screen):
         screen.blit(Animation.get_sync_frame(ForestResources.hugo_telllives, ForestResources.sync_levelcompleted, self.get_frame_index()), (128, -16))

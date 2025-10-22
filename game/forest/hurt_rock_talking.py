@@ -1,6 +1,7 @@
 import pygame
 
 from animation import Animation
+from audio_helper import AudioHelper
 from forest.forest_resources import ForestResources
 from forest.forest_utils import ForestUtils
 from game_data import GameData
@@ -21,7 +22,7 @@ class HurtRockTalking(State):
 
     def on_enter(self) -> None:
         super().on_enter()
-        pygame.mixer.Sound.play(ForestResources.speak_rock)
+        AudioHelper.play(ForestResources.speak_rock, self.context.country)
 
     def render(self, screen):
         screen.blit(Animation.get_sync_frame(ForestResources.hit_rock_sync, ForestResources.sync_rock, self.get_frame_index()), (0,0))

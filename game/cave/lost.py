@@ -1,6 +1,7 @@
 import pygame
 
 from animation import Animation
+from audio_helper import AudioHelper
 from cave.cave_resources import CaveResources
 from cave.lost_spring import LostSpring
 from game_data import GameData
@@ -22,10 +23,10 @@ class Lost(State):
             return LostSpring
 
         if self.one_shot(1, "PrePuf"):
-            pygame.mixer.Sound.play(CaveResources.pre_puf)
+            AudioHelper.play(CaveResources.pre_puf, self.context.country)
 
         if self.one_shot(2, "Puf"):
-            pygame.mixer.Sound.play(CaveResources.puf)
+            AudioHelper.play(CaveResources.puf, self.context.country)
 
         return None
 
