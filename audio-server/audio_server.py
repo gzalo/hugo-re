@@ -244,6 +244,7 @@ class AudioServer:
         
         # Create UDP socket
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self.sock.settimeout(1.0)  # Add 1 second timeout
         self.sock.bind((self.host, self.port))
         
         # Try to start audio stream
@@ -272,8 +273,11 @@ class AudioServer:
         
         try:
             while self.running:
-                data, addr = self.sock.recvfrom(4096)
-                self.handle_command(data, addr)
+                try:
+                    data, addr = self.sock.recvfrom(4096)
+                    self.handle_command(data, addr)
+                except socket.timeout:
+                    continue  # Timeout allows checking self.running
         except KeyboardInterrupt:
             print("\nShutting down server...")
         finally:
