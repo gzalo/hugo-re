@@ -16,16 +16,24 @@ import uuid
 import sounddevice as sd
 import soundfile as sf
 import numpy as np
+from scipy import signal
 
 
 class AudioInstance:
     """Represents a playing audio instance."""
     
     def __init__(self, instance_id: str, data: np.ndarray, samplerate: int, 
-                 loops: int, volume: float):
+                 loops: int, volume: float, target_samplerate: int = 44100):
         self.instance_id = instance_id
+        self.original_samplerate = samplerate
+        self.target_samplerate = target_samplerate
+        
+        # Resample if sample rates don't match
+        if samplerate != target_samplerate:
+            data = self._resample_audio(data, samplerate, target_samplerate)
+        
         self.data = data
-        self.samplerate = samplerate
+        self.samplerate = target_samplerate
         self.loops = loops
         self.volume = volume
         self.current_loop = 0
@@ -34,6 +42,26 @@ class AudioInstance:
         self.fade_duration = 0.0
         self.fade_start_time = None
         self.original_volume = volume
+    
+    def _resample_audio(self, data: np.ndarray, orig_sr: int, target_sr: int) -> np.ndarray:
+        """Resample audio to target sample rate."""
+        if orig_sr == target_sr:
+            return data
+        
+        # Calculate resampling ratio
+        ratio = target_sr / orig_sr
+        
+        # Handle mono and stereo audio
+        if len(data.shape) == 1:
+            # Mono audio
+            num_samples = int(len(data) * ratio)
+            resampled = signal.resample(data, num_samples)
+        else:
+            # Stereo or multi-channel audio
+            num_samples = int(data.shape[0] * ratio)
+            resampled = signal.resample(data, num_samples, axis=0)
+        
+        return resampled.astype(np.float32)
         
     def get_next_frames(self, num_frames: int) -> Optional[np.ndarray]:
         """Get the next frames to play."""
@@ -92,6 +120,8 @@ class AudioInstance:
 class AudioServer:
     """Audio server that handles UDP JSON commands."""
     
+    OUTPUT_SAMPLERATE = 44100  # Output sample rate for audio stream
+    
     def __init__(self, host: str, port: int, assets_path: str, device: Optional[str] = None):
         self.host = host
         self.port = port
@@ -111,8 +141,8 @@ class AudioServer:
             with self.lock:
                 instances_to_remove = []
                 for instance_id, instance in self.instances.items():
-                    # Simulate consuming frames at 44100 Hz
-                    frames = instance.get_next_frames(4410)  # 0.1 seconds worth
+                    # Simulate consuming frames at the output sample rate
+                    frames = instance.get_next_frames(self.OUTPUT_SAMPLERATE // 10)  # 0.1 seconds worth
                     if frames is None:
                         instances_to_remove.append(instance_id)
                 
@@ -179,8 +209,9 @@ class AudioServer:
             # Generate unique instance ID
             instance_id = str(uuid.uuid4())
             
-            # Create audio instance
-            instance = AudioInstance(instance_id, data, samplerate, loops, volume)
+            # Create audio instance with target sample rate
+            instance = AudioInstance(instance_id, data, samplerate, loops, volume, 
+                                    target_samplerate=self.OUTPUT_SAMPLERATE)
             
             with self.lock:
                 self.instances[instance_id] = instance
@@ -252,7 +283,7 @@ class AudioServer:
             self.stream = sd.OutputStream(
                 callback=self.audio_callback,
                 channels=2,
-                samplerate=44100,
+                samplerate=self.OUTPUT_SAMPLERATE,
                 device=self.device,
                 blocksize=1024
             )
