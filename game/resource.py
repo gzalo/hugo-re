@@ -1,5 +1,4 @@
 import json
-import pygame
 import sys
 
 
