@@ -28,7 +28,7 @@ class CaveGame:
                 self._state = next_state(self.context)
                 self._state.on_enter()
 
-        if self.context.forest_score != self.rolling_score:
+        if self.context.forest_score != self.rolling_score and not self.sounding_score:
             self.context.cave_score_counter_id = AudioHelper.play(CaveResources.score_counter, self.context.audio_port, loops=-1)
             self.sounding_score = True
 

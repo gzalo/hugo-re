@@ -12,11 +12,15 @@ class Attract(VideoState):
         super().process_events(phone_events)
         from tv_show.initial import Initial
         from tv_show.playing import Playing
+        from tv_show.in_cave import InCave
 
         if phone_events.offhook:
             return Initial
 
         if phone_events.press_5:
             return Playing
+        if phone_events.press_6:
+            self.context.forest_score = 1000
+            return InCave
 
         return None
