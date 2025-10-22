@@ -21,6 +21,6 @@ class WaitingBeforeTalking(State):
         AudioHelper.play(CaveResources.her_er_vi, self.context.audio_port)
 
         if Config.ARGENTINE_VERSION:
-            AudioHelper.play(CaveResources.bg_music, self.context.audio_port)
+            self.context.cave_bg_music_id = AudioHelper.play(CaveResources.bg_music, self.context.audio_port)
         else:
-            AudioHelper.play(CaveResources.stemning, self.context.audio_port)
+            self.context.cave_stemning_id = AudioHelper.play(CaveResources.stemning, self.context.audio_port)

@@ -31,7 +31,7 @@ class WaitingInput(State):
     def on_enter(self) -> None:
         super().on_enter()
         if not Config.ARGENTINE_VERSION:
-            AudioHelper.play(CaveResources.stemning, self.context.audio_port)
+            self.context.cave_stemning_id = AudioHelper.play(CaveResources.stemning, self.context.audio_port)
 
     def on_exit(self) -> None:
         super().on_exit()

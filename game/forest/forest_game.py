@@ -33,7 +33,7 @@ class ForestGame:
         self.effect_status = None
         self.effect_start = None
 
-        AudioHelper.play(ForestResources.sfx_bg_atmosphere, context.audio_port, loops=-1)
+        self.context.forest_bg_atmosphere_id = AudioHelper.play(ForestResources.sfx_bg_atmosphere, context.audio_port, loops=-1)
 
     def process_events(self, phone_events: PhoneEvents):
         if self.effect_status == EffectType.INVERT and global_state.frame_time - self.effect_start > Config.EFFECT_DURATION_ORB:
@@ -140,7 +140,7 @@ class ForestGame:
 
     def end(self):
         self._state.on_exit()
-        AudioHelper.stop(ForestResources.sfx_bg_atmosphere, self.context.audio_port)
+        AudioHelper.stop(self.context.forest_bg_atmosphere_id, self.context.audio_port)
         self.ended = True
 
     @staticmethod

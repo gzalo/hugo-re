@@ -19,9 +19,9 @@ class FamilyHappy(State):
 
     def on_enter(self) -> None:
         super().on_enter()
-        AudioHelper.play(CaveResources.fanfare, self.context.audio_port)
+        self.context.cave_fanfare_id = AudioHelper.play(CaveResources.fanfare, self.context.audio_port)
 
     def on_exit(self) -> None:
         super().on_exit()
-        AudioHelper.stop(CaveResources.fanfare, self.context.audio_port)
+        AudioHelper.stop(self.context.cave_fanfare_id, self.context.audio_port)
 
