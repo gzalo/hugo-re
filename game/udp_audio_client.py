@@ -2,7 +2,6 @@ import json
 import socket
 import threading
 from typing import Optional, Dict
-import pygame
 
 
 class UDPAudioClient:
