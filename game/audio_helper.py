@@ -1,6 +1,97 @@
 """Helper module for audio playback that routes to UDP audio servers."""
 
-from udp_audio_client import get_client
+import json
+import socket
+import threading
+from typing import Optional, Dict
+
+
+class UDPAudioClient:
+    """Client for sending audio commands via UDP to external audio server."""
+    
+    def __init__(self, port: int):
+        self.port = port
+        self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self.lock = threading.Lock()
+        self.instance_map: Dict[str, int] = {}  # Maps resource strings to instance IDs
+    
+    def send_command(self, command: dict) -> Optional[dict]:
+        """Send a command to the audio server and receive response."""
+        try:
+            with self.lock:
+                message = json.dumps(command).encode('utf-8')
+                self.sock.sendto(message, ('127.0.0.1', self.port))
+                
+                # Set timeout for receiving response
+                self.sock.settimeout(1.0)
+                try:
+                    data, _ = self.sock.recvfrom(4096)
+                    response = json.loads(data.decode('utf-8'))
+                    return response
+                except socket.timeout:
+                    # No response received, return None
+                    return None
+        except Exception as e:
+            print(f"Error sending UDP command: {e}")
+            return None
+    
+    def play(self, resource: str, loops: int = 0, volume: float = 1.0) -> Optional[int]:
+        """
+        Send PLAY command to audio server.
+        
+        Args:
+            resource: Path to audio resource
+            loops: Number of loops (-1 for infinite)
+            volume: Volume level (0.0 to 1.0)
+        
+        Returns:
+            Instance ID if successful, None otherwise
+        """
+        command = {
+            "cmd": "PLAY",
+            "resource": resource,
+            "loops": loops,
+            "volume": volume
+        }
+        response = self.send_command(command)
+        if response and "instance_id" in response:
+            instance_id = response["instance_id"]
+            self.instance_map[resource] = instance_id
+            return instance_id
+        return None
+    
+    def stop(self, resource: str, fade_duration: int = 0):
+        """
+        Send STOP command to audio server.
+        
+        Args:
+            resource: Path to audio resource
+            fade_duration: Fade out duration in milliseconds
+        """
+        instance_id = self.instance_map.get(resource)
+        if instance_id is not None:
+            command = {
+                "cmd": "STOP",
+                "instance_id": instance_id,
+                "duration": fade_duration
+            }
+            self.send_command(command)
+            del self.instance_map[resource]
+    
+    def close(self):
+        """Close the UDP socket."""
+        self.sock.close()
+
+
+# Global clients dictionary for each port
+_clients: Dict[int, UDPAudioClient] = {}
+
+
+def get_client(port: int) -> UDPAudioClient:
+    """Get or create UDP client for a port."""
+    if port not in _clients:
+        _clients[port] = UDPAudioClient(port)
+    return _clients[port]
 
 
 class AudioHelper:
