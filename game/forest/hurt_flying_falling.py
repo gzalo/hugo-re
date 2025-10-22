@@ -1,6 +1,7 @@
 import pygame.mixer
 
 from animation import Animation
+from audio_helper import AudioHelper
 from forest.forest_resources import ForestResources
 from forest.hurt_flying_falling_hang_animation import HurtFlyingFallingHangAnimation
 from state import State
@@ -14,8 +15,8 @@ class HurtFlyingFalling(State):
 
     def on_enter(self) -> None:
         super().on_enter()
-        pygame.mixer.Sound.play(ForestResources.speak_catapult_down)
-        pygame.mixer.Sound.play(ForestResources.sfx_hugo_crash)
+        AudioHelper.play(ForestResources.speak_catapult_down, self.context.audio_port)
+        AudioHelper.play(ForestResources.sfx_hugo_crash, self.context.audio_port)
 
     def render(self, screen):
         screen.blit(Animation.get_frame(ForestResources.catapult_fall, self.get_frame_index_fast()), (0,0))

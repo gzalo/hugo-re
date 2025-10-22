@@ -1,7 +1,6 @@
 import json
-import pygame
 import sys
-
+import pygame
 
 class Resource:
     if len(sys.argv) > 1:
@@ -17,7 +16,9 @@ class Resource:
     @staticmethod
     def load_speak(game, filename):
         path = "/speak/" if game == "RopeOutroData" else "/speaks/"
-        return pygame.mixer.Sound(Resource.DATA_DIR + "/" + game + path + filename)
+        resource_path = game + path + filename
+        # Return resource path string instead of pygame.mixer.Sound
+        return resource_path
 
     @staticmethod
     def load_sfx(game, filename):
@@ -26,7 +27,9 @@ class Resource:
         else:
             sfx = "sfx"
 
-        return pygame.mixer.Sound(Resource.DATA_DIR + "/" + game + "/" + sfx + "/" + filename)
+        resource_path = game + "/" + sfx + "/" + filename
+        # Return resource path string instead of pygame.mixer.Sound
+        return resource_path
 
     @staticmethod
     def load_surfaces(game, name, start, end):

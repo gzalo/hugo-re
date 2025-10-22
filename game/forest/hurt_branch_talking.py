@@ -1,6 +1,7 @@
 import pygame
 
 from animation import Animation
+from audio_helper import AudioHelper
 from forest.forest_resources import ForestResources
 from forest.forest_utils import ForestUtils
 from game_data import GameData
@@ -23,4 +24,4 @@ class HurtBranchTalking(State):
 
     def on_enter(self) -> None:
         super().on_enter()
-        pygame.mixer.Sound.play(ForestResources.speak_hitlog)
+        AudioHelper.play(ForestResources.speak_hitlog, self.context.audio_port)

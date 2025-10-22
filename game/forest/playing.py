@@ -4,6 +4,7 @@ import random
 import pygame
 
 import global_state
+from audio_helper import AudioHelper
 from config import Config
 from effect_type import EffectType
 from forest.forest_resources import ForestResources
@@ -70,42 +71,42 @@ class Playing(State):
 
             if self.context.forest_obstacles[integer] != 0 and not Config.GOD_MODE:
                 if self.context.forest_obstacles[integer] == 1 and not self.arrow_up_focus:  # Catapult
-                    pygame.mixer.Sound.play(ForestResources.sfx_hugo_launch)
-                    pygame.mixer.Sound.play(ForestResources.sfx_catapult_eject)
+                    AudioHelper.play(ForestResources.sfx_hugo_launch, self.context.audio_port)
+                    AudioHelper.play(ForestResources.sfx_catapult_eject, self.context.audio_port)
                     self.context.forest_obstacles[integer] = 0
                     return HurtFlyingStart
                 elif self.context.forest_obstacles[integer] == 2 and not self.arrow_up_focus:  # Trap
-                    pygame.mixer.Sound.play(ForestResources.sfx_hugo_hittrap)
+                    AudioHelper.play(ForestResources.sfx_hugo_hittrap, self.context.audio_port)
                     self.context.forest_obstacles[integer] = 0
                     return HurtTrapAnimation
                 elif self.context.forest_obstacles[integer] == 3 and not self.arrow_up_focus:  # Rock
-                    pygame.mixer.Sound.play(ForestResources.sfx_hugo_hitlog)
+                    AudioHelper.play(ForestResources.sfx_hugo_hitlog, self.context.audio_port)
                     self.context.forest_obstacles[integer] = 0
                     return HurtRockAnimation
                 elif self.context.forest_obstacles[integer] == 4:  # Tree
                     if self.arrow_down_focus:
-                        pygame.mixer.Sound.play(ForestResources.sfx_tree_swush)
+                        AudioHelper.play(ForestResources.sfx_tree_swush, self.context.audio_port)
                     else:
-                        pygame.mixer.Sound.play(ForestResources.sfx_hugo_hitlog)
+                        AudioHelper.play(ForestResources.sfx_hugo_hitlog, self.context.audio_port)
                         self.context.forest_obstacles[integer] = 0
                         return HurtBranchAnimation
 
             if self.arrow_up_focus and self.context.forest_sacks[integer] != 0:
                 if self.context.forest_sacks[integer] == 1:
                     self.context.forest_score += 100
-                    pygame.mixer.Sound.play(ForestResources.sfx_sack_normal)
+                    AudioHelper.play(ForestResources.sfx_sack_normal, self.context.audio_port)
                     self.context.forest_sacks[integer] = 0
                     global_state.attacks.append((self.context.country, EffectType.SPLAT, global_state.frame_time))
                 elif self.context.forest_sacks[integer] == 2:
                     self.context.forest_score += 250
-                    pygame.mixer.Sound.play(ForestResources.sfx_sack_bonus)
+                    AudioHelper.play(ForestResources.sfx_sack_bonus, self.context.audio_port)
                     self.context.forest_sacks[integer] = 0
                     global_state.attacks.append((self.context.country, EffectType.INVERT, global_state.frame_time))
 
         if self.get_frame_index() % 8 == 0 and not self.arrow_up_focus:
             walk_sfx = [ForestResources.sfx_hugo_walk0, ForestResources.sfx_hugo_walk1, ForestResources.sfx_hugo_walk2,
                         ForestResources.sfx_hugo_walk3, ForestResources.sfx_hugo_walk4]
-            pygame.mixer.Sound.play(walk_sfx[random.randint(0, 4)])
+            AudioHelper.play(walk_sfx[random.randint(0, 4)], self.context.audio_port)
 
         self.old_second = math.floor(self.context.forest_parallax_pos)
 

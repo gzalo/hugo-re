@@ -1,6 +1,7 @@
 import pygame.mixer
 
 from animation import Animation
+from audio_helper import AudioHelper
 from cave.cave_resources import CaveResources
 from cave.family_cage_opens import FamilyCageOpens
 from cave.scylla_spring import ScyllaSpring
@@ -26,15 +27,15 @@ class ScyllaLost(State):
 
         if self.context.cave_win_type == 0: # Bird
             if self.one_shot(0.5, "FugleSkrig"):
-                pygame.mixer.Sound.play(CaveResources.fugle_skrig)
+                AudioHelper.play(CaveResources.fugle_skrig, self.context.audio_port)
         elif self.context.cave_win_type == 1: # Leaves
             if self.one_shot(0.5, "Skrig"):
-                pygame.mixer.Sound.play(CaveResources.skrig)
+                AudioHelper.play(CaveResources.skrig, self.context.audio_port)
         else: # Ropes
             if self.one_shot(1, "PrePuf"):
-                pygame.mixer.Sound.play(CaveResources.pre_puf)
+                AudioHelper.play(CaveResources.pre_puf, self.context.audio_port)
             if self.one_shot(2, "Puf"):
-                pygame.mixer.Sound.play(CaveResources.puf)
+                AudioHelper.play(CaveResources.puf, self.context.audio_port)
         return None
 
 

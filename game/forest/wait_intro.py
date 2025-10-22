@@ -1,6 +1,7 @@
 import pygame
 
 from animation import Animation
+from audio_helper import AudioHelper
 from forest.forest_resources import ForestResources
 from forest.playing import Playing
 from game_data import GameData
@@ -21,7 +22,7 @@ class WaitIntro(State):
 
     def on_enter(self) -> None:
         super().on_enter()
-        pygame.mixer.Sound.play(ForestResources.speak_start)
+        AudioHelper.play(ForestResources.speak_start, self.context.audio_port)
 
     def render(self, screen):
         screen.blit(Animation.get_sync_frame(ForestResources.hugo_telllives, ForestResources.sync_start, self.get_frame_index()), (128, -16))

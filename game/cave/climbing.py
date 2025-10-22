@@ -1,6 +1,7 @@
 import pygame
 
 from animation import Animation
+from audio_helper import AudioHelper
 from cave.cave_resources import CaveResources
 from cave.waiting_input import WaitingInput
 from phone_events import PhoneEvents
@@ -13,10 +14,10 @@ class Climbing(State):
             return WaitingInput
 
         if self.one_shot(1, "NuKommerJeg"):
-            pygame.mixer.Sound.play(CaveResources.nu_kommer_jeg)
+            AudioHelper.play(CaveResources.nu_kommer_jeg, self.context.audio_port)
 
         if self.one_shot(2, "PreFanfare"):
-            pygame.mixer.Sound.play(CaveResources.pre_fanfare)
+            AudioHelper.play(CaveResources.pre_fanfare, self.context.audio_port)
 
         return None
 

@@ -3,6 +3,7 @@ import random
 import pygame
 
 from animation import Animation
+from audio_helper import AudioHelper
 from cave.cave_resources import CaveResources
 from cave.lost import Lost
 from cave.scylla_lost import ScyllaLost
@@ -22,13 +23,13 @@ class GoingRope(State):
 
         sound_time = [2,3,4][self.context.cave_selected_rope]
         if self.one_shot(sound_time, "HivIReb"):
-            pygame.mixer.Sound.play(CaveResources.hiv_i_reb)
+            AudioHelper.play(CaveResources.hiv_i_reb, self.context.audio_port)
 
         if self.every(0.4, "Fodtrin1"):
-            pygame.mixer.Sound.play(CaveResources.fodtrin1)
+            AudioHelper.play(CaveResources.fodtrin1, self.context.audio_port)
 
         if self.every(0.4, "Fodtrin2", 0.4):
-            pygame.mixer.Sound.play(CaveResources.fodtrin2)
+            AudioHelper.play(CaveResources.fodtrin2, self.context.audio_port)
 
         return None
 
