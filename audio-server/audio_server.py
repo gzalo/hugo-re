@@ -101,7 +101,24 @@ class AudioServer:
         self.running = False
         self.lock = threading.Lock()
         self.stream = None
+        self.simulation_mode = False
+        self.simulation_thread = None
         
+    def _simulation_loop(self):
+        """Simulation loop for when no audio device is available."""
+        while self.running:
+            time.sleep(0.1)  # Update at 10Hz
+            with self.lock:
+                instances_to_remove = []
+                for instance_id, instance in self.instances.items():
+                    # Simulate consuming frames at 44100 Hz
+                    frames = instance.get_next_frames(4410)  # 0.1 seconds worth
+                    if frames is None:
+                        instances_to_remove.append(instance_id)
+                
+                for instance_id in instances_to_remove:
+                    del self.instances[instance_id]
+    
     def audio_callback(self, outdata: np.ndarray, frames: int, time_info, status):
         """Callback for sounddevice stream."""
         if status:
@@ -229,15 +246,25 @@ class AudioServer:
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.sock.bind((self.host, self.port))
         
-        # Start audio stream
-        self.stream = sd.OutputStream(
-            callback=self.audio_callback,
-            channels=2,
-            samplerate=44100,
-            device=self.device,
-            blocksize=1024
-        )
-        self.stream.start()
+        # Try to start audio stream
+        try:
+            self.stream = sd.OutputStream(
+                callback=self.audio_callback,
+                channels=2,
+                samplerate=44100,
+                device=self.device,
+                blocksize=1024
+            )
+            self.stream.start()
+            print("Audio output stream started successfully")
+        except Exception as e:
+            print(f"Warning: Could not start audio output stream: {e}")
+            print("Running in simulation mode (no audio output)")
+            self.stream = None
+            self.simulation_mode = True
+            # Start simulation thread to update instances
+            self.simulation_thread = threading.Thread(target=self._simulation_loop, daemon=True)
+            self.simulation_thread.start()
         
         print("Audio Server ready and listening for commands...")
         
@@ -256,8 +283,11 @@ class AudioServer:
         """Stop the audio server."""
         self.running = False
         if self.stream:
-            self.stream.stop()
-            self.stream.close()
+            try:
+                self.stream.stop()
+                self.stream.close()
+            except Exception as e:
+                print(f"Warning during stream cleanup: {e}")
         self.sock.close()
         print("Audio Server stopped.")
 
@@ -280,7 +310,6 @@ def main():
     )
     parser.add_argument(
         "--assets",
-        required=True,
         help="Path to assets directory"
     )
     parser.add_argument(
@@ -300,6 +329,10 @@ def main():
         print("Available audio devices:")
         print(sd.query_devices())
         return
+    
+    # Validate assets path is provided when not listing devices
+    if not args.assets:
+        parser.error("the following arguments are required: --assets")
     
     # Validate assets path
     if not os.path.exists(args.assets):
