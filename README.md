@@ -40,8 +40,10 @@ Similar projects:
 - https://github.com/tuomasth/Hugo_Ski_Game_Finnish_24-2-2023
 - https://github.com/supinrus/HugoMega
 - https://github.com/supinrus/HugoResourceViewer
+- https://github.com/supinrus/ite-hugo-utils
 - https://github.com/erengaygusuz/hugo-lululu
 - https://github.com/ElMiauro/KitoPizzas
+- https://github.com/humbertodias/hugo-resource-viewer
 
 ### By gzalo (Gonzalo Avila) 2023-20XX
 ### In memoriam - Hugo Avila - 1921-2007
