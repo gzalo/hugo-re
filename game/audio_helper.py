@@ -13,7 +13,6 @@ class UDPAudioClient:
         self.port = port
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.lock = threading.Lock()
-        self.instance_map: Dict[str, int] = {}  # Maps resource strings to instance IDs
     
     def send_command(self, command: dict) -> Optional[dict]:
         """Send a command to the audio server and receive response."""
@@ -55,20 +54,17 @@ class UDPAudioClient:
         }
         response = self.send_command(command)
         if response and "instance_id" in response:
-            instance_id = response["instance_id"]
-            self.instance_map[resource] = instance_id
-            return instance_id
+            return response["instance_id"]
         return None
     
-    def stop(self, resource: str, fade_duration: int = 0):
+    def stop(self, instance_id: int, fade_duration: int = 0):
         """
         Send STOP command to audio server.
         
         Args:
-            resource: Path to audio resource
+            instance_id: Instance ID of the audio to stop
             fade_duration: Fade out duration in milliseconds
         """
-        instance_id = self.instance_map.get(resource)
         if instance_id is not None:
             command = {
                 "cmd": "STOP",
@@ -76,7 +72,6 @@ class UDPAudioClient:
                 "duration": fade_duration
             }
             self.send_command(command)
-            del self.instance_map[resource]
     
     def close(self):
         """Close the UDP socket."""
@@ -98,7 +93,7 @@ class AudioHelper:
     """Helper class to replace pygame.mixer.Sound calls with UDP-based calls."""
     
     @staticmethod
-    def play(resource: str, port: int, loops: int = 0):
+    def play(resource: str, port: int, loops: int = 0) -> Optional[int]:
         """
         Play a sound via UDP.
         
@@ -106,32 +101,37 @@ class AudioHelper:
             resource: Resource path string
             port: UDP port number for the audio server
             loops: Number of loops (0 = play once, -1 = loop forever)
+        
+        Returns:
+            Instance ID if successful, None otherwise
         """
         client = get_client(port)
-        client.play(resource, loops=loops, volume=1.0)
+        return client.play(resource, loops=loops, volume=1.0)
     
     @staticmethod
-    def stop(resource: str, port: int):
+    def stop(instance_id: Optional[int], port: int):
         """
         Stop a sound via UDP.
         
         Args:
-            resource: Resource path string
+            instance_id: Instance ID returned from play()
             port: UDP port number for the audio server
         """
-        client = get_client(port)
-        client.stop(resource, fade_duration=0)
+        if instance_id is not None:
+            client = get_client(port)
+            client.stop(instance_id, fade_duration=0)
     
     @staticmethod
-    def fadeout(resource: str, port: int, time: int = 0):
+    def fadeout(instance_id: Optional[int], port: int, time: int = 0):
         """
         Fade out a sound via UDP.
         
         Args:
-            resource: Resource path string
+            instance_id: Instance ID returned from play()
             port: UDP port number for the audio server
             time: Fade duration in milliseconds
         """
-        client = get_client(port)
-        client.stop(resource, fade_duration=time)
+        if instance_id is not None:
+            client = get_client(port)
+            client.stop(instance_id, fade_duration=time)
 

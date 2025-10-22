@@ -15,3 +15,9 @@ class GameData:
 
     cave_selected_rope: int
     cave_win_type: int
+    
+    forest_bg_atmosphere_id: int = None
+    cave_score_counter_id: int = None
+    cave_fanfare_id: int = None
+    cave_bg_music_id: int = None
+    cave_stemning_id: int = None

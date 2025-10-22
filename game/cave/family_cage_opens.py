@@ -13,9 +13,9 @@ class FamilyCageOpens(State):
     def on_exit(self) -> None:
         super().on_exit()
         if Config.ARGENTINE_VERSION:
-            AudioHelper.fadeout(CaveResources.bg_music, self.context.audio_port, 1000)
+            AudioHelper.fadeout(self.context.cave_bg_music_id, self.context.audio_port, 1000)
         else:
-            AudioHelper.fadeout(CaveResources.stemning, self.context.audio_port, 1000)
+            AudioHelper.fadeout(self.context.cave_stemning_id, self.context.audio_port, 1000)
 
     def process_events(self, phone_events: PhoneEvents):
         if self.get_frame_index() >= len(CaveResources.family_cage):
