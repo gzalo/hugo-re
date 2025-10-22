@@ -1,6 +1,6 @@
 import json
 import sys
-
+import pygame
 
 class Resource:
     if len(sys.argv) > 1:
