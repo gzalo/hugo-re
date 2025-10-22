@@ -16,7 +16,7 @@ class HurtFlyingTalking(State):
 
     def on_enter(self) -> None:
         super().on_enter()
-        AudioHelper.play(ForestResources.speak_catapult_talktop, self.context.country)
+        AudioHelper.play(ForestResources.speak_catapult_talktop, self.context.audio_port)
 
     def render(self, screen):
         screen.blit(Animation.get_sync_frame(ForestResources.catapult_airtalk, ForestResources.sync_catapult_talktop, self.get_frame_index()), (0,0))

@@ -21,7 +21,7 @@ class WaitingInput(State):
             return GoingRope
 
         if self.one_shot(0.5, "afskylia_snak"):
-            AudioHelper.play(CaveResources.afskylia_snak, self.context.country)
+            AudioHelper.play(CaveResources.afskylia_snak, self.context.audio_port)
 
         return None
 
@@ -31,8 +31,8 @@ class WaitingInput(State):
     def on_enter(self) -> None:
         super().on_enter()
         if not Config.ARGENTINE_VERSION:
-            AudioHelper.play(CaveResources.stemning, self.context.country)
+            AudioHelper.play(CaveResources.stemning, self.context.audio_port)
 
     def on_exit(self) -> None:
         super().on_exit()
-        AudioHelper.play(CaveResources.tast_trykket, self.context.country)
+        AudioHelper.play(CaveResources.tast_trykket, self.context.audio_port)

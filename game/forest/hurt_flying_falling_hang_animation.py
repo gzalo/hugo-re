@@ -15,7 +15,7 @@ class HurtFlyingFallingHangAnimation(State):
 
     def on_enter(self) -> None:
         super().on_enter()
-        AudioHelper.play(ForestResources.sfx_hugo_hangstart, self.context.country)
+        AudioHelper.play(ForestResources.sfx_hugo_hangstart, self.context.audio_port)
 
     def render(self, screen):
         screen.blit(Animation.get_frame(ForestResources.catapult_hang, self.get_frame_index_fast()), (0,0))

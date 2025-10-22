@@ -22,7 +22,7 @@ class HurtRockTalking(State):
 
     def on_enter(self) -> None:
         super().on_enter()
-        AudioHelper.play(ForestResources.speak_rock, self.context.country)
+        AudioHelper.play(ForestResources.speak_rock, self.context.audio_port)
 
     def render(self, screen):
         screen.blit(Animation.get_sync_frame(ForestResources.hit_rock_sync, ForestResources.sync_rock, self.get_frame_index()), (0,0))

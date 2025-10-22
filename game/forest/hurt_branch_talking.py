@@ -24,4 +24,4 @@ class HurtBranchTalking(State):
 
     def on_enter(self) -> None:
         super().on_enter()
-        AudioHelper.play(ForestResources.speak_hitlog, self.context.country)
+        AudioHelper.play(ForestResources.speak_hitlog, self.context.audio_port)

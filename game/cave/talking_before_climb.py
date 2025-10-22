@@ -12,7 +12,7 @@ from state import State
 class TalkingBeforeClimb(State):
     def process_events(self, phone_events: PhoneEvents):
         if not Config.ARGENTINE_VERSION and self.one_shot(4, "TrappeGrin"):
-                AudioHelper.play(CaveResources.trappe_grin, self.context.country)
+                AudioHelper.play(CaveResources.trappe_grin, self.context.audio_port)
 
         if self.get_frame_index() >= len(CaveResources.sync_hugo_start):
             return Climbing
@@ -23,5 +23,5 @@ class TalkingBeforeClimb(State):
 
     def on_enter(self) -> None:
         super().on_enter()
-        AudioHelper.play(CaveResources.trappe_snak, self.context.country)
+        AudioHelper.play(CaveResources.trappe_snak, self.context.audio_port)
 

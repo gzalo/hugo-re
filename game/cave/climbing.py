@@ -14,10 +14,10 @@ class Climbing(State):
             return WaitingInput
 
         if self.one_shot(1, "NuKommerJeg"):
-            AudioHelper.play(CaveResources.nu_kommer_jeg, self.context.country)
+            AudioHelper.play(CaveResources.nu_kommer_jeg, self.context.audio_port)
 
         if self.one_shot(2, "PreFanfare"):
-            AudioHelper.play(CaveResources.pre_fanfare, self.context.country)
+            AudioHelper.play(CaveResources.pre_fanfare, self.context.audio_port)
 
         return None
 

@@ -29,7 +29,7 @@ class CaveGame:
                 self._state.on_enter()
 
         if self.context.forest_score != self.rolling_score:
-            AudioHelper.play(CaveResources.score_counter, self.context.country, loops=-1)
+            AudioHelper.play(CaveResources.score_counter, self.context.audio_port, loops=-1)
             self.sounding_score = True
 
     def render(self, screen):
@@ -38,7 +38,7 @@ class CaveGame:
         if self.rolling_score < self.context.forest_score:
             self.rolling_score += min(10, self.context.forest_score - self.rolling_score)
         elif self.sounding_score:
-            AudioHelper.stop(CaveResources.score_counter, self.context.country)
+            AudioHelper.stop(CaveResources.score_counter, self.context.audio_port)
             self.sounding_score = False
 
         self.render_score(screen)
@@ -58,5 +58,5 @@ class CaveGame:
 
     def end(self):
         self._state.on_exit()
-        AudioHelper.stop(CaveResources.score_counter, self.context.country)
+        AudioHelper.stop(CaveResources.score_counter, self.context.audio_port)
         self.ended = True

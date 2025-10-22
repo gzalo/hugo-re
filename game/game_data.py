@@ -4,6 +4,7 @@ from dataclasses import dataclass
 @dataclass
 class GameData:
     country: str
+    audio_port: int
 
     forest_score: int
     forest_lives: int

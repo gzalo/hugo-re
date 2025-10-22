@@ -1,7 +1,6 @@
 import json
 import pygame
 import sys
-from udp_audio_client import AudioManager
 
 
 class Resource:
@@ -19,10 +18,8 @@ class Resource:
     def load_speak(game, filename):
         path = "/speak/" if game == "RopeOutroData" else "/speaks/"
         resource_path = game + path + filename
-        sound = pygame.mixer.Sound(Resource.DATA_DIR + "/" + resource_path)
-        # Register sound with audio manager for UDP routing
-        AudioManager().register_sound(sound, resource_path)
-        return sound
+        # Return resource path string instead of pygame.mixer.Sound
+        return resource_path
 
     @staticmethod
     def load_sfx(game, filename):
@@ -32,10 +29,8 @@ class Resource:
             sfx = "sfx"
 
         resource_path = game + "/" + sfx + "/" + filename
-        sound = pygame.mixer.Sound(Resource.DATA_DIR + "/" + resource_path)
-        # Register sound with audio manager for UDP routing
-        AudioManager().register_sound(sound, resource_path)
-        return sound
+        # Return resource path string instead of pygame.mixer.Sound
+        return resource_path
 
     @staticmethod
     def load_surfaces(game, name, start, end):

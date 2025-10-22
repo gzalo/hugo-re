@@ -27,15 +27,15 @@ class ScyllaLost(State):
 
         if self.context.cave_win_type == 0: # Bird
             if self.one_shot(0.5, "FugleSkrig"):
-                AudioHelper.play(CaveResources.fugle_skrig, self.context.country)
+                AudioHelper.play(CaveResources.fugle_skrig, self.context.audio_port)
         elif self.context.cave_win_type == 1: # Leaves
             if self.one_shot(0.5, "Skrig"):
-                AudioHelper.play(CaveResources.skrig, self.context.country)
+                AudioHelper.play(CaveResources.skrig, self.context.audio_port)
         else: # Ropes
             if self.one_shot(1, "PrePuf"):
-                AudioHelper.play(CaveResources.pre_puf, self.context.country)
+                AudioHelper.play(CaveResources.pre_puf, self.context.audio_port)
             if self.one_shot(2, "Puf"):
-                AudioHelper.play(CaveResources.puf, self.context.country)
+                AudioHelper.play(CaveResources.puf, self.context.audio_port)
         return None
 
 

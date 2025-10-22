@@ -13,16 +13,16 @@ class HurtFlyingStart(State):
             return HurtFlyingTalking
 
         if self.one_shot(2.7, "crash"):
-            AudioHelper.play(ForestResources.sfx_hugo_screenklir, self.context.country)
+            AudioHelper.play(ForestResources.sfx_hugo_screenklir, self.context.audio_port)
 
         if self.one_shot(2.7, "uy"):
-            AudioHelper.play(ForestResources.speak_catapult_hit, self.context.country)
+            AudioHelper.play(ForestResources.speak_catapult_hit, self.context.audio_port)
 
         return None
 
     def on_enter(self) -> None:
         super().on_enter()
-        AudioHelper.play(ForestResources.speak_catapult_up, self.context.country)
+        AudioHelper.play(ForestResources.speak_catapult_up, self.context.audio_port)
 
     def render(self, screen):
         screen.blit(Animation.get_frame(ForestResources.catapult_fly, self.get_frame_index_fast()), (0,0))

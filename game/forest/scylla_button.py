@@ -8,7 +8,7 @@ from state import State
 class ScyllaButton(State):
     def process_events(self, events):
         if self.one_shot(0.5, "sfx_lightning_warning"):
-            AudioHelper.play(ForestResources.sfx_lightning_warning, self.context.country)
+            AudioHelper.play(ForestResources.sfx_lightning_warning, self.context.audio_port)
 
         if self.get_state_time() > 2:
             return Playing

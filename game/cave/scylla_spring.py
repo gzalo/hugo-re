@@ -14,10 +14,10 @@ class ScyllaSpring(State):
             return FamilyCageOpens
 
         if self.one_shot(1.5, "Fjeder"):
-            AudioHelper.play(CaveResources.fjeder, self.context.country)
+            AudioHelper.play(CaveResources.fjeder, self.context.audio_port)
 
         if self.one_shot(2, "AfskyliaSkydUd"):
-            AudioHelper.play(CaveResources.afskylia_skyd_ud, self.context.country)
+            AudioHelper.play(CaveResources.afskylia_skyd_ud, self.context.audio_port)
 
         return None
 

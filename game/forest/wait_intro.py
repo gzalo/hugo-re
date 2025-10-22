@@ -22,7 +22,7 @@ class WaitIntro(State):
 
     def on_enter(self) -> None:
         super().on_enter()
-        AudioHelper.play(ForestResources.speak_start, self.context.country)
+        AudioHelper.play(ForestResources.speak_start, self.context.audio_port)
 
     def render(self, screen):
         screen.blit(Animation.get_sync_frame(ForestResources.hugo_telllives, ForestResources.sync_start, self.get_frame_index()), (128, -16))

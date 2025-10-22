@@ -21,15 +21,15 @@ class TalkingAfterHurt(State):
             return Playing
 
         if self.one_shot(0.5, "knock1"):
-            AudioHelper.play(ForestResources.sfx_hugo_knock, self.context.country)
+            AudioHelper.play(ForestResources.sfx_hugo_knock, self.context.audio_port)
 
         if self.one_shot(0, "speak"):
-            AudioHelper.play(ForestResources.sfx_hugo_knock, self.context.country)
+            AudioHelper.play(ForestResources.sfx_hugo_knock, self.context.audio_port)
 
             if self.context.forest_lives == 1:
-                AudioHelper.play(ForestResources.speak_lastlife, self.context.country)
+                AudioHelper.play(ForestResources.speak_lastlife, self.context.audio_port)
             else:
-                AudioHelper.play(ForestResources.speak_dieonce, self.context.country)
+                AudioHelper.play(ForestResources.speak_dieonce, self.context.audio_port)
 
         return None
 

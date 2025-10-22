@@ -14,7 +14,7 @@ class LostSpring(State):
             return NullState
 
         if self.one_shot(2.5, "HugoSkydUd"):
-            AudioHelper.play(CaveResources.hugo_skyd_ud, self.context.country)
+            AudioHelper.play(CaveResources.hugo_skyd_ud, self.context.audio_port)
 
         return None
 
@@ -23,4 +23,4 @@ class LostSpring(State):
 
     def on_enter(self) -> None:
         super().on_enter()
-        AudioHelper.play(CaveResources.hugo_katapult, self.context.country)
+        AudioHelper.play(CaveResources.hugo_katapult, self.context.audio_port)

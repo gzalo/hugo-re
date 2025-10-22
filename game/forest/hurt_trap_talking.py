@@ -16,7 +16,7 @@ class HurtTrapTalking(State):
 
     def on_enter(self) -> None:
         super().on_enter()
-        AudioHelper.play(ForestResources.speak_trap, self.context.country)
+        AudioHelper.play(ForestResources.speak_trap, self.context.audio_port)
 
     def render(self, screen):
         screen.blit(Animation.get_sync_frame(ForestResources.hugo_traptalk, ForestResources.sync_trap, self.get_frame_index()), (0,0))

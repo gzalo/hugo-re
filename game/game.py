@@ -87,7 +87,9 @@ class Game:
         TvShowResources.init()
         Splat.init()
 
-        self.tv_shows = [TvShowParent(GameData(country, 0, 0, 0, [], [], [], 0, 0)) for country in Config.COUNTRIES]
+        # Map countries to audio ports
+        country_to_port = {"ar": 9001, "cl": 9002, "dn": 9003, "fr": 9004}
+        self.tv_shows = [TvShowParent(GameData(country, country_to_port.get(country, 9001), 0, 0, 0, [], [], [], 0, 0)) for country in Config.COUNTRIES]
         self.pos_by_country = {tv_show.country: self.positions[idx] for idx, tv_show in enumerate(self.tv_shows)}
 
         clock = pygame.time.Clock()

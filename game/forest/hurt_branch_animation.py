@@ -22,7 +22,7 @@ class HurtBranchAnimation(State):
 
     def on_enter(self) -> None:
         super().on_enter()
-        AudioHelper.play(ForestResources.sfx_birds, self.context.country)
+        AudioHelper.play(ForestResources.sfx_birds, self.context.audio_port)
 
     def render(self, screen):
         screen.blit(Animation.get_frame(ForestResources.hugohitlog, self.get_frame_index_fast()), (0,0))

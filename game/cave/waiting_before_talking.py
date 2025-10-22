@@ -18,9 +18,9 @@ class WaitingBeforeTalking(State):
 
     def on_enter(self) -> None:
         super().on_enter()
-        AudioHelper.play(CaveResources.her_er_vi, self.context.country)
+        AudioHelper.play(CaveResources.her_er_vi, self.context.audio_port)
 
         if Config.ARGENTINE_VERSION:
-            AudioHelper.play(CaveResources.bg_music, self.context.country)
+            AudioHelper.play(CaveResources.bg_music, self.context.audio_port)
         else:
-            AudioHelper.play(CaveResources.stemning, self.context.country)
+            AudioHelper.play(CaveResources.stemning, self.context.audio_port)

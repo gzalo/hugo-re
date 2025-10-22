@@ -71,42 +71,42 @@ class Playing(State):
 
             if self.context.forest_obstacles[integer] != 0 and not Config.GOD_MODE:
                 if self.context.forest_obstacles[integer] == 1 and not self.arrow_up_focus:  # Catapult
-                    AudioHelper.play(ForestResources.sfx_hugo_launch, self.context.country)
-                    AudioHelper.play(ForestResources.sfx_catapult_eject, self.context.country)
+                    AudioHelper.play(ForestResources.sfx_hugo_launch, self.context.audio_port)
+                    AudioHelper.play(ForestResources.sfx_catapult_eject, self.context.audio_port)
                     self.context.forest_obstacles[integer] = 0
                     return HurtFlyingStart
                 elif self.context.forest_obstacles[integer] == 2 and not self.arrow_up_focus:  # Trap
-                    AudioHelper.play(ForestResources.sfx_hugo_hittrap, self.context.country)
+                    AudioHelper.play(ForestResources.sfx_hugo_hittrap, self.context.audio_port)
                     self.context.forest_obstacles[integer] = 0
                     return HurtTrapAnimation
                 elif self.context.forest_obstacles[integer] == 3 and not self.arrow_up_focus:  # Rock
-                    AudioHelper.play(ForestResources.sfx_hugo_hitlog, self.context.country)
+                    AudioHelper.play(ForestResources.sfx_hugo_hitlog, self.context.audio_port)
                     self.context.forest_obstacles[integer] = 0
                     return HurtRockAnimation
                 elif self.context.forest_obstacles[integer] == 4:  # Tree
                     if self.arrow_down_focus:
-                        AudioHelper.play(ForestResources.sfx_tree_swush, self.context.country)
+                        AudioHelper.play(ForestResources.sfx_tree_swush, self.context.audio_port)
                     else:
-                        AudioHelper.play(ForestResources.sfx_hugo_hitlog, self.context.country)
+                        AudioHelper.play(ForestResources.sfx_hugo_hitlog, self.context.audio_port)
                         self.context.forest_obstacles[integer] = 0
                         return HurtBranchAnimation
 
             if self.arrow_up_focus and self.context.forest_sacks[integer] != 0:
                 if self.context.forest_sacks[integer] == 1:
                     self.context.forest_score += 100
-                    AudioHelper.play(ForestResources.sfx_sack_normal, self.context.country)
+                    AudioHelper.play(ForestResources.sfx_sack_normal, self.context.audio_port)
                     self.context.forest_sacks[integer] = 0
                     global_state.attacks.append((self.context.country, EffectType.SPLAT, global_state.frame_time))
                 elif self.context.forest_sacks[integer] == 2:
                     self.context.forest_score += 250
-                    AudioHelper.play(ForestResources.sfx_sack_bonus, self.context.country)
+                    AudioHelper.play(ForestResources.sfx_sack_bonus, self.context.audio_port)
                     self.context.forest_sacks[integer] = 0
                     global_state.attacks.append((self.context.country, EffectType.INVERT, global_state.frame_time))
 
         if self.get_frame_index() % 8 == 0 and not self.arrow_up_focus:
             walk_sfx = [ForestResources.sfx_hugo_walk0, ForestResources.sfx_hugo_walk1, ForestResources.sfx_hugo_walk2,
                         ForestResources.sfx_hugo_walk3, ForestResources.sfx_hugo_walk4]
-            AudioHelper.play(walk_sfx[random.randint(0, 4)], self.context.country)
+            AudioHelper.play(walk_sfx[random.randint(0, 4)], self.context.audio_port)
 
         self.old_second = math.floor(self.context.forest_parallax_pos)
 

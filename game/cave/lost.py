@@ -23,10 +23,10 @@ class Lost(State):
             return LostSpring
 
         if self.one_shot(1, "PrePuf"):
-            AudioHelper.play(CaveResources.pre_puf, self.context.country)
+            AudioHelper.play(CaveResources.pre_puf, self.context.audio_port)
 
         if self.one_shot(2, "Puf"):
-            AudioHelper.play(CaveResources.puf, self.context.country)
+            AudioHelper.play(CaveResources.puf, self.context.audio_port)
 
         return None
 
