@@ -7,7 +7,7 @@ from tv_show.video_state import VideoState
 
 class HaveLuck(VideoState):
     def __init__(self, context: GameData):
-        super().__init__(context, TvShowResources.videos_have_luck[context.country])
+        super().__init__(context, TvShowResources.videos_have_luck[context.country], False, TvShowResources.audio_have_luck[context.country])
 
     def process_events(self, phone_events: PhoneEvents):
         super().process_events(phone_events)

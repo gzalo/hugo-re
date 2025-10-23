@@ -6,7 +6,7 @@ from tv_show.video_state import VideoState
 
 class Attract(VideoState):
     def __init__(self, context: GameData):
-        super().__init__(context, TvShowResources.videos_attract[context.country], True)
+        super().__init__(context, TvShowResources.videos_attract[context.country], True, TvShowResources.audio_attract[context.country])
 
     def process_events(self, phone_events: PhoneEvents):
         super().process_events(phone_events)
