@@ -37,9 +37,9 @@ class TvShowResources:
             TvShowResources.videos_ending[country] = Video(prefix + "you_lost.avi", no_audio=True)
             TvShowResources.videos_have_luck[country] = Video(prefix + "have_luck.avi", no_audio=True)
             
-            TvShowResources.audio_attract[country] = audio_prefix + "attract_demo.aac"
-            TvShowResources.audio_initial[country] = audio_prefix + "hello_hello.aac"
-            TvShowResources.audio_press_5[country] = audio_prefix + "press_5.aac"
-            TvShowResources.audio_going_scylla[country] = audio_prefix + "scylla_cave.aac"
-            TvShowResources.audio_ending[country] = audio_prefix + "you_lost.aac"
-            TvShowResources.audio_have_luck[country] = audio_prefix + "have_luck.aac"
+            TvShowResources.audio_attract[country] = audio_prefix + "attract_demo.wav"
+            TvShowResources.audio_initial[country] = audio_prefix + "hello_hello.wav"
+            TvShowResources.audio_press_5[country] = audio_prefix + "press_5.wav"
+            TvShowResources.audio_going_scylla[country] = audio_prefix + "scylla_cave.wav"
+            TvShowResources.audio_ending[country] = audio_prefix + "you_lost.wav"
+            TvShowResources.audio_have_luck[country] = audio_prefix + "have_luck.wav"
