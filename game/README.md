@@ -7,6 +7,42 @@ Requires Python 3 and `ffmpeg.exe` or similar, can be the ["essentials" version]
 
 ## Usage:
 - Install requirements using `pip install -r requirements.txt`
+- Download mp3 from here: https://www.youtube.com/watch?v=maJVRkefBhw and place in `RopeOutroData/SFX/a_party_for_me.mp3` inside the converted resource folder
+- Extract the audios from the videos using the following ffmpeg commands:
+```
+mkdir -p converted_resources/audio_for_videos/ar
+ffmpeg -i resources/videos/ar/attract_demo.avi -vn -acodec copy converted_resources/audio_for_videos/ar/attract_demo.aac
+ffmpeg -i resources/videos/ar/have_luck.avi -vn -acodec copy converted_resources/audio_for_videos/ar/have_luck.aac
+ffmpeg -i resources/videos/ar/hello_hello.avi -vn -acodec copy converted_resources/audio_for_videos/ar/hello_hello.aac
+ffmpeg -i resources/videos/ar/press_5.avi -vn -acodec copy converted_resources/audio_for_videos/ar/press_5.aac
+ffmpeg -i resources/videos/ar/scylla_cave.avi -vn -acodec copy converted_resources/audio_for_videos/ar/scylla_cave.aac
+ffmpeg -i resources/videos/ar/you_lost.avi -vn -acodec copy converted_resources/audio_for_videos/ar/you_lost.aac
+
+mkdir -p converted_resources/audio_for_videos/cl
+ffmpeg -i resources/videos/cl/attract_demo.avi -vn -acodec copy converted_resources/audio_for_videos/cl/attract_demo.aac
+ffmpeg -i resources/videos/cl/have_luck.avi -vn -acodec copy converted_resources/audio_for_videos/cl/have_luck.aac
+ffmpeg -i resources/videos/cl/hello_hello.avi -vn -acodec copy converted_resources/audio_for_videos/cl/hello_hello.aac
+ffmpeg -i resources/videos/cl/press_5.avi -vn -acodec copy converted_resources/audio_for_videos/cl/press_5.aac
+ffmpeg -i resources/videos/cl/scylla_cave.avi -vn -acodec copy converted_resources/audio_for_videos/cl/scylla_cave.aac
+ffmpeg -i resources/videos/cl/you_lost.avi -vn -acodec copy converted_resources/audio_for_videos/cl/you_lost.aac
+
+mkdir -p converted_resources/audio_for_videos/dn
+ffmpeg -i resources/videos/dn/attract_demo.avi -vn -acodec copy converted_resources/audio_for_videos/dn/attract_demo.aac
+ffmpeg -i resources/videos/dn/have_luck.avi -vn -acodec copy converted_resources/audio_for_videos/dn/have_luck.aac
+ffmpeg -i resources/videos/dn/hello_hello.avi -vn -acodec copy converted_resources/audio_for_videos/dn/hello_hello.aac
+ffmpeg -i resources/videos/dn/press_5.avi -vn -acodec copy converted_resources/audio_for_videos/dn/press_5.aac
+ffmpeg -i resources/videos/dn/scylla_cave.avi -vn -acodec copy converted_resources/audio_for_videos/dn/scylla_cave.aac
+ffmpeg -i resources/videos/dn/you_lost.avi -vn -acodec copy converted_resources/audio_for_videos/dn/you_lost.aac
+
+mkdir -p converted_resources/audio_for_videos/fr
+ffmpeg -i resources/videos/fr/attract_demo.avi -vn -acodec copy converted_resources/audio_for_videos/fr/attract_demo.aac
+ffmpeg -i resources/videos/fr/have_luck.avi -vn -acodec copy converted_resources/audio_for_videos/fr/have_luck.aac
+ffmpeg -i resources/videos/fr/hello_hello.avi -vn -acodec copy converted_resources/audio_for_videos/fr/hello_hello.aac
+ffmpeg -i resources/videos/fr/press_5.avi -vn -acodec copy converted_resources/audio_for_videos/fr/press_5.aac
+ffmpeg -i resources/videos/fr/scylla_cave.avi -vn -acodec copy converted_resources/audio_for_videos/fr/scylla_cave.aac
+ffmpeg -i resources/videos/fr/you_lost.avi -vn -acodec copy converted_resources/audio_for_videos/fr/you_lost.aac
+
+```
 - Execute `game.py <path to converted resource folder>`
 
 ## Key mapping:
