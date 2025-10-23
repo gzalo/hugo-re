@@ -8,7 +8,7 @@ from tv_show.video_state import VideoState
 
 class Press5(VideoState):
     def __init__(self, context: GameData):
-        super().__init__(context, TvShowResources.videos_press_5[context.country], True)
+        super().__init__(context, TvShowResources.videos_press_5[context.country], True, TvShowResources.audio_press_5[context.country])
 
     def process_events(self, phone_events: PhoneEvents):
         super().process_events(phone_events)
