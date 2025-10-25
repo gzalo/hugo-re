@@ -259,7 +259,7 @@ int main(int argc, char **argv)
     // Start the library (worker threads etc)
     ep.libStart();
     std::cout << "*** PJSUA2 STARTED ***" << std::endl;
-/*
+
 try {
     // Get the number of audio devices
     unsigned int devCount = ep.audDevManager().getDevCount();
@@ -301,9 +301,7 @@ try {
 
 } catch (pj::Error& err) {
     std::cerr << "Error enumerating audio devices: " << err.info() << std::endl;
-}*/
-
-    ep.audDevManager().setCaptureDev(-1);
+}
 
     // Configure an AccountConfig
     AccountConfig acfg;

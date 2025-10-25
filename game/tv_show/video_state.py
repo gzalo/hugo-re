@@ -16,7 +16,7 @@ class VideoState(State):
         super().on_enter()
         self.video.restart()
         if self.audio_resource:
-            self.audio_instance_id = AudioHelper.play(self.audio_resource, self.context.audio_port, loops=-1 if self.loop else 0)
+            self.audio_instance_id = AudioHelper.play(self.audio_resource, self.context.audio_port, loops=-1)
 
     def process_events(self, phone_events: PhoneEvents):
         if self.loop and not self.video.active:

@@ -129,17 +129,19 @@ class Game:
                         if event.key == Config.BTN_9[i]:
                             phone_events[i].press_9 = True
 
-            any_playing = False
             pre_render = time.time()
 
             global_state.frame_time = time.time()
+
+            global_state.any_playing = False
+            for tv_show in self.tv_shows:
+                if tv_show.is_playing():
+                    global_state.any_playing = True
 
             for tv_show in self.tv_shows:
                 index = self.tv_shows.index(tv_show)
                 tv_show.handle_events(phone_events[index])
                 tv_show.render(screens[index])
-                if tv_show.is_playing():
-                    any_playing = True
 
             post_render = time.time()
 
@@ -160,7 +162,7 @@ class Game:
             for i in range(4):
                 display.blit(screens[i], self.positions[i])
 
-            if not any_playing:
+            if not global_state.any_playing:
                 display.blit(logo, (0,0))
             else:
                 for i in range(4):
@@ -183,7 +185,7 @@ class Game:
                         if dt > Config.EFFECT_DURATION_ORB:
                             self.effective_attacks.remove(attack)
 
-            self.render_frame(ctx, display, program, render_object, any_playing)
+            self.render_frame(ctx, display, program, render_object, global_state.any_playing)
             post_shader = time.time()
 
             render_time = (post_render - pre_render) * 1000
