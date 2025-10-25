@@ -58,5 +58,7 @@ class CaveGame:
 
     def end(self):
         self._state.on_exit()
-        AudioHelper.stop(self.context.cave_score_counter_id, self.context.audio_port)
+        if self.sounding_score:
+            AudioHelper.stop(self.context.cave_score_counter_id, self.context.audio_port)
+            self.sounding_score = False
         self.ended = True
