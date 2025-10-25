@@ -55,6 +55,24 @@ void processDtmf(string digit, bool down){
     }
 }
 
+// Function to find device index by name
+int findDeviceByName(const std::string& deviceName, bool isInput, Endpoint& ep) {
+    unsigned int devCount = ep.audDevManager().getDevCount();
+    
+    for (unsigned int i = 0; i < devCount; ++i) {
+        pj::AudioDevInfo devInfo = ep.audDevManager().getDevInfo(i);
+        
+        // Check if device name matches and has the required input/output capability
+        if (devInfo.name == deviceName) {
+            if ((isInput && devInfo.inputCount > 0) || (!isInput && devInfo.outputCount > 0)) {
+                return i;
+            }
+        }
+    }
+    
+    return -1; // Device not found
+}
+
 class MyAudioMediaPort: public AudioMediaPort
 {
     virtual void onFrameRequested(MediaFrame &frame)
@@ -161,13 +179,14 @@ int main(int argc, char **argv)
 {
 
     if (argc != 4) {
-        std::cerr << "Usage: " << argv[0] << "<PhoneId> <CaptureDevice> <PlaybackDevice> (e.g 0 4 7)" << std::endl;
+        std::cerr << "Usage: " << argv[0] << " <PhoneId> <CaptureDeviceName> <PlaybackDeviceName>" << std::endl;
+        std::cerr << "Example: " << argv[0] << " 0 \"USB Audio Device\" \"Speakers\"" << std::endl;
         return -1;
     }
 
     phoneId = std::stoi(argv[1]);
-    int captureDev = std::stoi(argv[2]);
-    int playbackDev = std::stoi(argv[3]);
+    std::string captureDevName = argv[2];
+    std::string playbackDevName = argv[3];
 
     Endpoint ep;
 
@@ -295,12 +314,33 @@ try {
         }
     }
 
-    // Set capture and playback devices (as in your original code)
+    // Find devices by name
+    int captureDev = findDeviceByName(captureDevName, true, ep);
+    int playbackDev = findDeviceByName(playbackDevName, false, ep);
+
+    // Check if devices were found
+    if (captureDev == -1) {
+        std::cerr << "Error: Capture device '" << captureDevName << "' not found or has no input capability!" << std::endl;
+        std::cerr << "Available input devices are listed above." << std::endl;
+        return 1;
+    }
+
+    if (playbackDev == -1) {
+        std::cerr << "Error: Playback device '" << playbackDevName << "' not found or has no output capability!" << std::endl;
+        std::cerr << "Available output devices are listed above." << std::endl;
+        return 1;
+    }
+
+    std::cout << "Using capture device: " << captureDevName << " (index " << captureDev << ")" << std::endl;
+    std::cout << "Using playback device: " << playbackDevName << " (index " << playbackDev << ")" << std::endl;
+
+    // Set capture and playback devices
     ep.audDevManager().setCaptureDev(captureDev);
     ep.audDevManager().setPlaybackDev(playbackDev);
 
 } catch (pj::Error& err) {
     std::cerr << "Error enumerating audio devices: " << err.info() << std::endl;
+    return 1;
 }
 
     // Configure an AccountConfig
