@@ -63,6 +63,7 @@ typedef enum {
     STATE_CAVE_LOST_SPRING,
     STATE_CAVE_SCYLLA_LOST,
     STATE_CAVE_SCYLLA_SPRING,
+    STATE_CAVE_TALKING_BEFORE_CLIMB,
     STATE_CAVE_WAITING_BEFORE_TALKING,
     STATE_CAVE_WAITING_INPUT,
 
@@ -850,6 +851,167 @@ void render_game_over() {
     SDL_RenderPresent(renderer);
 }
 
+// Forest hurt state rendering functions
+void render_forest_branch_animation() {
+    SDL_SetRenderDrawColor(renderer, 100, 100, 200, 255);
+    SDL_RenderClear(renderer);
+    draw_text_box(70, 100, 180, 40, "Branch hit!");
+    SDL_RenderPresent(renderer);
+}
+
+void render_forest_branch_talking() {
+    SDL_SetRenderDrawColor(renderer, 120, 120, 220, 255);
+    SDL_RenderClear(renderer);
+    draw_text_box(60, 100, 200, 40, "Hugo: Ouch!");
+    SDL_RenderPresent(renderer);
+}
+
+void render_forest_flying_start() {
+    SDL_SetRenderDrawColor(renderer, 150, 150, 255, 255);
+    SDL_RenderClear(renderer);
+    draw_text_box(60, 100, 200, 40, "Hugo flies up!");
+    SDL_RenderPresent(renderer);
+}
+
+void render_forest_flying_talking() {
+    SDL_SetRenderDrawColor(renderer, 170, 170, 255, 255);
+    SDL_RenderClear(renderer);
+    draw_text_box(50, 100, 220, 40, "Hugo: Whoa!");
+    SDL_RenderPresent(renderer);
+}
+
+void render_forest_flying_falling() {
+    SDL_SetRenderDrawColor(renderer, 190, 150, 255, 255);
+    SDL_RenderClear(renderer);
+    draw_text_box(60, 100, 200, 40, "Hugo falling...");
+    SDL_RenderPresent(renderer);
+}
+
+void render_forest_flying_falling_hang_animation() {
+    SDL_SetRenderDrawColor(renderer, 200, 170, 255, 255);
+    SDL_RenderClear(renderer);
+    draw_text_box(50, 100, 220, 40, "Catching branch!");
+    SDL_RenderPresent(renderer);
+}
+
+void render_forest_flying_falling_hang_talking() {
+    SDL_SetRenderDrawColor(renderer, 220, 190, 255, 255);
+    SDL_RenderClear(renderer);
+    draw_text_box(50, 100, 220, 40, "Hugo: Got it!");
+    SDL_RenderPresent(renderer);
+}
+
+void render_forest_rock_animation() {
+    SDL_SetRenderDrawColor(renderer, 150, 100, 100, 255);
+    SDL_RenderClear(renderer);
+    draw_text_box(60, 100, 200, 40, "Rock incoming!");
+    SDL_RenderPresent(renderer);
+}
+
+void render_forest_rock_hit_animation() {
+    SDL_SetRenderDrawColor(renderer, 180, 100, 100, 255);
+    SDL_RenderClear(renderer);
+    draw_text_box(70, 100, 180, 40, "Rock hits!");
+    SDL_RenderPresent(renderer);
+}
+
+void render_forest_rock_talking() {
+    SDL_SetRenderDrawColor(renderer, 200, 120, 120, 255);
+    SDL_RenderClear(renderer);
+    draw_text_box(60, 100, 200, 40, "Hugo: Ow!");
+    SDL_RenderPresent(renderer);
+}
+
+void render_forest_trap_animation() {
+    SDL_SetRenderDrawColor(renderer, 120, 120, 80, 255);
+    SDL_RenderClear(renderer);
+    draw_text_box(60, 100, 200, 40, "Fell in trap!");
+    SDL_RenderPresent(renderer);
+}
+
+void render_forest_trap_talking() {
+    SDL_SetRenderDrawColor(renderer, 140, 140, 100, 255);
+    SDL_RenderClear(renderer);
+    draw_text_box(60, 100, 200, 40, "Hugo: Help!");
+    SDL_RenderPresent(renderer);
+}
+
+void render_forest_scylla_button() {
+    SDL_SetRenderDrawColor(renderer, 200, 0, 200, 255);
+    SDL_RenderClear(renderer);
+    
+    // Flashing Scylla button
+    if (get_frame_index() % 2 == 0) {
+        draw_text_box(60, 100, 200, 40, "SCYLLA!");
+    }
+    
+    SDL_RenderPresent(renderer);
+}
+
+void render_forest_talking_after_hurt() {
+    SDL_SetRenderDrawColor(renderer, 100, 150, 100, 255);
+    SDL_RenderClear(renderer);
+    
+    char lives_text[50];
+    if (game_ctx.lives == 1) {
+        snprintf(lives_text, sizeof(lives_text), "Last life!");
+    } else {
+        snprintf(lives_text, sizeof(lives_text), "%d lives left", game_ctx.lives);
+    }
+    
+    draw_text_box(60, 80, 200, 40, "Hugo hurt!");
+    draw_text_box(70, 130, 180, 30, lives_text);
+    
+    SDL_RenderPresent(renderer);
+}
+
+void render_forest_talking_game_over() {
+    SDL_SetRenderDrawColor(renderer, 200, 0, 0, 255);
+    SDL_RenderClear(renderer);
+    
+    draw_text_box(60, 80, 200, 40, "GAME OVER");
+    
+    char score_text[50];
+    snprintf(score_text, sizeof(score_text), "Score: %d", game_ctx.score);
+    draw_text_box(80, 130, 160, 30, score_text);
+    
+    SDL_RenderPresent(renderer);
+}
+
+void render_forest_win_talking() {
+    SDL_SetRenderDrawColor(renderer, 0, 200, 0, 255);
+    SDL_RenderClear(renderer);
+    
+    draw_text_box(60, 60, 200, 40, "Forest cleared!");
+    
+    char score_text[50];
+    snprintf(score_text, sizeof(score_text), "Score: %d", game_ctx.score);
+    draw_text_box(80, 110, 160, 30, score_text);
+    
+    draw_text_box(50, 160, 220, 30, "Cave bonus coming!");
+    
+    SDL_RenderPresent(renderer);
+}
+
+// Cave game rendering functions
+void render_cave_waiting_before_talking() {
+    SDL_SetRenderDrawColor(renderer, 40, 40, 90, 255);
+    SDL_RenderClear(renderer);
+    
+    draw_text_box(60, 100, 200, 40, "Entering cave...");
+    
+    SDL_RenderPresent(renderer);
+}
+
+void render_cave_talking_before_climb() {
+    SDL_SetRenderDrawColor(renderer, 50, 50, 100, 255);
+    SDL_RenderClear(renderer);
+    
+    draw_text_box(50, 100, 220, 40, "Hugo: Let's go!");
+    
+    SDL_RenderPresent(renderer);
+}
+
 // Cave game rendering functions
 void render_cave_intro() {
     SDL_SetRenderDrawColor(renderer, 50, 50, 100, 255);
@@ -934,7 +1096,8 @@ void render_cave_lost_spring() {
     SDL_RenderPresent(renderer);
 }
 
-void render_cave_win() {
+void render_cave_scylla_lost() {
+    // Scylla loses (Hugo wins)
     SDL_SetRenderDrawColor(renderer, 50, 150, 50, 255);
     SDL_RenderClear(renderer);
     
@@ -947,7 +1110,7 @@ void render_cave_win() {
     SDL_RenderPresent(renderer);
 }
 
-void render_cave_win_spring() {
+void render_cave_scylla_spring() {
     SDL_SetRenderDrawColor(renderer, 80, 180, 80, 255);
     SDL_RenderClear(renderer);
     
@@ -956,7 +1119,16 @@ void render_cave_win_spring() {
     SDL_RenderPresent(renderer);
 }
 
-void render_cave_happy() {
+void render_cave_family_cage_opens() {
+    SDL_SetRenderDrawColor(renderer, 100, 200, 100, 255);
+    SDL_RenderClear(renderer);
+    
+    draw_text_box(60, 100, 200, 40, "Cage opening!");
+    
+    SDL_RenderPresent(renderer);
+}
+
+void render_cave_family_happy() {
     SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);
     SDL_RenderClear(renderer);
     
@@ -970,11 +1142,24 @@ void render_cave_happy() {
     SDL_RenderPresent(renderer);
 }
 
+// Legacy cave rendering functions (for compatibility)
+void render_cave_win() {
+    render_cave_scylla_lost();
+}
+
+void render_cave_win_spring() {
+    render_cave_scylla_spring();
+}
+
+void render_cave_happy() {
+    render_cave_family_happy();
+}
+
 // Process instructions state
 bool process_instructions(SDL_Event* event) {
     if (event && event->type == SDL_KEYDOWN) {
         if (event->key.keysym.sym == SDLK_5) {
-            change_state(STATE_WAIT_INTRO);
+            change_state(STATE_FOREST_WAIT_INTRO);
             return true;
         }
     }
@@ -984,7 +1169,7 @@ bool process_instructions(SDL_Event* event) {
 // Process wait intro state
 void process_wait_intro() {
     if (get_state_time() > 2.0) {
-        change_state(STATE_PLAYING);
+        change_state(STATE_FOREST_PLAYING);
     }
 }
 
@@ -1024,7 +1209,7 @@ void process_playing(SDL_Event* event) {
     
     // Check if reached end
     if (game_ctx.parallax_pos >= FOREST_MAX_TIME) {
-        change_state(STATE_WIN);
+        change_state(STATE_FOREST_WIN_TALKING);
         return;
     }
     
@@ -1041,14 +1226,28 @@ void process_playing(SDL_Event* event) {
     
     // Check for new obstacles
     if (game_ctx.old_second != (int)floor(game_ctx.parallax_pos)) {
-        // Check collision
-        if (check_collision(current_pos)) {
-            game_ctx.lives--;
-            game_ctx.obstacles[current_pos] = OBS_NONE;
-            printf("Hit obstacle! Lives remaining: %d\n", game_ctx.lives);
-            
-            if (game_ctx.lives <= 0) {
-                change_state(STATE_GAME_OVER);
+        // Check collision with obstacles and transition to hurt states
+        ObstacleType obs = game_ctx.obstacles[current_pos];
+        if (obs != OBS_NONE) {
+            if (obs == OBS_CATAPULT && !game_ctx.arrow_up_focus) {
+                // Catapult hit - go flying
+                game_ctx.obstacles[current_pos] = OBS_NONE;
+                change_state(STATE_FOREST_FLYING_START);
+                return;
+            } else if (obs == OBS_TRAP && !game_ctx.arrow_up_focus) {
+                // Trap hit
+                game_ctx.obstacles[current_pos] = OBS_NONE;
+                change_state(STATE_FOREST_TRAP_ANIMATION);
+                return;
+            } else if (obs == OBS_ROCK && !game_ctx.arrow_up_focus) {
+                // Rock hit
+                game_ctx.obstacles[current_pos] = OBS_NONE;
+                change_state(STATE_FOREST_ROCK_ANIMATION);
+                return;
+            } else if (obs == OBS_TREE && !game_ctx.arrow_down_focus) {
+                // Branch hit (need to duck to avoid)
+                game_ctx.obstacles[current_pos] = OBS_NONE;
+                change_state(STATE_FOREST_BRANCH_ANIMATION);
                 return;
             }
         }
@@ -1083,11 +1282,139 @@ void process_playing(SDL_Event* event) {
     }
 }
 
-// Process win state
+// Helper function to reduce lives and transition appropriately
+void reduce_lives_and_transition() {
+    game_ctx.lives--;
+    printf("Hit obstacle! Lives remaining: %d\n", game_ctx.lives);
+    
+    if (game_ctx.lives <= 0) {
+        change_state(STATE_FOREST_TALKING_GAME_OVER);
+    } else {
+        change_state(STATE_FOREST_TALKING_AFTER_HURT);
+    }
+}
+
+// Forest hurt state processing functions
+
+void process_forest_branch_animation() {
+    // Branch hit animation - placeholder timing, ideally based on animation frames
+    if (get_state_time() > 1.0) {
+        change_state(STATE_FOREST_BRANCH_TALKING);
+    }
+}
+
+void process_forest_branch_talking() {
+    // Branch talking - placeholder timing
+    if (get_state_time() > 2.0) {
+        reduce_lives_and_transition();
+    }
+}
+
+void process_forest_flying_start() {
+    // Hugo flying up from catapult
+    if (get_state_time() > 3.0) {
+        change_state(STATE_FOREST_FLYING_TALKING);
+    }
+}
+
+void process_forest_flying_talking() {
+    // Hugo talking while at top of flight
+    if (get_state_time() > 1.5) {
+        change_state(STATE_FOREST_FLYING_FALLING);
+    }
+}
+
+void process_forest_flying_falling() {
+    // Hugo falling down
+    if (get_state_time() > 1.0) {
+        change_state(STATE_FOREST_FLYING_FALLING_HANG_ANIMATION);
+    }
+}
+
+void process_forest_flying_falling_hang_animation() {
+    // Hugo catching branch animation
+    if (get_state_time() > 1.5) {
+        change_state(STATE_FOREST_FLYING_FALLING_HANG_TALKING);
+    }
+}
+
+void process_forest_flying_falling_hang_talking() {
+    // Hugo talking while hanging
+    if (get_state_time() > 2.0) {
+        reduce_lives_and_transition();
+    }
+}
+
+void process_forest_rock_animation() {
+    // Hugo looking at rock
+    if (get_state_time() > 0.5) {
+        change_state(STATE_FOREST_ROCK_HIT_ANIMATION);
+    }
+}
+
+void process_forest_rock_hit_animation() {
+    // Rock hits Hugo
+    if (get_state_time() > 1.0) {
+        change_state(STATE_FOREST_ROCK_TALKING);
+    }
+}
+
+void process_forest_rock_talking() {
+    // Hugo talks after rock hit
+    if (get_state_time() > 2.0) {
+        reduce_lives_and_transition();
+    }
+}
+
+void process_forest_trap_animation() {
+    // Hugo falling into trap
+    if (get_state_time() > 1.5) {
+        change_state(STATE_FOREST_TRAP_TALKING);
+    }
+}
+
+void process_forest_trap_talking() {
+    // Hugo talking after trap
+    if (get_state_time() > 2.0) {
+        reduce_lives_and_transition();
+    }
+}
+
+void process_forest_scylla_button() {
+    // Scylla button flashing (not normally triggered in single player)
+    if (get_state_time() > 2.0) {
+        change_state(STATE_FOREST_PLAYING);
+    }
+}
+
+void process_forest_talking_after_hurt() {
+    // Hugo talks after getting hurt (still has lives)
+    double duration = (game_ctx.lives == 1) ? 3.0 : 2.5;
+    if (get_state_time() > duration) {
+        change_state(STATE_FOREST_PLAYING);
+    }
+}
+
+void process_forest_talking_game_over() {
+    // Hugo talks about game over
+    if (get_state_time() > 4.0) {
+        change_state(STATE_END);
+    }
+}
+
+void process_forest_win_talking() {
+    // Hugo talks after winning forest
+    if (get_state_time() > 3.0) {
+        // Transition to cave bonus game
+        change_state(STATE_CAVE_WAITING_BEFORE_TALKING);
+    }
+}
+
+// Process win state (legacy - redirects to win_talking)
 void process_win() {
     if (get_state_time() > 3.0) {
         // Transition to cave bonus game
-        change_state(STATE_CAVE_INTRO);
+        change_state(STATE_CAVE_WAITING_BEFORE_TALKING);
     }
 }
 
@@ -1099,6 +1426,19 @@ void process_game_over() {
 }
 
 // Cave game processing functions
+void process_cave_waiting_before_talking() {
+    if (get_state_time() > 2.5) {
+        change_state(STATE_CAVE_TALKING_BEFORE_CLIMB);
+    }
+}
+
+void process_cave_talking_before_climb() {
+    // Hugo talks before climbing (~4 seconds based on sync timing)
+    if (get_state_time() > 4.0) {
+        change_state(STATE_CAVE_CLIMBING);
+    }
+}
+
 void process_cave_intro() {
     if (get_state_time() > 2.5) {
         change_state(STATE_CAVE_CLIMBING);
@@ -1141,7 +1481,7 @@ void process_cave_going_rope() {
             // Lost
             change_state(STATE_CAVE_LOST);
         } else {
-            // Won - different multipliers
+            // Won - different multipliers (Scylla loses, Hugo wins)
             if (random_value == 1) {
                 game_ctx.cave_win_type = 0; // Bird
                 game_ctx.score *= 2;
@@ -1152,13 +1492,15 @@ void process_cave_going_rope() {
                 game_ctx.cave_win_type = 2; // Ropes
                 game_ctx.score *= 4;
             }
-            change_state(STATE_CAVE_WIN);
+            change_state(STATE_CAVE_SCYLLA_LOST);
         }
     }
 }
 
 void process_cave_lost() {
-    if (get_state_time() > 4.5) {
+    // Hugo animation based on selected rope
+    double durations[] = {4.5, 4.5, 4.5};
+    if (get_state_time() > durations[game_ctx.cave_selected_rope]) {
         change_state(STATE_CAVE_LOST_SPRING);
     }
 }
@@ -1169,26 +1511,35 @@ void process_cave_lost_spring() {
     }
 }
 
-void process_cave_win() {
+void process_cave_scylla_lost() {
+    // Scylla loses animation (Hugo wins)
     double durations[] = {6.3, 5.6, 4.3}; // bird, leaves, ropes
     
     if (get_state_time() > durations[game_ctx.cave_win_type]) {
         if (game_ctx.cave_win_type == 2) {
             // Only ropes path goes through spring
-            change_state(STATE_CAVE_WIN_SPRING);
+            change_state(STATE_CAVE_SCYLLA_SPRING);
         } else {
-            change_state(STATE_CAVE_HAPPY);
+            change_state(STATE_CAVE_FAMILY_CAGE_OPENS);
         }
     }
 }
 
-void process_cave_win_spring() {
+void process_cave_scylla_spring() {
+    // Scylla spring animation
     if (get_state_time() > 3.5) {
-        change_state(STATE_CAVE_HAPPY);
+        change_state(STATE_CAVE_FAMILY_CAGE_OPENS);
     }
 }
 
-void process_cave_happy() {
+void process_cave_family_cage_opens() {
+    // Family cage opens
+    if (get_state_time() > 3.0) {
+        change_state(STATE_CAVE_FAMILY_HAPPY);
+    }
+}
+
+void process_cave_family_happy() {
     if (get_state_time() > 5.0) {
         change_state(STATE_END);
     }
@@ -1215,7 +1566,7 @@ void game_loop() {
                     quit = true;
                 } else if (state_info.current_state == STATE_INSTRUCTIONS) {
                     event_processed = process_instructions(&event);
-                } else if (state_info.current_state == STATE_PLAYING) {
+                } else if (state_info.current_state == STATE_FOREST_PLAYING) {
                     process_playing(&event);
                     event_processed = true;
                 } else if (state_info.current_state == STATE_CAVE_WAITING_INPUT) {
@@ -1231,27 +1582,91 @@ void game_loop() {
                     render_instructions();
                 }
                 break;
-            case STATE_WAIT_INTRO:
+                
+            // Forest states
+            case STATE_FOREST_WAIT_INTRO:
                 process_wait_intro();
                 render_wait_intro();
                 break;
-            case STATE_PLAYING:
+            case STATE_FOREST_PLAYING:
                 if (!event_processed) {
                     process_playing(NULL);
                 }
                 render_playing();
                 break;
-            case STATE_WIN:
-                process_win();
-                render_win();
+            case STATE_FOREST_BRANCH_ANIMATION:
+                process_forest_branch_animation();
+                render_forest_branch_animation();
                 break;
-            case STATE_GAME_OVER:
-                process_game_over();
-                render_game_over();
+            case STATE_FOREST_BRANCH_TALKING:
+                process_forest_branch_talking();
+                render_forest_branch_talking();
                 break;
-            case STATE_CAVE_INTRO:
-                process_cave_intro();
-                render_cave_intro();
+            case STATE_FOREST_FLYING_START:
+                process_forest_flying_start();
+                render_forest_flying_start();
+                break;
+            case STATE_FOREST_FLYING_TALKING:
+                process_forest_flying_talking();
+                render_forest_flying_talking();
+                break;
+            case STATE_FOREST_FLYING_FALLING:
+                process_forest_flying_falling();
+                render_forest_flying_falling();
+                break;
+            case STATE_FOREST_FLYING_FALLING_HANG_ANIMATION:
+                process_forest_flying_falling_hang_animation();
+                render_forest_flying_falling_hang_animation();
+                break;
+            case STATE_FOREST_FLYING_FALLING_HANG_TALKING:
+                process_forest_flying_falling_hang_talking();
+                render_forest_flying_falling_hang_talking();
+                break;
+            case STATE_FOREST_ROCK_ANIMATION:
+                process_forest_rock_animation();
+                render_forest_rock_animation();
+                break;
+            case STATE_FOREST_ROCK_HIT_ANIMATION:
+                process_forest_rock_hit_animation();
+                render_forest_rock_hit_animation();
+                break;
+            case STATE_FOREST_ROCK_TALKING:
+                process_forest_rock_talking();
+                render_forest_rock_talking();
+                break;
+            case STATE_FOREST_TRAP_ANIMATION:
+                process_forest_trap_animation();
+                render_forest_trap_animation();
+                break;
+            case STATE_FOREST_TRAP_TALKING:
+                process_forest_trap_talking();
+                render_forest_trap_talking();
+                break;
+            case STATE_FOREST_SCYLLA_BUTTON:
+                process_forest_scylla_button();
+                render_forest_scylla_button();
+                break;
+            case STATE_FOREST_TALKING_AFTER_HURT:
+                process_forest_talking_after_hurt();
+                render_forest_talking_after_hurt();
+                break;
+            case STATE_FOREST_TALKING_GAME_OVER:
+                process_forest_talking_game_over();
+                render_forest_talking_game_over();
+                break;
+            case STATE_FOREST_WIN_TALKING:
+                process_forest_win_talking();
+                render_forest_win_talking();
+                break;
+                
+            // Cave states
+            case STATE_CAVE_WAITING_BEFORE_TALKING:
+                process_cave_waiting_before_talking();
+                render_cave_waiting_before_talking();
+                break;
+            case STATE_CAVE_TALKING_BEFORE_CLIMB:
+                process_cave_talking_before_climb();
+                render_cave_talking_before_climb();
                 break;
             case STATE_CAVE_CLIMBING:
                 process_cave_climbing();
@@ -1274,18 +1689,23 @@ void game_loop() {
                 process_cave_lost_spring();
                 render_cave_lost_spring();
                 break;
-            case STATE_CAVE_WIN:
-                process_cave_win();
-                render_cave_win();
+            case STATE_CAVE_SCYLLA_LOST:
+                process_cave_scylla_lost();
+                render_cave_scylla_lost();
                 break;
-            case STATE_CAVE_WIN_SPRING:
-                process_cave_win_spring();
-                render_cave_win_spring();
+            case STATE_CAVE_SCYLLA_SPRING:
+                process_cave_scylla_spring();
+                render_cave_scylla_spring();
                 break;
-            case STATE_CAVE_HAPPY:
-                process_cave_happy();
-                render_cave_happy();
+            case STATE_CAVE_FAMILY_CAGE_OPENS:
+                process_cave_family_cage_opens();
+                render_cave_family_cage_opens();
                 break;
+            case STATE_CAVE_FAMILY_HAPPY:
+                process_cave_family_happy();
+                render_cave_family_happy();
+                break;
+                
             case STATE_END:
                 quit = true;
                 break;
