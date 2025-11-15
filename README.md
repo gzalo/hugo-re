@@ -8,6 +8,7 @@ Relive the Hugo TV gaming experience from the 90s!
 Multiplayer reimplementation of Hugo minigames using the original resources.
 
 - [Game code (uses pygame, should be cross-platform)](game/)
+- [Lite version (single-player C/SDL2 implementation)](game-lite/)
 - [Game asset converter](converter/)
 
 If you want to play with actual phones (or IP phones):

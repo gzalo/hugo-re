@@ -23,3 +23,9 @@ ENV/
 # OS
 .DS_Store
 Thumbs.db
+
+# C/C++ build artifacts
+*.o
+*.a
+*.exe
+game-lite/hugo_lite
