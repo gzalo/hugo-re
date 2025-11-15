@@ -1,7 +1,7 @@
 # Makefile for Hugo Lite
 
 CC = gcc
-CFLAGS = -Wall -Wextra -O2 -std=c11
+CFLAGS = -Wall -Wextra -O2 -std=c11 -Wno-unused-parameter
 LIBS = -lSDL2 -lSDL2_image -lSDL2_mixer -lm
 
 # Detect SDL2 using pkg-config
