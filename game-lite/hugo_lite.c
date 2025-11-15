@@ -151,6 +151,65 @@ typedef struct {
     SDL_Texture* scoreboard;
     SDL_Texture* score_numbers;    // score digits spritesheet
     SDL_Texture* hugo_lives;       // life indicator
+    
+    // Forest hurt animations
+    SDL_Texture** hugohitlog;          // branch hit animation (0-42)
+    int hugohitlog_count;
+    SDL_Texture** hugohitlog_talk;     // branch talking (0-17)
+    int hugohitlog_talk_count;
+    SDL_Texture** catapult_fly;        // flying up (0-113)
+    int catapult_fly_count;
+    SDL_Texture** catapult_fall;       // falling down (0-74)
+    int catapult_fall_count;
+    SDL_Texture** catapult_airtalk;    // talking in air (0-15)
+    int catapult_airtalk_count;
+    SDL_Texture** catapult_hang;       // hanging (0-12)
+    int catapult_hang_count;
+    SDL_Texture** catapult_hangspeak;  // hanging mouth (0-11)
+    int catapult_hangspeak_count;
+    SDL_Texture** hugo_lookrock;       // looking at rock (0-14)
+    int hugo_lookrock_count;
+    SDL_Texture** hit_rock;            // hit by rock (0-60)
+    int hit_rock_count;
+    SDL_Texture** hit_rock_sync;       // rock talking (0-17)
+    int hit_rock_sync_count;
+    SDL_Texture** hugo_traphurt;       // trap hurt (0-9)
+    int hugo_traphurt_count;
+    SDL_Texture** hugo_traptalk;       // trap talking (0-15)
+    int hugo_traptalk_count;
+    
+    // Cave animations
+    SDL_Texture** cave_talks;          // cave intro talking (0-12)
+    int cave_talks_count;
+    SDL_Texture** cave_climbs;         // climbing (0-40)
+    int cave_climbs_count;
+    SDL_Texture** cave_first_rope;     // first rope descent (0-32)
+    int cave_first_rope_count;
+    SDL_Texture** cave_second_rope;    // second rope descent (0-39)
+    int cave_second_rope_count;
+    SDL_Texture** cave_third_rope;     // third rope descent (0-48)
+    int cave_third_rope_count;
+    SDL_Texture** cave_scylla_bird;    // scylla bird (0-62)
+    int cave_scylla_bird_count;
+    SDL_Texture** cave_scylla_leaves;  // scylla leaves (0-55)
+    int cave_scylla_leaves_count;
+    SDL_Texture** cave_scylla_ropes;   // scylla ropes (0-42)
+    int cave_scylla_ropes_count;
+    SDL_Texture** cave_scylla_spring;  // scylla spring (0-34)
+    int cave_scylla_spring_count;
+    SDL_Texture** cave_hugo_puff_first;  // hugo puff first rope (0-44)
+    int cave_hugo_puff_first_count;
+    SDL_Texture** cave_hugo_puff_second; // hugo puff second rope (0-44)
+    int cave_hugo_puff_second_count;
+    SDL_Texture** cave_hugo_puff_third;  // hugo puff third rope (0-44)
+    int cave_hugo_puff_third_count;
+    SDL_Texture** cave_hugo_spring;    // hugo spring (0-38)
+    int cave_hugo_spring_count;
+    SDL_Texture** cave_family_cage;    // family cage opens (0-33)
+    int cave_family_cage_count;
+    SDL_Texture** cave_happy;          // happy ending (0-111)
+    int cave_happy_count;
+    SDL_Texture* cave_hugo_sprite;     // hugo standing sprite
 } GameTextures;
 
 // Global game variables
@@ -202,6 +261,29 @@ int load_animation_frames(SDL_Texture** textures, const char* data_dir, const ch
         }
     }
     return loaded;
+}
+
+// Load animation sequence (allocates array)
+SDL_Texture** load_animation_sequence(const char* data_dir, const char* rel_path, int start, int end, int* out_count) {
+    int count = end - start + 1;
+    SDL_Texture** textures_arr = (SDL_Texture**)malloc(count * sizeof(SDL_Texture*));
+    if (!textures_arr) {
+        *out_count = 0;
+        return NULL;
+    }
+    
+    int loaded = 0;
+    for (int i = start; i <= end; i++) {
+        char path[512];
+        snprintf(path, sizeof(path), "%s%s_%d.png", data_dir, rel_path, i);
+        textures_arr[i - start] = load_texture(path);
+        if (textures_arr[i - start]) {
+            loaded++;
+        }
+    }
+    
+    *out_count = count;
+    return textures_arr;
 }
 
 void init_textures(const char *data_dir) {
@@ -292,6 +374,41 @@ void init_textures(const char *data_dir) {
     textures.hugo_lives = load_texture(path);
     if (textures.hugo_lives) loaded_count++;
     
+    // Load forest hurt animation sequences
+    textures.hugohitlog = load_animation_sequence(data_dir, "/ForestData/gfx/BRANCH-GROGGY.til", 0, 42, &textures.hugohitlog_count);
+    textures.hugohitlog_talk = load_animation_sequence(data_dir, "/ForestData/gfx/BRANCH-SPEAK.til", 0, 17, &textures.hugohitlog_talk_count);
+    textures.catapult_fly = load_animation_sequence(data_dir, "/ForestData/gfx/HGKATFLY.til", 0, 113, &textures.catapult_fly_count);
+    textures.catapult_fall = load_animation_sequence(data_dir, "/ForestData/gfx/HGKATFLY.til", 115, 189, &textures.catapult_fall_count);
+    textures.catapult_airtalk = load_animation_sequence(data_dir, "/ForestData/gfx/CATAPULT-SPEAK.til", 0, 15, &textures.catapult_airtalk_count);
+    textures.catapult_hang = load_animation_sequence(data_dir, "/ForestData/gfx/HGKATHNG.TIL", 0, 12, &textures.catapult_hang_count);
+    textures.catapult_hangspeak = load_animation_sequence(data_dir, "/ForestData/gfx/hanging_mouth.cgf", 0, 11, &textures.catapult_hangspeak_count);
+    textures.hugo_lookrock = load_animation_sequence(data_dir, "/ForestData/gfx/hugo-rock.til", 0, 14, &textures.hugo_lookrock_count);
+    textures.hit_rock = load_animation_sequence(data_dir, "/ForestData/gfx/HGROCK.TIL", 0, 60, &textures.hit_rock_count);
+    textures.hit_rock_sync = load_animation_sequence(data_dir, "/ForestData/gfx/MSYNCRCK.TIL", 0, 17, &textures.hit_rock_sync_count);
+    textures.hugo_traphurt = load_animation_sequence(data_dir, "/ForestData/gfx/TRAP-HURTS.til", 0, 9, &textures.hugo_traphurt_count);
+    textures.hugo_traptalk = load_animation_sequence(data_dir, "/ForestData/gfx/traptalk.til", 0, 15, &textures.hugo_traptalk_count);
+    
+    // Load cave animation sequences
+    textures.cave_talks = load_animation_sequence(data_dir, "/RopeOutroData/gfx/STAIRS.TIL", 0, 12, &textures.cave_talks_count);
+    textures.cave_climbs = load_animation_sequence(data_dir, "/RopeOutroData/gfx/STAIRS.TIL", 11, 51, &textures.cave_climbs_count);
+    textures.cave_first_rope = load_animation_sequence(data_dir, "/RopeOutroData/gfx/CASELIVE.TIL", 0, 32, &textures.cave_first_rope_count);
+    textures.cave_second_rope = load_animation_sequence(data_dir, "/RopeOutroData/gfx/CASELIVE.TIL", 33, 72, &textures.cave_second_rope_count);
+    textures.cave_third_rope = load_animation_sequence(data_dir, "/RopeOutroData/gfx/CASELIVE.TIL", 73, 121, &textures.cave_third_rope_count);
+    textures.cave_scylla_leaves = load_animation_sequence(data_dir, "/RopeOutroData/gfx/CASELIVE.TIL", 122, 177, &textures.cave_scylla_leaves_count);
+    textures.cave_scylla_bird = load_animation_sequence(data_dir, "/RopeOutroData/gfx/CASELIVE.TIL", 178, 240, &textures.cave_scylla_bird_count);
+    textures.cave_scylla_ropes = load_animation_sequence(data_dir, "/RopeOutroData/gfx/CASELIVE.TIL", 241, 283, &textures.cave_scylla_ropes_count);
+    textures.cave_scylla_spring = load_animation_sequence(data_dir, "/RopeOutroData/gfx/CASELIVE.TIL", 284, 318, &textures.cave_scylla_spring_count);
+    textures.cave_family_cage = load_animation_sequence(data_dir, "/RopeOutroData/gfx/CASELIVE.TIL", 319, 352, &textures.cave_family_cage_count);
+    textures.cave_hugo_puff_first = load_animation_sequence(data_dir, "/RopeOutroData/gfx/CASEDIE.TIL", 122, 166, &textures.cave_hugo_puff_first_count);
+    textures.cave_hugo_puff_second = load_animation_sequence(data_dir, "/RopeOutroData/gfx/CASEDIE.TIL", 167, 211, &textures.cave_hugo_puff_second_count);
+    textures.cave_hugo_puff_third = load_animation_sequence(data_dir, "/RopeOutroData/gfx/CASEDIE.TIL", 212, 256, &textures.cave_hugo_puff_third_count);
+    textures.cave_hugo_spring = load_animation_sequence(data_dir, "/RopeOutroData/gfx/CASEDIE.TIL", 257, 295, &textures.cave_hugo_spring_count);
+    textures.cave_happy = load_animation_sequence(data_dir, "/RopeOutroData/gfx/HAPPY.TIL", 0, 111, &textures.cave_happy_count);
+    
+    // Load cave hugo sprite
+    snprintf(path, sizeof(path), "%s/RopeOutroData/gfx/hugo.cgf_0.png", data_dir);
+    textures.cave_hugo_sprite = load_texture(path);
+    
     printf("Loaded %d textures (data_dir: %s)\n", loaded_count, data_dir);
 }
 
@@ -335,6 +452,50 @@ void free_textures() {
     for (int i = 0; i < 16; i++) {
         if (textures.hugo_telllives[i]) SDL_DestroyTexture(textures.hugo_telllives[i]);
     }
+    
+    // Helper macro to free animation sequences
+    #define FREE_ANIM_SEQ(seq, count) \
+        if (seq) { \
+            for (int i = 0; i < count; i++) { \
+                if (seq[i]) SDL_DestroyTexture(seq[i]); \
+            } \
+            free(seq); \
+        }
+    
+    // Free forest hurt animations
+    FREE_ANIM_SEQ(textures.hugohitlog, textures.hugohitlog_count);
+    FREE_ANIM_SEQ(textures.hugohitlog_talk, textures.hugohitlog_talk_count);
+    FREE_ANIM_SEQ(textures.catapult_fly, textures.catapult_fly_count);
+    FREE_ANIM_SEQ(textures.catapult_fall, textures.catapult_fall_count);
+    FREE_ANIM_SEQ(textures.catapult_airtalk, textures.catapult_airtalk_count);
+    FREE_ANIM_SEQ(textures.catapult_hang, textures.catapult_hang_count);
+    FREE_ANIM_SEQ(textures.catapult_hangspeak, textures.catapult_hangspeak_count);
+    FREE_ANIM_SEQ(textures.hugo_lookrock, textures.hugo_lookrock_count);
+    FREE_ANIM_SEQ(textures.hit_rock, textures.hit_rock_count);
+    FREE_ANIM_SEQ(textures.hit_rock_sync, textures.hit_rock_sync_count);
+    FREE_ANIM_SEQ(textures.hugo_traphurt, textures.hugo_traphurt_count);
+    FREE_ANIM_SEQ(textures.hugo_traptalk, textures.hugo_traptalk_count);
+    
+    // Free cave animations
+    FREE_ANIM_SEQ(textures.cave_talks, textures.cave_talks_count);
+    FREE_ANIM_SEQ(textures.cave_climbs, textures.cave_climbs_count);
+    FREE_ANIM_SEQ(textures.cave_first_rope, textures.cave_first_rope_count);
+    FREE_ANIM_SEQ(textures.cave_second_rope, textures.cave_second_rope_count);
+    FREE_ANIM_SEQ(textures.cave_third_rope, textures.cave_third_rope_count);
+    FREE_ANIM_SEQ(textures.cave_scylla_bird, textures.cave_scylla_bird_count);
+    FREE_ANIM_SEQ(textures.cave_scylla_leaves, textures.cave_scylla_leaves_count);
+    FREE_ANIM_SEQ(textures.cave_scylla_ropes, textures.cave_scylla_ropes_count);
+    FREE_ANIM_SEQ(textures.cave_scylla_spring, textures.cave_scylla_spring_count);
+    FREE_ANIM_SEQ(textures.cave_hugo_puff_first, textures.cave_hugo_puff_first_count);
+    FREE_ANIM_SEQ(textures.cave_hugo_puff_second, textures.cave_hugo_puff_second_count);
+    FREE_ANIM_SEQ(textures.cave_hugo_puff_third, textures.cave_hugo_puff_third_count);
+    FREE_ANIM_SEQ(textures.cave_hugo_spring, textures.cave_hugo_spring_count);
+    FREE_ANIM_SEQ(textures.cave_family_cage, textures.cave_family_cage_count);
+    FREE_ANIM_SEQ(textures.cave_happy, textures.cave_happy_count);
+    
+    if (textures.cave_hugo_sprite) SDL_DestroyTexture(textures.cave_hugo_sprite);
+    
+    #undef FREE_ANIM_SEQ
 }
 
 // Initialize SDL
@@ -457,19 +618,6 @@ void change_state(GameState new_state) {
     state_info.frame_count = 0;
 }
 
-// Draw simple text (using rectangles to represent text)
-void draw_text_box(int x, int y, int w, int h, const char* text) {
-    SDL_Rect box = {x, y, w, h};
-    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-    SDL_RenderFillRect(renderer, &box);
-    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-    SDL_RenderDrawRect(renderer, &box);
-    
-    // In a full implementation, would render actual text
-    // For now, just show a box where text would go
-    (void)text; // Suppress unused parameter warning
-}
-
 // Render instructions screen
 void render_instructions() {
     SDL_SetRenderDrawColor(renderer, 20, 50, 100, 255);
@@ -478,18 +626,6 @@ void render_instructions() {
     // Use the actual instruction image if available
     if (textures.instruction_screen) {
         SDL_RenderCopy(renderer, textures.instruction_screen, NULL, NULL);
-    } else {
-        // Fallback to text boxes
-        draw_text_box(40, 20, 240, 30, "HUGO - FOREST GAME");
-        draw_text_box(30, 60, 260, 20, "Press UP (2) to JUMP");
-        draw_text_box(30, 90, 260, 20, "Press DOWN (8) to DUCK");
-        draw_text_box(30, 120, 260, 20, "Collect sacks for points!");
-        draw_text_box(30, 150, 260, 20, "Avoid obstacles!");
-    }
-    
-    // Start prompt (always show blinking text)
-    if (get_frame_index() % 10 < 5) {
-        draw_text_box(70, 190, 180, 25, "Press 5 to START");
     }
     
     SDL_RenderPresent(renderer);
@@ -832,323 +968,466 @@ void render_playing() {
     SDL_RenderPresent(renderer);
 }
 
-// Render win screen
-void render_win() {
-    SDL_SetRenderDrawColor(renderer, 0, 200, 0, 255);
-    SDL_RenderClear(renderer);
-    
-    draw_text_box(80, 60, 160, 40, "YOU WIN!");
-    
-    char score_text[50];
-    snprintf(score_text, sizeof(score_text), "Score: %d", game_ctx.score);
-    draw_text_box(80, 110, 160, 30, score_text);
-    
-    draw_text_box(50, 160, 220, 30, "Cave bonus coming!");
-    
-    SDL_RenderPresent(renderer);
-}
-
-// Render game over screen
-void render_game_over() {
-    SDL_SetRenderDrawColor(renderer, 200, 0, 0, 255);
-    SDL_RenderClear(renderer);
-    
-    draw_text_box(60, 80, 200, 40, "GAME OVER");
-    
-    char score_text[50];
-    snprintf(score_text, sizeof(score_text), "Score: %d", game_ctx.score);
-    draw_text_box(80, 130, 160, 30, score_text);
-    
-    SDL_RenderPresent(renderer);
-}
-
 // Forest hurt state rendering functions
 void render_forest_branch_animation() {
-    SDL_SetRenderDrawColor(renderer, 100, 100, 200, 255);
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
     SDL_RenderClear(renderer);
-    draw_text_box(70, 100, 180, 40, "Branch hit!");
+    
+    if (textures.hugohitlog && textures.hugohitlog_count > 0) {
+        int frame = get_frame_index_fast();
+        if (frame >= textures.hugohitlog_count) frame = textures.hugohitlog_count - 1;
+        if (textures.hugohitlog[frame]) {
+            SDL_RenderCopy(renderer, textures.hugohitlog[frame], NULL, NULL);
+        }
+    }
+    
     SDL_RenderPresent(renderer);
 }
 
 void render_forest_branch_talking() {
-    SDL_SetRenderDrawColor(renderer, 120, 120, 220, 255);
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
     SDL_RenderClear(renderer);
-    draw_text_box(60, 100, 200, 40, "Hugo: Ouch!");
+    
+    if (textures.hugohitlog_talk && textures.hugohitlog_talk_count > 0) {
+        int frame = get_frame_index();
+        if (frame >= textures.hugohitlog_talk_count) frame = textures.hugohitlog_talk_count - 1;
+        if (textures.hugohitlog_talk[frame]) {
+            SDL_RenderCopy(renderer, textures.hugohitlog_talk[frame], NULL, NULL);
+        }
+    }
+    
     SDL_RenderPresent(renderer);
 }
 
 void render_forest_flying_start() {
-    SDL_SetRenderDrawColor(renderer, 150, 150, 255, 255);
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
     SDL_RenderClear(renderer);
-    draw_text_box(60, 100, 200, 40, "Hugo flies up!");
+    
+    if (textures.catapult_fly && textures.catapult_fly_count > 0) {
+        int frame = get_frame_index_fast();
+        if (frame >= textures.catapult_fly_count) frame = textures.catapult_fly_count - 1;
+        if (textures.catapult_fly[frame]) {
+            SDL_RenderCopy(renderer, textures.catapult_fly[frame], NULL, NULL);
+        }
+    }
+    
     SDL_RenderPresent(renderer);
 }
 
 void render_forest_flying_talking() {
-    SDL_SetRenderDrawColor(renderer, 170, 170, 255, 255);
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
     SDL_RenderClear(renderer);
-    draw_text_box(50, 100, 220, 40, "Hugo: Whoa!");
+    
+    if (textures.catapult_airtalk && textures.catapult_airtalk_count > 0) {
+        int frame = get_frame_index();
+        if (frame >= textures.catapult_airtalk_count) frame = textures.catapult_airtalk_count - 1;
+        if (textures.catapult_airtalk[frame]) {
+            SDL_RenderCopy(renderer, textures.catapult_airtalk[frame], NULL, NULL);
+        }
+    }
+    
     SDL_RenderPresent(renderer);
 }
 
 void render_forest_flying_falling() {
-    SDL_SetRenderDrawColor(renderer, 190, 150, 255, 255);
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
     SDL_RenderClear(renderer);
-    draw_text_box(60, 100, 200, 40, "Hugo falling...");
+    
+    if (textures.catapult_fall && textures.catapult_fall_count > 0) {
+        int frame = get_frame_index_fast();
+        if (frame >= textures.catapult_fall_count) frame = textures.catapult_fall_count - 1;
+        if (textures.catapult_fall[frame]) {
+            SDL_RenderCopy(renderer, textures.catapult_fall[frame], NULL, NULL);
+        }
+    }
+    
     SDL_RenderPresent(renderer);
 }
 
 void render_forest_flying_falling_hang_animation() {
-    SDL_SetRenderDrawColor(renderer, 200, 170, 255, 255);
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
     SDL_RenderClear(renderer);
-    draw_text_box(50, 100, 220, 40, "Catching branch!");
+    
+    if (textures.catapult_hang && textures.catapult_hang_count > 0) {
+        int frame = get_frame_index_fast();
+        if (frame >= textures.catapult_hang_count) frame = textures.catapult_hang_count - 1;
+        if (textures.catapult_hang[frame]) {
+            SDL_RenderCopy(renderer, textures.catapult_hang[frame], NULL, NULL);
+        }
+    }
+    
     SDL_RenderPresent(renderer);
 }
 
 void render_forest_flying_falling_hang_talking() {
-    SDL_SetRenderDrawColor(renderer, 220, 190, 255, 255);
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
     SDL_RenderClear(renderer);
-    draw_text_box(50, 100, 220, 40, "Hugo: Got it!");
+    
+    // Render static hang frame as background
+    if (textures.catapult_hang && textures.catapult_hang_count > 12) {
+        if (textures.catapult_hang[12]) {
+            SDL_RenderCopy(renderer, textures.catapult_hang[12], NULL, NULL);
+        }
+    }
+    
+    // Render talking mouth animation on top
+    if (textures.catapult_hangspeak && textures.catapult_hangspeak_count > 0) {
+        int frame = get_frame_index();
+        if (frame >= textures.catapult_hangspeak_count) frame = textures.catapult_hangspeak_count - 1;
+        if (textures.catapult_hangspeak[frame]) {
+            SDL_Rect mouth_pos = {115, 117, 0, 0};
+            SDL_QueryTexture(textures.catapult_hangspeak[frame], NULL, NULL, &mouth_pos.w, &mouth_pos.h);
+            SDL_RenderCopy(renderer, textures.catapult_hangspeak[frame], NULL, &mouth_pos);
+        }
+    }
+    
     SDL_RenderPresent(renderer);
 }
 
 void render_forest_rock_animation() {
-    SDL_SetRenderDrawColor(renderer, 150, 100, 100, 255);
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
     SDL_RenderClear(renderer);
-    draw_text_box(60, 100, 200, 40, "Rock incoming!");
+    
+    if (textures.hugo_lookrock && textures.hugo_lookrock_count > 0) {
+        int frame = get_frame_index_fast();
+        if (frame >= textures.hugo_lookrock_count) frame = textures.hugo_lookrock_count - 1;
+        if (textures.hugo_lookrock[frame]) {
+            SDL_RenderCopy(renderer, textures.hugo_lookrock[frame], NULL, NULL);
+        }
+    }
+    
     SDL_RenderPresent(renderer);
 }
 
 void render_forest_rock_hit_animation() {
-    SDL_SetRenderDrawColor(renderer, 180, 100, 100, 255);
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
     SDL_RenderClear(renderer);
-    draw_text_box(70, 100, 180, 40, "Rock hits!");
+    
+    if (textures.hit_rock && textures.hit_rock_count > 0) {
+        int frame = get_frame_index_fast();
+        if (frame >= textures.hit_rock_count) frame = textures.hit_rock_count - 1;
+        if (textures.hit_rock[frame]) {
+            SDL_RenderCopy(renderer, textures.hit_rock[frame], NULL, NULL);
+        }
+    }
+    
     SDL_RenderPresent(renderer);
 }
 
 void render_forest_rock_talking() {
-    SDL_SetRenderDrawColor(renderer, 200, 120, 120, 255);
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
     SDL_RenderClear(renderer);
-    draw_text_box(60, 100, 200, 40, "Hugo: Ow!");
+    
+    if (textures.hit_rock_sync && textures.hit_rock_sync_count > 0) {
+        int frame = get_frame_index();
+        if (frame >= textures.hit_rock_sync_count) frame = textures.hit_rock_sync_count - 1;
+        if (textures.hit_rock_sync[frame]) {
+            SDL_RenderCopy(renderer, textures.hit_rock_sync[frame], NULL, NULL);
+        }
+    }
+    
     SDL_RenderPresent(renderer);
 }
 
 void render_forest_trap_animation() {
-    SDL_SetRenderDrawColor(renderer, 120, 120, 80, 255);
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
     SDL_RenderClear(renderer);
-    draw_text_box(60, 100, 200, 40, "Fell in trap!");
+    
+    if (textures.hugo_traphurt && textures.hugo_traphurt_count > 0) {
+        int frame = get_frame_index();
+        if (frame >= textures.hugo_traphurt_count) frame = textures.hugo_traphurt_count - 1;
+        if (textures.hugo_traphurt[frame]) {
+            SDL_RenderCopy(renderer, textures.hugo_traphurt[frame], NULL, NULL);
+        }
+    }
+    
     SDL_RenderPresent(renderer);
 }
 
 void render_forest_trap_talking() {
-    SDL_SetRenderDrawColor(renderer, 140, 140, 100, 255);
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
     SDL_RenderClear(renderer);
-    draw_text_box(60, 100, 200, 40, "Hugo: Help!");
+    
+    if (textures.hugo_traptalk && textures.hugo_traptalk_count > 0) {
+        int frame = get_frame_index();
+        if (frame >= textures.hugo_traptalk_count) frame = textures.hugo_traptalk_count - 1;
+        if (textures.hugo_traptalk[frame]) {
+            SDL_RenderCopy(renderer, textures.hugo_traptalk[frame], NULL, NULL);
+        }
+    }
+    
     SDL_RenderPresent(renderer);
 }
 
 void render_forest_scylla_button() {
-    SDL_SetRenderDrawColor(renderer, 200, 0, 200, 255);
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
     SDL_RenderClear(renderer);
     
-    // Flashing Scylla button
-    if (get_frame_index() % 2 == 0) {
-        draw_text_box(60, 100, 200, 40, "SCYLLA!");
-    }
+    // Scylla button is shown in multiplayer mode - not typically used in single player
+    // Just render a blank screen for now
     
     SDL_RenderPresent(renderer);
 }
 
 void render_forest_talking_after_hurt() {
-    SDL_SetRenderDrawColor(renderer, 100, 150, 100, 255);
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
     SDL_RenderClear(renderer);
     
-    char lives_text[50];
-    if (game_ctx.lives == 1) {
-        snprintf(lives_text, sizeof(lives_text), "Last life!");
-    } else {
-        snprintf(lives_text, sizeof(lives_text), "%d lives left", game_ctx.lives);
+    // Render Hugo telllives animation
+    if (textures.hugo_telllives[0]) {
+        int frame = get_frame_index();
+        if (frame >= 16) frame = 15;
+        SDL_Rect hugo = {128, -16, 64, 256};
+        SDL_RenderCopy(renderer, textures.hugo_telllives[frame], NULL, &hugo);
     }
-    
-    draw_text_box(60, 80, 200, 40, "Hugo hurt!");
-    draw_text_box(70, 130, 180, 30, lives_text);
     
     SDL_RenderPresent(renderer);
 }
 
 void render_forest_talking_game_over() {
-    SDL_SetRenderDrawColor(renderer, 200, 0, 0, 255);
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
     SDL_RenderClear(renderer);
     
-    draw_text_box(60, 80, 200, 40, "GAME OVER");
-    
-    char score_text[50];
-    snprintf(score_text, sizeof(score_text), "Score: %d", game_ctx.score);
-    draw_text_box(80, 130, 160, 30, score_text);
+    // Render Hugo telllives animation for game over
+    if (textures.hugo_telllives[0]) {
+        int frame = get_frame_index();
+        if (frame >= 16) frame = 15;
+        SDL_Rect hugo = {128, -16, 64, 256};
+        SDL_RenderCopy(renderer, textures.hugo_telllives[frame], NULL, &hugo);
+    }
     
     SDL_RenderPresent(renderer);
 }
 
 void render_forest_win_talking() {
-    SDL_SetRenderDrawColor(renderer, 0, 200, 0, 255);
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
     SDL_RenderClear(renderer);
     
-    draw_text_box(60, 60, 200, 40, "Forest cleared!");
-    
-    char score_text[50];
-    snprintf(score_text, sizeof(score_text), "Score: %d", game_ctx.score);
-    draw_text_box(80, 110, 160, 30, score_text);
-    
-    draw_text_box(50, 160, 220, 30, "Cave bonus coming!");
+    // Render Hugo telllives animation for win
+    if (textures.hugo_telllives[0]) {
+        int frame = get_frame_index();
+        if (frame >= 16) frame = 15;
+        SDL_Rect hugo = {128, -16, 64, 256};
+        SDL_RenderCopy(renderer, textures.hugo_telllives[frame], NULL, &hugo);
+    }
     
     SDL_RenderPresent(renderer);
 }
 
 // Cave game rendering functions
 void render_cave_waiting_before_talking() {
-    SDL_SetRenderDrawColor(renderer, 40, 40, 90, 255);
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
     SDL_RenderClear(renderer);
     
-    draw_text_box(60, 100, 200, 40, "Entering cave...");
+    if (textures.cave_talks && textures.cave_talks_count > 12) {
+        // Show frame 12 (last frame of talks before climbing)
+        if (textures.cave_talks[12]) {
+            SDL_RenderCopy(renderer, textures.cave_talks[12], NULL, NULL);
+        }
+    }
     
     SDL_RenderPresent(renderer);
 }
 
 void render_cave_talking_before_climb() {
-    SDL_SetRenderDrawColor(renderer, 50, 50, 100, 255);
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
     SDL_RenderClear(renderer);
     
-    draw_text_box(50, 100, 220, 40, "Hugo: Let's go!");
-    
-    SDL_RenderPresent(renderer);
-}
-
-// Cave game rendering functions
-void render_cave_intro() {
-    SDL_SetRenderDrawColor(renderer, 50, 50, 100, 255);
-    SDL_RenderClear(renderer);
-    
-    draw_text_box(60, 80, 200, 40, "BONUS: CAVE!");
-    draw_text_box(50, 130, 220, 30, "Improve your score!");
+    if (textures.cave_talks && textures.cave_talks_count > 0) {
+        int frame = get_frame_index();
+        if (frame >= textures.cave_talks_count) frame = textures.cave_talks_count - 1;
+        if (textures.cave_talks[frame]) {
+            SDL_RenderCopy(renderer, textures.cave_talks[frame], NULL, NULL);
+        }
+    }
     
     SDL_RenderPresent(renderer);
 }
 
 void render_cave_climbing() {
-    SDL_SetRenderDrawColor(renderer, 60, 60, 120, 255);
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
     SDL_RenderClear(renderer);
     
-    draw_text_box(80, 100, 160, 40, "Climbing...");
+    if (textures.cave_climbs && textures.cave_climbs_count > 0) {
+        int frame = get_frame_index();
+        if (frame >= textures.cave_climbs_count) frame = textures.cave_climbs_count - 1;
+        if (textures.cave_climbs[frame]) {
+            SDL_RenderCopy(renderer, textures.cave_climbs[frame], NULL, NULL);
+        }
+    }
     
     SDL_RenderPresent(renderer);
 }
 
 void render_cave_waiting_input() {
-    SDL_SetRenderDrawColor(renderer, 70, 70, 140, 255);
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
     SDL_RenderClear(renderer);
     
-    draw_text_box(40, 60, 240, 30, "Choose a rope!");
-    draw_text_box(80, 100, 160, 25, "Press 3, 6, or 9");
-    
-    // Draw three rope indicators
-    SDL_Rect rope1 = {60, 150, 30, 50};
-    SDL_Rect rope2 = {145, 150, 30, 50};
-    SDL_Rect rope3 = {230, 150, 30, 50};
-    
-    SDL_SetRenderDrawColor(renderer, 200, 150, 100, 255);
-    SDL_RenderFillRect(renderer, &rope1);
-    SDL_RenderFillRect(renderer, &rope2);
-    SDL_RenderFillRect(renderer, &rope3);
-    
-    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-    SDL_RenderDrawRect(renderer, &rope1);
-    SDL_RenderDrawRect(renderer, &rope2);
-    SDL_RenderDrawRect(renderer, &rope3);
+    // Show last frame of climbing animation
+    if (textures.cave_climbs && textures.cave_climbs_count > 0) {
+        int last_frame = textures.cave_climbs_count - 1;
+        if (textures.cave_climbs[last_frame]) {
+            SDL_RenderCopy(renderer, textures.cave_climbs[last_frame], NULL, NULL);
+        }
+    }
     
     SDL_RenderPresent(renderer);
 }
 
 void render_cave_going_rope() {
-    SDL_SetRenderDrawColor(renderer, 80, 80, 160, 255);
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
     SDL_RenderClear(renderer);
     
-    draw_text_box(60, 80, 200, 40, "Going down...");
+    SDL_Texture** rope_animation = NULL;
+    int rope_count = 0;
     
-    // Show selected rope
-    if (game_ctx.cave_selected_rope >= 0) {
-        int rope_x[] = {60, 145, 230};
-        SDL_Rect selected_rope = {rope_x[game_ctx.cave_selected_rope], 150, 30, 50};
-        SDL_SetRenderDrawColor(renderer, 255, 255, 0, 255);
-        SDL_RenderFillRect(renderer, &selected_rope);
+    if (game_ctx.cave_selected_rope == 0) {
+        rope_animation = textures.cave_first_rope;
+        rope_count = textures.cave_first_rope_count;
+    } else if (game_ctx.cave_selected_rope == 1) {
+        rope_animation = textures.cave_second_rope;
+        rope_count = textures.cave_second_rope_count;
+    } else if (game_ctx.cave_selected_rope == 2) {
+        rope_animation = textures.cave_third_rope;
+        rope_count = textures.cave_third_rope_count;
+    }
+    
+    if (rope_animation && rope_count > 0) {
+        int frame = get_frame_index();
+        if (frame >= rope_count) frame = rope_count - 1;
+        if (rope_animation[frame]) {
+            SDL_RenderCopy(renderer, rope_animation[frame], NULL, NULL);
+        }
     }
     
     SDL_RenderPresent(renderer);
 }
 
 void render_cave_lost() {
-    SDL_SetRenderDrawColor(renderer, 150, 50, 50, 255);
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
     SDL_RenderClear(renderer);
     
-    draw_text_box(80, 100, 160, 40, "Oh no!");
+    SDL_Texture** puff_animation = NULL;
+    int puff_count = 0;
+    
+    if (game_ctx.cave_selected_rope == 0) {
+        puff_animation = textures.cave_hugo_puff_first;
+        puff_count = textures.cave_hugo_puff_first_count;
+    } else if (game_ctx.cave_selected_rope == 1) {
+        puff_animation = textures.cave_hugo_puff_second;
+        puff_count = textures.cave_hugo_puff_second_count;
+    } else if (game_ctx.cave_selected_rope == 2) {
+        puff_animation = textures.cave_hugo_puff_third;
+        puff_count = textures.cave_hugo_puff_third_count;
+    }
+    
+    if (puff_animation && puff_count > 0) {
+        int frame = get_frame_index();
+        if (frame >= puff_count) frame = puff_count - 1;
+        if (puff_animation[frame]) {
+            SDL_RenderCopy(renderer, puff_animation[frame], NULL, NULL);
+        }
+    }
     
     SDL_RenderPresent(renderer);
 }
 
 void render_cave_lost_spring() {
-    SDL_SetRenderDrawColor(renderer, 180, 80, 80, 255);
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
     SDL_RenderClear(renderer);
     
-    draw_text_box(60, 80, 200, 40, "Hugo bounces!");
-    
-    char score_text[50];
-    snprintf(score_text, sizeof(score_text), "Final: %d", game_ctx.score);
-    draw_text_box(80, 140, 160, 30, score_text);
+    if (textures.cave_hugo_spring && textures.cave_hugo_spring_count > 0) {
+        int frame = get_frame_index();
+        if (frame >= textures.cave_hugo_spring_count) frame = textures.cave_hugo_spring_count - 1;
+        if (textures.cave_hugo_spring[frame]) {
+            SDL_RenderCopy(renderer, textures.cave_hugo_spring[frame], NULL, NULL);
+        }
+    }
     
     SDL_RenderPresent(renderer);
 }
 
 void render_cave_scylla_lost() {
     // Scylla loses (Hugo wins)
-    SDL_SetRenderDrawColor(renderer, 50, 150, 50, 255);
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
     SDL_RenderClear(renderer);
     
-    const char* win_types[] = {"Bird!", "Leaves!", "Ropes!"};
-    const char* multipliers[] = {"Score x2", "Score x3", "Score x4"};
+    SDL_Texture** scylla_animation = NULL;
+    int scylla_count = 0;
     
-    draw_text_box(70, 80, 180, 40, win_types[game_ctx.cave_win_type]);
-    draw_text_box(70, 130, 180, 30, multipliers[game_ctx.cave_win_type]);
+    if (game_ctx.cave_win_type == 0) {
+        scylla_animation = textures.cave_scylla_bird;
+        scylla_count = textures.cave_scylla_bird_count;
+    } else if (game_ctx.cave_win_type == 1) {
+        scylla_animation = textures.cave_scylla_leaves;
+        scylla_count = textures.cave_scylla_leaves_count;
+    } else if (game_ctx.cave_win_type == 2) {
+        scylla_animation = textures.cave_scylla_ropes;
+        scylla_count = textures.cave_scylla_ropes_count;
+    }
+    
+    if (scylla_animation && scylla_count > 0) {
+        int frame = get_frame_index();
+        if (frame >= scylla_count) frame = scylla_count - 1;
+        if (scylla_animation[frame]) {
+            SDL_RenderCopy(renderer, scylla_animation[frame], NULL, NULL);
+        }
+    }
+    
+    // Render Hugo sprite on top
+    if (textures.cave_hugo_sprite) {
+        int hugo_positions[3][2] = {{25, 105}, {97, 100}, {172, 102}};
+        SDL_Rect hugo_rect;
+        SDL_QueryTexture(textures.cave_hugo_sprite, NULL, NULL, &hugo_rect.w, &hugo_rect.h);
+        hugo_rect.x = hugo_positions[game_ctx.cave_selected_rope][0];
+        hugo_rect.y = hugo_positions[game_ctx.cave_selected_rope][1];
+        SDL_RenderCopy(renderer, textures.cave_hugo_sprite, NULL, &hugo_rect);
+    }
     
     SDL_RenderPresent(renderer);
 }
 
 void render_cave_scylla_spring() {
-    SDL_SetRenderDrawColor(renderer, 80, 180, 80, 255);
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
     SDL_RenderClear(renderer);
     
-    draw_text_box(60, 100, 200, 40, "Scylla springs!");
+    if (textures.cave_scylla_spring && textures.cave_scylla_spring_count > 0) {
+        int frame = get_frame_index();
+        if (frame >= textures.cave_scylla_spring_count) frame = textures.cave_scylla_spring_count - 1;
+        if (textures.cave_scylla_spring[frame]) {
+            SDL_RenderCopy(renderer, textures.cave_scylla_spring[frame], NULL, NULL);
+        }
+    }
     
     SDL_RenderPresent(renderer);
 }
 
 void render_cave_family_cage_opens() {
-    SDL_SetRenderDrawColor(renderer, 100, 200, 100, 255);
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
     SDL_RenderClear(renderer);
     
-    draw_text_box(60, 100, 200, 40, "Cage opening!");
+    if (textures.cave_family_cage && textures.cave_family_cage_count > 0) {
+        int frame = get_frame_index();
+        if (frame >= textures.cave_family_cage_count) frame = textures.cave_family_cage_count - 1;
+        if (textures.cave_family_cage[frame]) {
+            SDL_RenderCopy(renderer, textures.cave_family_cage[frame], NULL, NULL);
+        }
+    }
     
     SDL_RenderPresent(renderer);
 }
 
 void render_cave_family_happy() {
-    SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
     SDL_RenderClear(renderer);
     
-    draw_text_box(60, 60, 200, 40, "VICTORY!");
-    draw_text_box(60, 110, 200, 30, "Family saved!");
-    
-    char score_text[50];
-    snprintf(score_text, sizeof(score_text), "Final: %d", game_ctx.score);
-    draw_text_box(80, 160, 160, 30, score_text);
+    if (textures.cave_happy && textures.cave_happy_count > 0) {
+        int frame = get_frame_index();
+        if (frame >= textures.cave_happy_count) frame = textures.cave_happy_count - 1;
+        if (textures.cave_happy[frame]) {
+            SDL_RenderCopy(renderer, textures.cave_happy[frame], NULL, NULL);
+        }
+    }
     
     SDL_RenderPresent(renderer);
 }
