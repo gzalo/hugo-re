@@ -1,7 +1,18 @@
 /*
  * Hugo Lite - Single Player C/SDL2 Version
  * A simplified version of the Hugo forest game (the main game)
- * Based on the Python implementation in ../game/forest/
+ * Based on the Python implementation in ../game/forest/ and ../game/cave/
+ * 
+ * All GameState enum values are now implemented with corresponding:
+ * - process_*() functions for state logic and transitions
+ * - render_*() functions for visual display
+ * 
+ * State flow follows the Python implementation:
+ * 1. Forest game: INSTRUCTIONS -> WAIT_INTRO -> PLAYING -> (hurt states or WIN_TALKING)
+ * 2. Hurt states: Each obstacle type has animation->talking->reduce_lives sequence
+ * 3. Cave game: WAITING_BEFORE_TALKING -> TALKING_BEFORE_CLIMB -> CLIMBING -> 
+ *              WAITING_INPUT -> GOING_ROPE -> (LOST path or SCYLLA_LOST win path)
+ * 4. Win path: SCYLLA_LOST -> (SCYLLA_SPRING for ropes) -> FAMILY_CAGE_OPENS -> FAMILY_HAPPY
  */
 
 #include <SDL2/SDL.h>
