@@ -14,6 +14,13 @@
 #include "state.h"
 #include "forest.h"
 #include "cave.h"
+#include "cJSON.h"
+
+SDL_Window* window = NULL;
+SDL_Renderer* renderer = NULL;
+GameContext game_ctx;
+GameTextures textures;
+GameAudio audio;
 
 GameState process_instructions(InputState state) {
     if (state.key_start || get_state_time() > INSTRUCTIONS_TIMEOUT) {
@@ -94,6 +101,41 @@ RenderFunc render_funcs[STATE_END + 1] = {
     render_cave_waiting_input
 };
 
+RenderFunc on_enter_funcs[STATE_END + 1] = {
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    on_enter_cave_climbing,
+    on_enter_cave_family_cage_opens,
+    on_enter_cave_family_happy,
+    on_enter_cave_going_rope,
+    on_enter_cave_lost,
+    on_enter_cave_lost_spring,
+    on_enter_cave_scylla_lost,
+    on_enter_cave_scylla_spring,
+    on_enter_cave_talking_before_climb,
+    on_enter_cave_waiting_before_talking,
+    on_enter_cave_waiting_input
+};
+
+
 const char * game_state_name[] = {
     "STATE_NONE",
     "STATE_INSTRUCTIONS",
@@ -136,6 +178,11 @@ const char * game_state_name[] = {
 };
 
 SDL_Texture* animation_get_sync_frame(Animation animation, int frame_index) {
+    if(animation.sync_data == NULL) {
+        printf("Animation has no sync data!\n");
+        return NULL;
+    }
+    
     if (frame_index >= animation.sync_count) {
         frame_index = animation.sync_count - 1;
     }
@@ -155,7 +202,7 @@ SDL_Texture* animation_get_sync_frame(Animation animation, int frame_index) {
 }
 
 // Get a regular animation frame
-SDL_Texture* animation_get_frame(Animation animation, int frame_index) {
+Texture* animation_get_frame(Animation animation, int frame_index) {
     if (frame_index >= animation.frame_count) {
         printf("Animation index out of range!\n");
         frame_index = animation.frame_count - 1;
@@ -164,14 +211,7 @@ SDL_Texture* animation_get_frame(Animation animation, int frame_index) {
     return animation.frames[frame_index];
 }
 
-SDL_Window* window = NULL;
-SDL_Renderer* renderer = NULL;
-GameContext game_ctx;
-GameTextures textures;
-GameAudio audio;
-
-
-SDL_Texture* load_texture(const char* path) {
+Texture* load_texture(const char* path) {
     SDL_Surface* surface = IMG_Load(path);
     if (!surface) {
         printf("Warning: Could not load image %s: %s\n", path, IMG_GetError());
@@ -188,7 +228,7 @@ SDL_Texture* load_texture(const char* path) {
     return texture;
 }
 
-int load_animation_frames(SDL_Texture** textures, const char* data_dir, const char* rel_path, int start, int end) {
+int load_animation_frames(Texture** textures, const char* data_dir, const char* rel_path, int start, int end) {
     int loaded = 0;
     for (int i = start; i <= end; i++) {
         char path[512];
@@ -204,7 +244,23 @@ int load_animation_frames(SDL_Texture** textures, const char* data_dir, const ch
     return loaded;
 }
 
-Animation load_animation_sequence(const char* data_dir, const char* rel_path, int start, int end) {
+void render(Texture *texture, int x, int y){
+    if(texture){
+        SDL_Rect dest_rect;
+        dest_rect.x = x;
+        dest_rect.y = y;
+        SDL_QueryTexture(texture, NULL, NULL, &dest_rect.w, &dest_rect.h);
+        SDL_RenderCopy(renderer, texture, NULL, &dest_rect);
+    }
+}
+
+void play(Audio *audio){
+    if(audio){
+        Mix_PlayChannel(-1, audio, 0);
+    }
+}
+
+Animation load_animation_sequence(const char* data_dir, const char* rel_path, int start, int end, const char* sync_file) {
     Animation anim;
     anim.frame_count = end - start + 1;
     anim.frames = (SDL_Texture**)malloc(anim.frame_count * sizeof(SDL_Texture*));
@@ -215,6 +271,7 @@ Animation load_animation_sequence(const char* data_dir, const char* rel_path, in
         return anim;
     }
     
+    // Load frames
     int loaded = 0;
     for (int i = start; i <= end; i++) {
         char path[512];
@@ -225,8 +282,49 @@ Animation load_animation_sequence(const char* data_dir, const char* rel_path, in
         }
     }
     
+    // Load sync data if provided
     anim.sync_data = NULL;
     anim.sync_count = 0;
+    
+    if (sync_file != NULL) {
+        char sync_path[512];
+        snprintf(sync_path, sizeof(sync_path), "%s/%s", data_dir, sync_file);
+        
+        FILE* fp = fopen(sync_path, "rb");
+        if (fp) {
+            fseek(fp, 0, SEEK_END);
+            long length = ftell(fp);
+            fseek(fp, 0, SEEK_SET);
+            
+            char* json_str = (char*)malloc(length + 1);
+            if (json_str) {
+                fread(json_str, 1, length, fp);
+                json_str[length] = '\0';
+                
+                cJSON* root = cJSON_Parse(json_str);
+                if (root) {
+                    cJSON* indices = cJSON_GetObjectItem(root, "frameIndices");
+                    if (cJSON_IsArray(indices)) {
+                        anim.sync_count = cJSON_GetArraySize(indices);
+                        anim.sync_data = (int*)malloc(anim.sync_count * sizeof(int));
+                        
+                        if (anim.sync_data) {
+                            for (int i = 0; i < anim.sync_count; i++) {
+                                cJSON* item = cJSON_GetArrayItem(indices, i);
+                                anim.sync_data[i] = cJSON_GetNumberValue(item);
+                            }
+                        }
+                    }
+                    cJSON_Delete(root);
+                }
+                free(json_str);
+            }
+            fclose(fp);
+        } else {
+            printf("Warning: Could not load sync file %s\n", sync_path);
+        }
+    }
+    
     return anim;
 }
 
@@ -319,35 +417,35 @@ void init_textures(const char *data_dir) {
     if (textures.hugo_lives) loaded_count++;
     
     // Load forest hurt animation sequences
-    textures.hugohitlog = load_animation_sequence(data_dir, "/ForestData/gfx/BRANCH-GROGGY.til", 0, 42);
-    textures.hugohitlog_talk = load_animation_sequence(data_dir, "/ForestData/gfx/BRANCH-SPEAK.til", 0, 17);
-    textures.catapult_fly = load_animation_sequence(data_dir, "/ForestData/gfx/HGKATFLY.til", 0, 113);
-    textures.catapult_fall = load_animation_sequence(data_dir, "/ForestData/gfx/HGKATFLY.til", 115, 189);
-    textures.catapult_airtalk = load_animation_sequence(data_dir, "/ForestData/gfx/CATAPULT-SPEAK.til", 0, 15);
-    textures.catapult_hang = load_animation_sequence(data_dir, "/ForestData/gfx/HGKATHNG.TIL", 0, 12);
-    textures.catapult_hangspeak = load_animation_sequence(data_dir, "/ForestData/gfx/hanging_mouth.cgf", 0, 11);
-    textures.hugo_lookrock = load_animation_sequence(data_dir, "/ForestData/gfx/hugo-rock.til", 0, 14);
-    textures.hit_rock = load_animation_sequence(data_dir, "/ForestData/gfx/HGROCK.TIL", 0, 60);
-    textures.hit_rock_sync = load_animation_sequence(data_dir, "/ForestData/gfx/MSYNCRCK.TIL", 0, 17);
-    textures.hugo_traphurt = load_animation_sequence(data_dir, "/ForestData/gfx/TRAP-HURTS.til", 0, 9);
-    textures.hugo_traptalk = load_animation_sequence(data_dir, "/ForestData/gfx/traptalk.til", 0, 15);
+    textures.hugohitlog = load_animation_sequence(data_dir, "/ForestData/gfx/BRANCH-GROGGY.til", 0, 42, NULL);
+    textures.hugohitlog_talk = load_animation_sequence(data_dir, "/ForestData/gfx/BRANCH-SPEAK.til", 0, 17, NULL);
+    textures.catapult_fly = load_animation_sequence(data_dir, "/ForestData/gfx/HGKATFLY.til", 0, 113, NULL);
+    textures.catapult_fall = load_animation_sequence(data_dir, "/ForestData/gfx/HGKATFLY.til", 115, 189, NULL);
+    textures.catapult_airtalk = load_animation_sequence(data_dir, "/ForestData/gfx/CATAPULT-SPEAK.til", 0, 15, NULL);
+    textures.catapult_hang = load_animation_sequence(data_dir, "/ForestData/gfx/HGKATHNG.TIL", 0, 12, NULL);
+    textures.catapult_hangspeak = load_animation_sequence(data_dir, "/ForestData/gfx/hanging_mouth.cgf", 0, 11, NULL);
+    textures.hugo_lookrock = load_animation_sequence(data_dir, "/ForestData/gfx/hugo-rock.til", 0, 14, NULL);
+    textures.hit_rock = load_animation_sequence(data_dir, "/ForestData/gfx/HGROCK.TIL", 0, 60, NULL);
+    textures.hit_rock_sync = load_animation_sequence(data_dir, "/ForestData/gfx/MSYNCRCK.TIL", 0, 17, NULL);
+    textures.hugo_traphurt = load_animation_sequence(data_dir, "/ForestData/gfx/TRAP-HURTS.til", 0, 9, NULL);
+    textures.hugo_traptalk = load_animation_sequence(data_dir, "/ForestData/gfx/traptalk.til", 0, 15, NULL);
     
     // Load cave animation sequences
-    textures.cave_talks = load_animation_sequence(data_dir, "/RopeOutroData/gfx/STAIRS.TIL", 0, 12);
-    textures.cave_climbs = load_animation_sequence(data_dir, "/RopeOutroData/gfx/STAIRS.TIL", 11, 51);
-    textures.cave_first_rope = load_animation_sequence(data_dir, "/RopeOutroData/gfx/CASELIVE.TIL", 0, 32);
-    textures.cave_second_rope = load_animation_sequence(data_dir, "/RopeOutroData/gfx/CASELIVE.TIL", 33, 72);
-    textures.cave_third_rope = load_animation_sequence(data_dir, "/RopeOutroData/gfx/CASELIVE.TIL", 73, 121);
-    textures.cave_scylla_leaves = load_animation_sequence(data_dir, "/RopeOutroData/gfx/CASELIVE.TIL", 122, 177);
-    textures.cave_scylla_bird = load_animation_sequence(data_dir, "/RopeOutroData/gfx/CASELIVE.TIL", 178, 240);
-    textures.cave_scylla_ropes = load_animation_sequence(data_dir, "/RopeOutroData/gfx/CASELIVE.TIL", 241, 283);
-    textures.cave_scylla_spring = load_animation_sequence(data_dir, "/RopeOutroData/gfx/CASELIVE.TIL", 284, 318);
-    textures.cave_family_cage = load_animation_sequence(data_dir, "/RopeOutroData/gfx/CASELIVE.TIL", 319, 352);
-    textures.cave_hugo_puff_first = load_animation_sequence(data_dir, "/RopeOutroData/gfx/CASEDIE.TIL", 122, 166);
-    textures.cave_hugo_puff_second = load_animation_sequence(data_dir, "/RopeOutroData/gfx/CASEDIE.TIL", 167, 211);
-    textures.cave_hugo_puff_third = load_animation_sequence(data_dir, "/RopeOutroData/gfx/CASEDIE.TIL", 212, 256);
-    textures.cave_hugo_spring = load_animation_sequence(data_dir, "/RopeOutroData/gfx/CASEDIE.TIL", 257, 295);
-    textures.cave_happy = load_animation_sequence(data_dir, "/RopeOutroData/gfx/HAPPY.TIL", 0, 111);
+    textures.cave_talks = load_animation_sequence(data_dir, "/RopeOutroData/gfx/STAIRS.TIL", 0, 12, "/RopeOutroData/Syncs/002-06.oos.json");
+    textures.cave_climbs = load_animation_sequence(data_dir, "/RopeOutroData/gfx/STAIRS.TIL", 11, 51, NULL);
+    textures.cave_first_rope = load_animation_sequence(data_dir, "/RopeOutroData/gfx/CASELIVE.TIL", 0, 32, NULL);
+    textures.cave_second_rope = load_animation_sequence(data_dir, "/RopeOutroData/gfx/CASELIVE.TIL", 33, 72, NULL);
+    textures.cave_third_rope = load_animation_sequence(data_dir, "/RopeOutroData/gfx/CASELIVE.TIL", 73, 121, NULL);
+    textures.cave_scylla_leaves = load_animation_sequence(data_dir, "/RopeOutroData/gfx/CASELIVE.TIL", 122, 177, NULL);
+    textures.cave_scylla_bird = load_animation_sequence(data_dir, "/RopeOutroData/gfx/CASELIVE.TIL", 178, 240, NULL);
+    textures.cave_scylla_ropes = load_animation_sequence(data_dir, "/RopeOutroData/gfx/CASELIVE.TIL", 241, 283, NULL);
+    textures.cave_scylla_spring = load_animation_sequence(data_dir, "/RopeOutroData/gfx/CASELIVE.TIL", 284, 318, NULL);
+    textures.cave_family_cage = load_animation_sequence(data_dir, "/RopeOutroData/gfx/CASELIVE.TIL", 319, 352, NULL);
+    textures.cave_hugo_puff_first = load_animation_sequence(data_dir, "/RopeOutroData/gfx/CASEDIE.TIL", 122, 166, NULL);
+    textures.cave_hugo_puff_second = load_animation_sequence(data_dir, "/RopeOutroData/gfx/CASEDIE.TIL", 167, 211, NULL);
+    textures.cave_hugo_puff_third = load_animation_sequence(data_dir, "/RopeOutroData/gfx/CASEDIE.TIL", 212, 256, NULL);
+    textures.cave_hugo_spring = load_animation_sequence(data_dir, "/RopeOutroData/gfx/CASEDIE.TIL", 257, 295, NULL);
+    textures.cave_happy = load_animation_sequence(data_dir, "/RopeOutroData/gfx/HAPPY.TIL", 0, 111, NULL);
     
     // Load cave hugo sprite
     snprintf(path, sizeof(path), "%s/RopeOutroData/gfx/hugo.cgf_0.png", data_dir);
@@ -798,7 +896,7 @@ void game_loop() {
     
     // Initialize
     init_game_context();
-    state_info.current_state = STATE_INSTRUCTIONS;
+    state_info.current_state = STATE_CAVE_WAITING_BEFORE_TALKING;
     state_info.state_start_time = SDL_GetTicks() / 1000.0;
     srand(time(NULL));
     InputState input_state = {0};
@@ -843,11 +941,15 @@ void game_loop() {
         }
         
         GameState new_state = process_funcs[state_info.current_state](input_state);
-
+        
         if(new_state != STATE_NONE) {
             printf("State transition: %s -> %s\n", game_state_name[state_info.current_state], game_state_name[new_state]);
             state_info.current_state = new_state;
             state_info.state_start_time = SDL_GetTicks() / 1000.0;
+            OnEnterFunc on_enter_func = on_enter_funcs[state_info.current_state];
+            if (on_enter_func != NULL) {
+                on_enter_func();
+            }
         }
 
         render_funcs[state_info.current_state]();

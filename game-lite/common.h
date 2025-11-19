@@ -18,6 +18,10 @@
 #define SCREEN_HEIGHT 240
 #define WINDOW_SCALE 2
 
+// SDL-related typedefs
+typedef SDL_Texture Texture;
+typedef Mix_Chunk Audio;
+
 typedef enum {
     STATE_NONE,
     STATE_INSTRUCTIONS,
@@ -97,45 +101,48 @@ typedef struct {
 } StateInfo;
 
 typedef struct {
-    SDL_Texture** frames;
+    Texture** frames;
     int frame_count;
     int* sync_data;
     int sync_count;
 } Animation;
 
+Texture* animation_get_sync_frame(Animation animation, int frame_index);
+Texture* animation_get_frame(Animation animation, int frame_index);
+
 typedef struct {
     // Fixed assets
-    SDL_Texture* instruction_screen;
-    SDL_Texture* arrows[4];  // up, up_pressed, down, down_pressed
-    SDL_Texture* bg_gradient;
+    Texture* instruction_screen;
+    Texture* arrows[4];  // up, up_pressed, down, down_pressed
+    Texture* bg_gradient;
     
     // Background layers
-    SDL_Texture* bg_hillsday;
-    SDL_Texture* bg_trees;
-    SDL_Texture* bg_ground;
-    SDL_Texture* grass;
-    SDL_Texture* leaves1;
-    SDL_Texture* leaves2;
-    SDL_Texture* end_mountain;
+    Texture* bg_hillsday;
+    Texture* bg_trees;
+    Texture* bg_ground;
+    Texture* grass;
+    Texture* leaves1;
+    Texture* leaves2;
+    Texture* end_mountain;
     
     // Hugo animations
-    SDL_Texture* hugo_side[8];     // walking (0-7)
-    SDL_Texture* hugo_jump[3];     // jumping (0-2)
-    SDL_Texture* hugo_crawl[8];    // crawling (0-7)
-    SDL_Texture* hugo_telllives[16]; // intro animation (0-15)
+    Texture* hugo_side[8];     // walking (0-7)
+    Texture* hugo_jump[3];     // jumping (0-2)
+    Texture* hugo_crawl[8];    // crawling (0-7)
+    Texture* hugo_telllives[16]; // intro animation (0-15)
     
     // Obstacles
-    SDL_Texture* catapult[8];      // catapult (0-7)
-    SDL_Texture* trap[6];          // trap (0-5)
-    SDL_Texture* rock[8];          // rolling rock (0-7)
-    SDL_Texture* tree[7];          // branch swinging (0-6)
-    SDL_Texture* lone_tree;        // tree trunk
-    SDL_Texture* sack[4];          // sacks (0-3)
+    Texture* catapult[8];      // catapult (0-7)
+    Texture* trap[6];          // trap (0-5)
+    Texture* rock[8];          // rolling rock (0-7)
+    Texture* tree[7];          // branch swinging (0-6)
+    Texture* lone_tree;        // tree trunk
+    Texture* sack[4];          // sacks (0-3)
     
     // HUD elements
-    SDL_Texture* scoreboard;
-    SDL_Texture* score_numbers;    // score digits spritesheet
-    SDL_Texture* hugo_lives;       // life indicator
+    Texture* scoreboard;
+    Texture* score_numbers;    // score digits spritesheet
+    Texture* hugo_lives;       // life indicator
     
     // Forest hurt animations
     Animation hugohitlog;          // branch hit animation (0-42)
@@ -167,69 +174,69 @@ typedef struct {
     Animation cave_hugo_spring;    // hugo spring (0-38)
     Animation cave_family_cage;    // family cage opens (0-33)
     Animation cave_happy;          // happy ending (0-111)
-    SDL_Texture* cave_hugo_sprite;     // hugo standing sprite
+    Texture* cave_hugo_sprite;     // hugo standing sprite
 } GameTextures;
 
 typedef struct {
     // Forest speech
-    Mix_Chunk* speak_start;
-    Mix_Chunk* speak_rock;
-    Mix_Chunk* speak_dieonce;
-    Mix_Chunk* speak_trap;
-    Mix_Chunk* speak_lastlife;
-    Mix_Chunk* speak_catapult_up;
-    Mix_Chunk* speak_catapult_hit;
-    Mix_Chunk* speak_catapult_talktop;
-    Mix_Chunk* speak_catapult_down;
-    Mix_Chunk* speak_catapult_hang;
-    Mix_Chunk* speak_hitlog;
-    Mix_Chunk* speak_gameover;
-    Mix_Chunk* speak_levelcompleted;
+    Audio* speak_start;
+    Audio* speak_rock;
+    Audio* speak_dieonce;
+    Audio* speak_trap;
+    Audio* speak_lastlife;
+    Audio* speak_catapult_up;
+    Audio* speak_catapult_hit;
+    Audio* speak_catapult_talktop;
+    Audio* speak_catapult_down;
+    Audio* speak_catapult_hang;
+    Audio* speak_hitlog;
+    Audio* speak_gameover;
+    Audio* speak_levelcompleted;
     
     // Forest sound effects
-    Mix_Chunk* sfx_bg_atmosphere;
-    Mix_Chunk* sfx_lightning_warning;
-    Mix_Chunk* sfx_hugo_knock;
-    Mix_Chunk* sfx_hugo_hittrap;
-    Mix_Chunk* sfx_hugo_launch;
-    Mix_Chunk* sfx_sack_normal;
-    Mix_Chunk* sfx_sack_bonus;
-    Mix_Chunk* sfx_tree_swush;
-    Mix_Chunk* sfx_hugo_hitlog;
-    Mix_Chunk* sfx_catapult_eject;
-    Mix_Chunk* sfx_birds;
-    Mix_Chunk* sfx_hugo_hitscreen;
-    Mix_Chunk* sfx_hugo_screenklir;
-    Mix_Chunk* sfx_hugo_crash;
-    Mix_Chunk* sfx_hugo_hangstart;
-    Mix_Chunk* sfx_hugo_hang;
-    Mix_Chunk* sfx_hugo_walk[5];
+    Audio* sfx_bg_atmosphere;
+    Audio* sfx_lightning_warning;
+    Audio* sfx_hugo_knock;
+    Audio* sfx_hugo_hittrap;
+    Audio* sfx_hugo_launch;
+    Audio* sfx_sack_normal;
+    Audio* sfx_sack_bonus;
+    Audio* sfx_tree_swush;
+    Audio* sfx_hugo_hitlog;
+    Audio* sfx_catapult_eject;
+    Audio* sfx_birds;
+    Audio* sfx_hugo_hitscreen;
+    Audio* sfx_hugo_screenklir;
+    Audio* sfx_hugo_crash;
+    Audio* sfx_hugo_hangstart;
+    Audio* sfx_hugo_hang;
+    Audio* sfx_hugo_walk[5];
     
     // Cave speech
-    Mix_Chunk* cave_her_er_vi;
-    Mix_Chunk* cave_trappe_snak;
-    Mix_Chunk* cave_nu_kommer_jeg;
-    Mix_Chunk* cave_afskylia_snak;
-    Mix_Chunk* cave_hugo_katapult;
-    Mix_Chunk* cave_hugo_skyd_ud;
-    Mix_Chunk* cave_afskylia_skyd_ud;
-    Mix_Chunk* cave_hugoline_tak;
+    Audio* cave_her_er_vi;
+    Audio* cave_trappe_snak;
+    Audio* cave_nu_kommer_jeg;
+    Audio* cave_afskylia_snak;
+    Audio* cave_hugo_katapult;
+    Audio* cave_hugo_skyd_ud;
+    Audio* cave_afskylia_skyd_ud;
+    Audio* cave_hugoline_tak;
     
     // Cave sound effects
-    Mix_Chunk* cave_stemning;
-    Mix_Chunk* cave_fodtrin1;
-    Mix_Chunk* cave_fodtrin2;
-    Mix_Chunk* cave_hiv_i_reb;
-    Mix_Chunk* cave_fjeder;
-    Mix_Chunk* cave_pre_puf;
-    Mix_Chunk* cave_puf;
-    Mix_Chunk* cave_tast_trykket;
-    Mix_Chunk* cave_pre_fanfare;
-    Mix_Chunk* cave_fanfare;
-    Mix_Chunk* cave_fugle_skrig;
-    Mix_Chunk* cave_trappe_grin;
-    Mix_Chunk* cave_skrig;
-    Mix_Chunk* cave_score_counter;
+    Audio* cave_stemning;
+    Audio* cave_fodtrin1;
+    Audio* cave_fodtrin2;
+    Audio* cave_hiv_i_reb;
+    Audio* cave_fjeder;
+    Audio* cave_pre_puf;
+    Audio* cave_puf;
+    Audio* cave_tast_trykket;
+    Audio* cave_pre_fanfare;
+    Audio* cave_fanfare;
+    Audio* cave_fugle_skrig;
+    Audio* cave_trappe_grin;
+    Audio* cave_skrig;
+    Audio* cave_score_counter;
 } GameAudio;
 
 typedef struct {
@@ -241,8 +248,6 @@ typedef struct {
     bool cave_rope_3_pressed;
 } InputState;
 
-extern SDL_Window* window;
-extern SDL_Renderer* renderer;
 extern GameContext game_ctx;
 extern StateInfo state_info;
 extern GameTextures textures;
@@ -250,5 +255,9 @@ extern GameAudio audio;
 
 typedef GameState (*ProcessFunc)(InputState state);
 typedef void (*RenderFunc)(void);
+typedef void (*OnEnterFunc)(void);
+
+void render(Texture *texture, int x, int y);
+void play(Audio *audio);
 
 #endif
