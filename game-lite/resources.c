@@ -281,6 +281,12 @@ void init_textures(const char *data_dir) {
     // Load cave hugo sprite
     snprintf(path, sizeof(path), "%s/RopeOutroData/gfx/hugo.cgf_0.png", data_dir);
     textures.cave_hugo_sprite = load_texture(path);
+    
+    // Load cave score font (digits 0-9)
+    for (int i = 0; i < 10; i++) {
+        snprintf(path, sizeof(path), "%s/RopeOutroData/gfx/SCORE.cgf_%d.png", data_dir, i);
+        textures.cave_score_font[i] = load_texture(path);
+    }
 }
 
 Mix_Chunk* load_audio(const char* path) {

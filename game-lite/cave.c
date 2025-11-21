@@ -67,6 +67,23 @@ void render_cave_scoreboard(void) {
     int tens = (value % 100) / 10;
     int ones = value % 10;
 
+    // Render score digits using cave score font
+    int x_score = 243;
+    int y_score = 203;
+    int x_space = 16;
+    
+    if (textures.cave_score_font[thousands]) {
+        render(textures.cave_score_font[thousands], x_score + x_space * 0, y_score);
+    }
+    if (textures.cave_score_font[hundreds]) {
+        render(textures.cave_score_font[hundreds], x_score + x_space * 1, y_score);
+    }
+    if (textures.cave_score_font[tens]) {
+        render(textures.cave_score_font[tens], x_score + x_space * 2, y_score);
+    }
+    if (textures.cave_score_font[ones]) {
+        render(textures.cave_score_font[ones], x_score + x_space * 3, y_score);
+    }
 }
 
 CaveState process_cave_waiting_before_talking(InputState state) { 
@@ -531,7 +548,7 @@ GameState process_cave(InputState state) {
     if (next_state != STATE_CAVE_NONE) {
         
         if (next_state == STATE_CAVE_END) {
-            return STATE_FOREST;
+            return STATE_END;
         }
         
         current_cave_state = next_state;
@@ -544,6 +561,9 @@ GameState process_cave(InputState state) {
     if (game_ctx.score != game_ctx.rolling_score && !sounding_score) {
         cave_score_counter_id = play_loop(audio.cave_score_counter);
         sounding_score = true;
+    } else if (game_ctx.score == game_ctx.rolling_score && sounding_score) {
+        stop_audio(cave_score_counter_id);
+        sounding_score = false;
     }
     
     return STATE_NONE;
@@ -588,14 +608,6 @@ void render_cave() {
         default:
             break;            
     }
-    
-    // Update rolling score
-    if (game_ctx.rolling_score < game_ctx.score) {
-        game_ctx.rolling_score += min(10, game_ctx.score - game_ctx.rolling_score);
-    } else if (sounding_score) {
-        stop_audio(cave_score_counter_id);
-        sounding_score = false;
-    }
 }
 
 void on_enter_cave() {
@@ -605,4 +617,8 @@ void on_enter_cave() {
     game_ctx.rolling_score = game_ctx.score;
     on_enter_cave_state(current_cave_state);
     current_state_time = get_game_time();
+}
+
+void set_cave_score(int score) {
+    game_ctx.score = score;
 }

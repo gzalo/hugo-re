@@ -8,6 +8,7 @@ void render_forest_background();
 void render_forest_bottom();
 void external_effect(int effect_type);
 void end_forest();
+int get_forest_score();
 
 // Effect types (matches Python EffectType enum)
 typedef enum {

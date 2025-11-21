@@ -80,6 +80,14 @@ void game_loop() {
         
         if(new_state != STATE_NONE) {
             printf("State transition: %d -> %d\n", current_state, new_state);
+            
+            // Pass forest score to cave when transitioning
+            if (current_state == STATE_FOREST && new_state == STATE_CAVE) {
+                int forest_score = get_forest_score();
+                printf("Passing forest score to cave: %d\n", forest_score);
+                set_cave_score(forest_score);
+            }
+            
             current_state = new_state;
             current_state_start_time = get_game_time();
             reset_state_events();

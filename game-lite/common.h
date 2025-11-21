@@ -95,6 +95,7 @@ typedef struct {
     Animation cave_family_cage;    // family cage opens (0-33)
     Animation cave_happy;          // happy ending (0-111)
     Texture* cave_hugo_sprite;     // hugo standing sprite
+    Texture* cave_score_font[10];  // cave score digits (0-9)
 } GameTextures;
 
 typedef struct {
