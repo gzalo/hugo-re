@@ -1,46 +1,70 @@
 #ifndef FOREST_H
 #define FOREST_H
 
-void init_game_context();
+GameState process_forest(InputState state);
+void render_forest();
+void on_enter_forest();
+void render_forest_background();
+void render_forest_bottom();
+void external_effect(int effect_type);
+void end_forest();
 
-GameState process_forest_branch_animation(InputState state);
-GameState process_forest_branch_talking(InputState state);
-GameState process_forest_flying_falling(InputState state);
-GameState process_forest_flying_falling_hang_animation(InputState state);
-GameState process_forest_flying_falling_hang_talking(InputState state);
-GameState process_forest_flying_start(InputState state);
-GameState process_forest_flying_talking(InputState state);
-GameState process_forest_rock_animation(InputState state);
-GameState process_forest_rock_hit_animation(InputState state);
-GameState process_forest_rock_talking(InputState state);
-GameState process_forest_trap_animation(InputState state);
-GameState process_forest_trap_talking(InputState state);
-GameState process_forest_playing(InputState state);
-GameState process_forest_scylla_button(InputState state);
-GameState process_forest_talking_after_hurt(InputState state);
-GameState process_forest_talking_game_over(InputState state);
-GameState process_forest_wait_intro(InputState state);
-GameState process_forest_win_talking(InputState state);
+// Effect types (matches Python EffectType enum)
+typedef enum {
+    EFFECT_NONE = 0,
+    EFFECT_SPLAT = 1,
+    EFFECT_INVERT = 2
+} EffectType;
 
-void render_forest_branch_animation();
-void render_forest_branch_talking();
-void render_forest_flying_falling();
-void render_forest_flying_falling_hang_animation();
-void render_forest_flying_falling_hang_talking();
-void render_forest_flying_start();
-void render_forest_flying_talking();
-void render_forest_rock_animation();
-void render_forest_rock_hit_animation();
-void render_forest_rock_talking();
-void render_forest_trap_animation();
-void render_forest_trap_talking();
-void render_forest_playing();
-void render_forest_scylla_button();
-void render_forest_talking_after_hurt();
-void render_forest_talking_game_over();
-void render_forest_wait_intro();
-void render_forest_win_talking();
+typedef enum {
+    STATE_FOREST_NONE,
+    STATE_FOREST_BRANCH_ANIMATION,
+    STATE_FOREST_BRANCH_TALKING,
+    STATE_FOREST_FLYING_FALLING,
+    STATE_FOREST_FLYING_FALLING_HANG_ANIMATION,
+    STATE_FOREST_FLYING_FALLING_HANG_TALKING,
+    STATE_FOREST_FLYING_START,
+    STATE_FOREST_FLYING_TALKING,
+    STATE_FOREST_ROCK_ANIMATION,
+    STATE_FOREST_ROCK_HIT_ANIMATION,
+    STATE_FOREST_ROCK_TALKING,
+    STATE_FOREST_TRAP_ANIMATION,
+    STATE_FOREST_TRAP_TALKING,
+    STATE_FOREST_PLAYING,
+    STATE_FOREST_SCYLLA_BUTTON,
+    STATE_FOREST_TALKING_AFTER_HURT,
+    STATE_FOREST_TALKING_GAME_OVER,
+    STATE_FOREST_WAIT_INTRO,
+    STATE_FOREST_WIN_TALKING,
+    STATE_FOREST_END
+} ForestState;
 
-void on_enter_forest_playing();
+typedef enum {
+    OBS_NONE = 0,
+    OBS_CATAPULT = 1,
+    OBS_TRAP = 2,
+    OBS_ROCK = 3,
+    OBS_TREE = 4
+} ObstacleType;
+
+typedef struct {
+    int score;
+    int lives;
+    double parallax_pos;
+    ObstacleType obstacles[FOREST_MAX_TIME];
+    int sacks[FOREST_MAX_TIME];
+    int leaves[FOREST_MAX_TIME];
+    bool arrow_up_focus;
+    bool arrow_down_focus;
+    double hugo_jumping_time;
+    double hugo_crawling_time;
+    double last_time;
+    int old_second;
+    
+    // Cave game state (shared context)
+    int cave_selected_rope;
+    int cave_win_type;
+    int rolling_score;
+} ForestContext;
 
 #endif

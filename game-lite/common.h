@@ -1,94 +1,10 @@
 #include "render_sdl.h"
 #include <stdbool.h>
 #include "config.h"
+#include "resources.h"
 
 #ifndef COMMON_H
 #define COMMON_H
-
-typedef enum {
-    STATE_NONE,
-    STATE_INSTRUCTIONS,
-    STATE_FOREST,
-    STATE_CAVE,
-
-    // Forest states
-    STATE_FOREST_BRANCH_ANIMATION,
-    STATE_FOREST_BRANCH_TALKING,
-    STATE_FOREST_FLYING_FALLING,
-    STATE_FOREST_FLYING_FALLING_HANG_ANIMATION,
-    STATE_FOREST_FLYING_FALLING_HANG_TALKING,
-    STATE_FOREST_FLYING_START,
-    STATE_FOREST_FLYING_TALKING,
-    STATE_FOREST_ROCK_ANIMATION,
-    STATE_FOREST_ROCK_HIT_ANIMATION,
-    STATE_FOREST_ROCK_TALKING,
-    STATE_FOREST_TRAP_ANIMATION,
-    STATE_FOREST_TRAP_TALKING,
-    STATE_FOREST_PLAYING,
-    STATE_FOREST_SCYLLA_BUTTON,
-    STATE_FOREST_TALKING_AFTER_HURT,
-    STATE_FOREST_TALKING_GAME_OVER,
-    STATE_FOREST_WAIT_INTRO,
-    STATE_FOREST_WIN_TALKING,
-
-    // Cave bonus game states
-    STATE_CAVE_CLIMBING,
-    STATE_CAVE_FAMILY_CAGE_OPENS,
-    STATE_CAVE_FAMILY_HAPPY,
-    STATE_CAVE_GOING_ROPE,
-    STATE_CAVE_LOST,
-    STATE_CAVE_LOST_SPRING,
-    STATE_CAVE_SCYLLA_LOST,
-    STATE_CAVE_SCYLLA_SPRING,
-    STATE_CAVE_TALKING_BEFORE_CLIMB,
-    STATE_CAVE_WAITING_BEFORE_TALKING,
-    STATE_CAVE_WAITING_INPUT,
-
-    // End state
-    STATE_END
-} GameState;
-
-typedef enum {
-    OBS_NONE = 0,
-    OBS_CATAPULT = 1,
-    OBS_TRAP = 2,
-    OBS_ROCK = 3,
-    OBS_TREE = 4
-} ObstacleType;
-
-typedef struct {
-    int score;
-    int lives;
-    double parallax_pos;
-    ObstacleType obstacles[FOREST_MAX_TIME];
-    int sacks[FOREST_MAX_TIME];
-    int leaves[FOREST_MAX_TIME];
-    bool arrow_up_focus;
-    bool arrow_down_focus;
-    double hugo_jumping_time;
-    double hugo_crawling_time;
-    double last_time;
-    int old_second;
-    // Cave game data
-    int cave_selected_rope;  // 0, 1, or 2 for ropes 3, 6, 9
-    int cave_win_type;       // 0=bird, 1=leaves, 2=ropes
-    int rolling_score;
-} GameContext;
-
-typedef struct {
-    double state_start_time;
-    GameState current_state;
-} StateInfo;
-
-typedef struct {
-    Texture** frames;
-    int frame_count;
-    int* sync_data;
-    int sync_count;
-} Animation;
-
-Texture* animation_get_sync_frame(Animation animation, int frame_index);
-Texture* animation_get_frame(Animation animation, int frame_index);
 
 typedef struct {
     // Fixed assets
@@ -104,7 +20,6 @@ typedef struct {
     Texture* leaves1;
     Texture* leaves2;
     Texture* end_mountain;
-
     
     // Hugo animations
     Texture* hugo_side[8];     // walking (0-7)
@@ -250,13 +165,15 @@ typedef enum {
     RENDER_POST
 } RenderStage;
 
-extern GameContext game_ctx;
-extern StateInfo state_info;
 extern GameTextures textures;
 extern GameAudio audio;
 
-typedef GameState (*ProcessFunc)(InputState state);
-typedef void (*RenderFunc)(void);
-typedef void (*OnEnterFunc)(void);
+typedef enum {
+    STATE_NONE,
+    STATE_INSTRUCTIONS,
+    STATE_FOREST,
+    STATE_CAVE,
+    STATE_END
+} GameState;
 
 #endif

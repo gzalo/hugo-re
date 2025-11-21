@@ -6,22 +6,17 @@
 #include <stdlib.h>   // rand, srand
 #include <time.h>     // time
 
+#include "forest.h"
+
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
 #endif
 
-// -----------------------------------------------------------------------------
-// Additional constants used here but not in common.h
-// -----------------------------------------------------------------------------
+static ForestContext game_ctx = {0};
+static ForestState current_forest_state = STATE_FOREST_WAIT_INTRO;
+static double current_state_time = 0.0;
 
-// Background speed multiplier used in Python version
-#ifndef FOREST_BG_SPEED_MULTIPLIER
 #define FOREST_BG_SPEED_MULTIPLIER 1.0
-#endif
-
-// -----------------------------------------------------------------------------
-// Helper for modulo that matches Python's behavior for scrolling
-// -----------------------------------------------------------------------------
 
 static double new_mod(double a, double b) {
     double res = fmod(a, b);
@@ -69,11 +64,11 @@ void generate_obstacles() {
 
 void generate_sacks() {
     // Match Python probabilities exactly:
-    // empty 70%, normal 21%, bonus 9%
+    // empty 70%, normal 21% (other_prob = 0.3 * 0.7 = 0.21), gold 9% (other_prob_high = 0.3 * 0.3 = 0.09)
     for (int i = 0; i < FOREST_MAX_TIME; i++) {
         int r = rand() % 100;
         if (r < 70) {
-            game_ctx.sacks[i] = 0; // No sack
+            game_ctx.sacks[i] = 0; // No sack (70%)
         } else if (r < 91) {  // 70 + 21 = 91
             game_ctx.sacks[i] = 1; // Normal sack (21%)
         } else {
@@ -125,7 +120,30 @@ void init_game_context() {
 
 // ---------------- HUD / BOTTOM ----------------
 
-void render_hud() {
+// Helper to get spritesheet area (matches Python get_spritesheet_area)
+typedef struct {
+    int x;
+    int y;
+    int width;
+    int height;
+} SpriteSheetArea;
+
+
+static SpriteSheetArea get_spritesheet_area(int value) {
+    int width = 32;
+    int height = 33;
+    int xpos = value % 5;
+    int ypos = value / 5;
+    
+    SpriteSheetArea area;
+    area.x = 1 + xpos * (width + 1);
+    area.y = 1 + ypos * (height + 1);
+    area.width = width;
+    area.height = height;
+    return area;
+}
+
+void render_forest_bottom() {
     render(textures.scoreboard, 0, 184);
 
     // Lives indicators
@@ -146,14 +164,8 @@ void render_hud() {
 
     int vals[4] = { thousands, hundreds, tens, ones };
     for (int i = 0; i < 4; i++) {
-        int v = vals[i];
-        int width  = 32;
-        int height = 33;
-        int xpos   = v % 5;
-        int ypos   = v / 5;
-        int sx = 1 + xpos * (width + 1);
-        int sy = 1 + ypos * (height + 1);
-        render_subtexture(textures.score_numbers, sx, sy, width, height,
+        SpriteSheetArea area = get_spritesheet_area(vals[i]);
+        render_subtexture(textures.score_numbers, area.x, area.y, area.width, area.height,
                           x_score + x_space * i, y_score);
     }
 }
@@ -161,7 +173,7 @@ void render_hud() {
 // ---------------- RENDERING: BACKGROUND / OBSTACLES / SACKS / HUGO / CONTROLS ----------------
 
 void render_obstacles() {
-    int frame = get_frame_index();
+    int frame = get_frame_index(current_state_time);
     double fract = game_ctx.parallax_pos - floor(game_ctx.parallax_pos);
 
     for (int i = 0; i < FOREST_MAX_TIME; i++) {
@@ -210,7 +222,7 @@ void render_obstacles() {
 }
 
 void render_sacks() {
-    (void)get_frame_index(); // frame not used but kept for parity
+    (void)get_frame_index(current_state_time); // frame not used but kept for parity
 
     for (int i = 0; i < FOREST_MAX_TIME; i++) {
         if (game_ctx.sacks[i] == 0) continue;
@@ -248,7 +260,7 @@ void render_leaves() {
 }
 
 void render_hugo() {
-    int frame = get_frame_index();
+    int frame = get_frame_index(current_state_time);
     int hugo_x = HUGO_X_POS;
     double now = get_game_time();
 
@@ -288,7 +300,7 @@ void render_controls() {
 }
 
 // Render background (match Python parallax as close as possible)
-void render_background() {
+void render_forest_background() {
     double hills_speed = 6.0 * FOREST_BG_SPEED_MULTIPLIER;
     double trees_speed = 12.0 * FOREST_BG_SPEED_MULTIPLIER;
     double grass_speed = 30.0 * FOREST_BG_SPEED_MULTIPLIER;
@@ -348,16 +360,17 @@ void render_background() {
 }
 
 void render_forest_playing() {
-    render_background();
+    render_forest_background();
     render_obstacles();
     render_sacks();
     render_leaves();
     render_hugo();
     render_controls();
-    render_hud();
+    render_forest_bottom();
 }
 
 void on_enter_forest_playing() {
+    init_game_context();
     game_ctx.arrow_up_focus = false;
     game_ctx.arrow_down_focus = false;
     game_ctx.hugo_jumping_time = -1;
@@ -370,7 +383,7 @@ void on_enter_forest_playing() {
 
 void render_forest_branch_animation() {
     if (textures.hugohitlog.frames && textures.hugohitlog.frame_count > 0) {
-        int frame = get_frame_index_fast();
+        int frame = get_frame_index_fast(current_state_time);
         if (frame >= textures.hugohitlog.frame_count) frame = textures.hugohitlog.frame_count - 1;
         Texture *t = textures.hugohitlog.frames[frame];
         if (t) render(t, 0, 0);
@@ -378,7 +391,7 @@ void render_forest_branch_animation() {
 }
 
 void render_forest_branch_talking() {
-    int frame = get_frame_index();
+    int frame = get_frame_index(current_state_time);
     
     // Use sync_hitlog with hugohitlog_talk animation
     if (textures.hugohitlog_talk.frames && textures.hugohitlog_talk.frame_count > 0 && 
@@ -402,7 +415,7 @@ void render_forest_branch_talking() {
 
 void render_forest_flying_start() {
     if (textures.catapult_fly.frames && textures.catapult_fly.frame_count > 0) {
-        int frame = get_frame_index_fast();
+        int frame = get_frame_index_fast(current_state_time);
         if (frame >= textures.catapult_fly.frame_count) frame = textures.catapult_fly.frame_count - 1;
         Texture *t = textures.catapult_fly.frames[frame];
         if (t) render(t, 0, 0);
@@ -410,7 +423,7 @@ void render_forest_flying_start() {
 }
 
 void render_forest_flying_talking() {
-    int frame = get_frame_index();
+    int frame = get_frame_index(current_state_time);
     
     // Use sync_catapult_talktop with catapult_airtalk animation
     if (textures.catapult_airtalk.frames && textures.catapult_airtalk.frame_count > 0 && 
@@ -434,7 +447,7 @@ void render_forest_flying_talking() {
 
 void render_forest_flying_falling() {
     if (textures.catapult_fall.frames && textures.catapult_fall.frame_count > 0) {
-        int frame = get_frame_index_fast();
+        int frame = get_frame_index_fast(current_state_time);
         if (frame >= textures.catapult_fall.frame_count) frame = textures.catapult_fall.frame_count - 1;
         Texture *t = textures.catapult_fall.frames[frame];
         if (t) render(t, 0, 0);
@@ -443,7 +456,7 @@ void render_forest_flying_falling() {
 
 void render_forest_flying_falling_hang_animation() {
     if (textures.catapult_hang.frames && textures.catapult_hang.frame_count > 0) {
-        int frame = get_frame_index_fast();
+        int frame = get_frame_index_fast(current_state_time);
         if (frame >= textures.catapult_hang.frame_count) frame = textures.catapult_hang.frame_count - 1;
         Texture *t = textures.catapult_hang.frames[frame];
         if (t) render(t, 0, 0);
@@ -451,7 +464,7 @@ void render_forest_flying_falling_hang_animation() {
 }
 
 void render_forest_flying_falling_hang_talking() {
-    int frame = get_frame_index();
+    int frame = get_frame_index(current_state_time);
     
     // Static hang frame 12 as background
     if (textures.catapult_hang.frames && textures.catapult_hang.frame_count > 12) {
@@ -481,7 +494,7 @@ void render_forest_flying_falling_hang_talking() {
 
 void render_forest_rock_animation() {
     if (textures.hugo_lookrock.frames && textures.hugo_lookrock.frame_count > 0) {
-        int frame = get_frame_index_fast();
+        int frame = get_frame_index_fast(current_state_time);
         if (frame >= textures.hugo_lookrock.frame_count) frame = textures.hugo_lookrock.frame_count - 1;
         Texture *t = textures.hugo_lookrock.frames[frame];
         if (t) render(t, 0, 0);
@@ -490,7 +503,7 @@ void render_forest_rock_animation() {
 
 void render_forest_rock_hit_animation() {
     if (textures.hit_rock.frames && textures.hit_rock.frame_count > 0) {
-        int frame = get_frame_index_fast();
+        int frame = get_frame_index_fast(current_state_time);
         if (frame >= textures.hit_rock.frame_count) frame = textures.hit_rock.frame_count - 1;
         Texture *t = textures.hit_rock.frames[frame];
         if (t) render(t, 0, 0);
@@ -498,7 +511,7 @@ void render_forest_rock_hit_animation() {
 }
 
 void render_forest_rock_talking() {
-    int frame = get_frame_index();
+    int frame = get_frame_index(current_state_time);
     
     // Use sync_rock data if available, otherwise fall back to hit_rock_sync animation
     if (textures.hugo_telllives.frames && textures.hugo_telllives.frame_count > 0 && 
@@ -522,7 +535,7 @@ void render_forest_rock_talking() {
 
 void render_forest_trap_animation() {
     if (textures.hugo_traphurt.frames && textures.hugo_traphurt.frame_count > 0) {
-        int frame = get_frame_index();
+        int frame = get_frame_index(current_state_time);
         if (frame >= textures.hugo_traphurt.frame_count) frame = textures.hugo_traphurt.frame_count - 1;
         Texture *t = textures.hugo_traphurt.frames[frame];
         if (t) render(t, 0, 0);
@@ -530,7 +543,7 @@ void render_forest_trap_animation() {
 }
 
 void render_forest_trap_talking() {
-    int frame = get_frame_index();
+    int frame = get_frame_index(current_state_time);
     
     // Use sync_trap data if available with hugo_telllives, otherwise use hugo_traptalk
     if (textures.hugo_telllives.frames && textures.hugo_telllives.frame_count > 0 && 
@@ -559,7 +572,7 @@ void render_forest_scylla_button() {
 }
 
 void render_forest_talking_after_hurt() {
-    int frame = get_frame_index();
+    int frame = get_frame_index(current_state_time);
     
     // Use appropriate sync data based on lives remaining
     int* sync_data = (game_ctx.lives == 1) ? textures.sync_lastlife : textures.sync_dieonce;
@@ -587,7 +600,7 @@ void render_forest_talking_after_hurt() {
 }
 
 void render_forest_talking_game_over() {
-    int frame = get_frame_index();
+    int frame = get_frame_index(current_state_time);
     
     // Use sync_gameover data
     if (textures.hugo_telllives.frames && textures.hugo_telllives.frame_count > 0 && 
@@ -605,7 +618,7 @@ void render_forest_talking_game_over() {
 }
 
 void render_forest_win_talking() {
-    int frame = get_frame_index();
+    int frame = get_frame_index(current_state_time);
     
     // Use sync_levelcompleted data
     if (textures.hugo_telllives.frames && textures.hugo_telllives.frame_count > 0 && 
@@ -623,7 +636,7 @@ void render_forest_win_talking() {
 }
 
 void render_forest_wait_intro() {
-    int frame = get_frame_index();
+    int frame = get_frame_index(current_state_time);
     
     // Use sync_start data for intro talking
     if (textures.hugo_telllives.frames && textures.hugo_telllives.frame_count > 0 && 
@@ -664,7 +677,7 @@ bool check_collision(int obstacle_idx) {
 
 // ---------------- STATE PROCESSING: PLAYING / HURT / TALKING / WIN / GAME OVER ----------------
 
-GameState process_forest_playing(InputState state) {
+ForestState process_forest_playing(InputState state) {
     // Inputs: map to key_up / key_down from common.h
     if (!game_ctx.arrow_up_focus && !game_ctx.arrow_down_focus) {
         if (state.key_up) {
@@ -761,7 +774,7 @@ GameState process_forest_playing(InputState state) {
     }
 
     // Footstep SFX every 8 frames if not jumping
-    if (get_frame_index() % 8 == 0 && !game_ctx.arrow_up_focus) {
+    if (get_frame_index(current_state_time) % 8 == 0 && !game_ctx.arrow_up_focus) {
         int r = rand() % 5;
         Audio *walk_sfx[5] = {
             audio.sfx_hugo_walk[0],
@@ -773,11 +786,11 @@ GameState process_forest_playing(InputState state) {
         if (walk_sfx[r]) play(walk_sfx[r]);
     }
 
-    return STATE_NONE;
+    return STATE_FOREST_NONE;
 }
 
 // Helper: reduce lives and go to appropriate talking/game over
-GameState reduce_lives_and_transition() {
+ForestState reduce_lives_and_transition() {
     game_ctx.lives--;
     printf("Hit obstacle! Lives remaining: %d\n", game_ctx.lives);
 
@@ -790,197 +803,197 @@ GameState reduce_lives_and_transition() {
 
 // ---------------- HURT STATE PROCESSING ----------------
 
-GameState process_forest_branch_animation(InputState state) {
+ForestState process_forest_branch_animation(InputState state) {
     (void)state;
-    if (one_shot(0.0, 0)) {
+    if (one_shot(current_state_time, 0.0, 0)) {
         if (audio.sfx_birds) play(audio.sfx_birds);
     }
 
-    if (get_frame_index_fast() >= textures.hugohitlog.frame_count) {
+    if (get_frame_index_fast(current_state_time) >= textures.hugohitlog.frame_count) {
         return STATE_FOREST_BRANCH_TALKING;
     }
-    return STATE_NONE;
+    return STATE_FOREST_NONE;
 }
 
-GameState process_forest_branch_talking(InputState state) {
+ForestState process_forest_branch_talking(InputState state) {
     (void)state;
-    if (one_shot(0.0, 0)) {
+    if (one_shot(current_state_time, 0.0, 0)) {
         if (audio.speak_hitlog) play(audio.speak_hitlog);
     }
 
     // Use sync data to determine transition
-    if (textures.sync_hitlog_count > 0 && get_frame_index() >= textures.sync_hitlog_count) {
+    if (textures.sync_hitlog_count > 0 && get_frame_index(current_state_time) >= textures.sync_hitlog_count) {
         return reduce_lives_and_transition();
     }
 
     // Fallback
-    if (get_frame_index() >= textures.hugohitlog_talk.frame_count) {
+    if (get_frame_index(current_state_time) >= textures.hugohitlog_talk.frame_count) {
         return reduce_lives_and_transition();
     }
-    return STATE_NONE;
+    return STATE_FOREST_NONE;
 }
 
-GameState process_forest_flying_start(InputState state) {
+ForestState process_forest_flying_start(InputState state) {
     (void)state;
-    if (one_shot(0.0, 0)) {
+    if (one_shot(current_state_time, 0.0, 0)) {
         if (audio.speak_catapult_up) play(audio.speak_catapult_up);
     }
 
-    if (one_shot(2.7, 1)) {
+    if (one_shot(current_state_time, 2.7, 1)) {
         if (audio.sfx_hugo_screenklir) play(audio.sfx_hugo_screenklir);
     }
 
-    if (one_shot(2.7, 2)) {
+    if (one_shot(current_state_time, 2.7, 2)) {
         if (audio.speak_catapult_hit) play(audio.speak_catapult_hit);
     }
 
-    if (get_frame_index_fast() >= textures.catapult_fly.frame_count) {
+    if (get_frame_index_fast(current_state_time) >= textures.catapult_fly.frame_count) {
         return STATE_FOREST_FLYING_TALKING;
     }
-    return STATE_NONE;
+    return STATE_FOREST_NONE;
 }
 
-GameState process_forest_flying_talking(InputState state) {
+ForestState process_forest_flying_talking(InputState state) {
     (void)state;
-    if (one_shot(0.0, 0)) {
+    if (one_shot(current_state_time, 0.0, 0)) {
         if (audio.speak_catapult_talktop) play(audio.speak_catapult_talktop);
     }
 
     // Use sync data to determine transition
-    if (textures.sync_catapult_talktop_count > 0 && get_frame_index() >= textures.sync_catapult_talktop_count) {
+    if (textures.sync_catapult_talktop_count > 0 && get_frame_index(current_state_time) >= textures.sync_catapult_talktop_count) {
         return STATE_FOREST_FLYING_FALLING;
     }
 
     // Fallback
-    if (get_frame_index() >= textures.catapult_airtalk.frame_count) {
+    if (get_frame_index(current_state_time) >= textures.catapult_airtalk.frame_count) {
         return STATE_FOREST_FLYING_FALLING;
     }
-    return STATE_NONE;
+    return STATE_FOREST_NONE;
 }
 
-GameState process_forest_flying_falling(InputState state) {
+ForestState process_forest_flying_falling(InputState state) {
     (void)state;
-    if (one_shot(0.0, 0)) {
+    if (one_shot(current_state_time, 0.0, 0)) {
         if (audio.speak_catapult_down) play(audio.speak_catapult_down);
         if (audio.sfx_hugo_crash)       play(audio.sfx_hugo_crash);
     }
 
-    if (get_frame_index_fast() >= textures.catapult_fall.frame_count) {
+    if (get_frame_index_fast(current_state_time) >= textures.catapult_fall.frame_count) {
         return STATE_FOREST_FLYING_FALLING_HANG_ANIMATION;
     }
-    return STATE_NONE;
+    return STATE_FOREST_NONE;
 }
 
-GameState process_forest_flying_falling_hang_animation(InputState state) {
+ForestState process_forest_flying_falling_hang_animation(InputState state) {
     (void)state;
-    if (one_shot(0.0, 0)) {
+    if (one_shot(current_state_time, 0.0, 0)) {
         if (audio.sfx_hugo_hangstart) play(audio.sfx_hugo_hangstart);
     }
 
-    if (get_frame_index_fast() >= textures.catapult_hang.frame_count) {
+    if (get_frame_index_fast(current_state_time) >= textures.catapult_hang.frame_count) {
         return STATE_FOREST_FLYING_FALLING_HANG_TALKING;
     }
-    return STATE_NONE;
+    return STATE_FOREST_NONE;
 }
 
-GameState process_forest_flying_falling_hang_talking(InputState state) {
+ForestState process_forest_flying_falling_hang_talking(InputState state) {
     (void)state;
-    if (one_shot(0.0, 0)) {
+    if (one_shot(current_state_time, 0.0, 0)) {
         if (audio.speak_catapult_hang) play(audio.speak_catapult_hang);
         if (audio.sfx_hugo_hang)       play(audio.sfx_hugo_hang);
     }
 
     // Use sync data to determine transition
-    if (textures.sync_catapult_hang_count > 0 && get_frame_index() >= textures.sync_catapult_hang_count) {
+    if (textures.sync_catapult_hang_count > 0 && get_frame_index(current_state_time) >= textures.sync_catapult_hang_count) {
         return reduce_lives_and_transition();
     }
 
     // Fallback: time-based
-    if (get_state_time() > 3.0) {
+    if (get_state_time(current_state_time) > 3.0) {
         return reduce_lives_and_transition();
     }
-    return STATE_NONE;
+    return STATE_FOREST_NONE;
 }
 
-GameState process_forest_rock_animation(InputState state) {
+ForestState process_forest_rock_animation(InputState state) {
     (void)state;
-    if (get_frame_index_fast() >= textures.hugo_lookrock.frame_count) {
+    if (get_frame_index_fast(current_state_time) >= textures.hugo_lookrock.frame_count) {
         return STATE_FOREST_ROCK_HIT_ANIMATION;
     }
-    return STATE_NONE;
+    return STATE_FOREST_NONE;
 }
 
-GameState process_forest_rock_hit_animation(InputState state) {
+ForestState process_forest_rock_hit_animation(InputState state) {
     (void)state;
-    if (get_frame_index_fast() >= textures.hit_rock.frame_count) {
+    if (get_frame_index_fast(current_state_time) >= textures.hit_rock.frame_count) {
         return STATE_FOREST_ROCK_TALKING;
     }
-    return STATE_NONE;
+    return STATE_FOREST_NONE;
 }
 
-GameState process_forest_rock_talking(InputState state) {
+ForestState process_forest_rock_talking(InputState state) {
     (void)state;
-    if (one_shot(0.0, 0)) {
+    if (one_shot(current_state_time, 0.0, 0)) {
         if (audio.speak_rock) play(audio.speak_rock);
     }
 
     // Use sync data if available
-    if (textures.sync_rock_count > 0 && get_frame_index() >= textures.sync_rock_count) {
+    if (textures.sync_rock_count > 0 && get_frame_index(current_state_time) >= textures.sync_rock_count) {
         return reduce_lives_and_transition();
     }
 
     // Fallback: time-based
-    if (get_state_time() > 3.0) {
+    if (get_state_time(current_state_time) > 3.0) {
         return reduce_lives_and_transition();
     }
-    return STATE_NONE;
+    return STATE_FOREST_NONE;
 }
 
-GameState process_forest_trap_animation(InputState state) {
+ForestState process_forest_trap_animation(InputState state) {
     (void)state;
-    if (get_frame_index() >= textures.hugo_traphurt.frame_count) {
+    if (get_frame_index(current_state_time) >= textures.hugo_traphurt.frame_count) {
         return STATE_FOREST_TRAP_TALKING;
     }
-    return STATE_NONE;
+    return STATE_FOREST_NONE;
 }
 
-GameState process_forest_trap_talking(InputState state) {
+ForestState process_forest_trap_talking(InputState state) {
     (void)state;
-    if (one_shot(0.0, 0)) {
+    if (one_shot(current_state_time, 0.0, 0)) {
         if (audio.speak_trap) play(audio.speak_trap);
     }
 
     // Use sync data if available
-    if (textures.sync_trap_count > 0 && get_frame_index() >= textures.sync_trap_count) {
+    if (textures.sync_trap_count > 0 && get_frame_index(current_state_time) >= textures.sync_trap_count) {
         return reduce_lives_and_transition();
     }
 
     // Fallback: time-based
-    if (get_state_time() > 3.0) {
+    if (get_state_time(current_state_time) > 3.0) {
         return reduce_lives_and_transition();
     }
-    return STATE_NONE;
+    return STATE_FOREST_NONE;
 }
 
-GameState process_forest_scylla_button(InputState state) {
+ForestState process_forest_scylla_button(InputState state) {
     (void)state;
-    if (one_shot(0.5, 0)) {
+    if (one_shot(current_state_time, 0.5, 0)) {
         if (audio.sfx_lightning_warning) play(audio.sfx_lightning_warning);
     }
 
-    if (get_state_time() > 2.0) {
+    if (get_state_time(current_state_time) > 2.0) {
         return STATE_FOREST_PLAYING;
     }
-    return STATE_NONE;
+    return STATE_FOREST_NONE;
 }
 
-GameState process_forest_talking_after_hurt(InputState state) {
+ForestState process_forest_talking_after_hurt(InputState state) {
     (void)state;
-    if (one_shot(0.5, 0)) {
+    if (one_shot(current_state_time, 0.5, 0)) {
         if (audio.sfx_hugo_knock) play(audio.sfx_hugo_knock);
     }
 
-    if (one_shot(0.0, 1)) {
+    if (one_shot(current_state_time, 0.0, 1)) {
         if (audio.sfx_hugo_knock) play(audio.sfx_hugo_knock);
         if (game_ctx.lives == 1) {
             if (audio.speak_lastlife) play(audio.speak_lastlife);
@@ -991,85 +1004,228 @@ GameState process_forest_talking_after_hurt(InputState state) {
 
     // Use sync data to determine when to transition
     int sync_count = (game_ctx.lives == 1) ? textures.sync_lastlife_count : textures.sync_dieonce_count;
-    if (sync_count > 0 && get_frame_index() >= sync_count) {
+    if (sync_count > 0 && get_frame_index(current_state_time) >= sync_count) {
         return STATE_FOREST_PLAYING;
     }
 
     // Fallback: after some time, continue
-    if (get_state_time() > 4.0) {
+    if (get_state_time(current_state_time) > 4.0) {
         return STATE_FOREST_PLAYING;
     }
-    return STATE_NONE;
+    return STATE_FOREST_NONE;
 }
 
-GameState process_forest_talking_game_over(InputState state) {
+ForestState process_forest_talking_game_over(InputState state) {
     (void)state;
-    if (one_shot(0.0, 0)) {
+    if (one_shot(current_state_time, 0.0, 0)) {
         if (audio.speak_gameover) play(audio.speak_gameover);
     }
 
     // Use sync data to determine when to transition
-    if (textures.sync_gameover_count > 0 && get_frame_index() >= textures.sync_gameover_count) {
-        return STATE_END;
+    if (textures.sync_gameover_count > 0 && get_frame_index(current_state_time) >= textures.sync_gameover_count) {
+        return STATE_FOREST_END;
     }
 
     // Fallback: after some time, end
-    if (get_state_time() > 5.0) {
-        return STATE_END;
+    if (get_state_time(current_state_time) > 5.0) {
+        return STATE_FOREST_END;
     }
-    return STATE_NONE;
+    return STATE_FOREST_NONE;
 }
 
-GameState process_forest_wait_intro(InputState state) {
+ForestState process_forest_wait_intro(InputState state) {
     (void)state;
-    if (one_shot(0.0, 0)) {
+    if (one_shot(current_state_time, 0.0, 0)) {
         if (audio.speak_start) play(audio.speak_start);
     }
 
     // Use sync data to determine when to transition to playing
-    if (textures.sync_start_count > 0 && get_frame_index() >= textures.sync_start_count) {
+    if (textures.sync_start_count > 0 && get_frame_index(current_state_time) >= textures.sync_start_count) {
         return STATE_FOREST_PLAYING;
     }
 
     // Fallback timeout
-    if (get_state_time() > 3.0) {
+    if (get_state_time(current_state_time) > 3.0) {
         return STATE_FOREST_PLAYING;
     }
-    return STATE_NONE;
+    return STATE_FOREST_NONE;
 }
 
-GameState process_forest_win_talking(InputState state) {
+ForestState process_forest_win_talking(InputState state) {
     (void)state;
-    if (one_shot(0.0, 0)) {
+    if (one_shot(current_state_time, 0.0, 0)) {
         if (audio.speak_levelcompleted) play(audio.speak_levelcompleted);
     }
 
     // Use sync data to determine when to transition
-    if (textures.sync_levelcompleted_count > 0 && get_frame_index() >= textures.sync_levelcompleted_count) {
-        return STATE_CAVE_WAITING_BEFORE_TALKING;
+    if (textures.sync_levelcompleted_count > 0 && get_frame_index(current_state_time) >= textures.sync_levelcompleted_count) {
+        return STATE_FOREST_END;
     }
 
     // Fallback timeout
-    if (get_state_time() > 5.0) {
-        return STATE_CAVE_WAITING_BEFORE_TALKING;
+    if (get_state_time(current_state_time) > 5.0) {
+        return STATE_FOREST_END;
     }
-    return STATE_NONE;
+    return STATE_FOREST_NONE;
 }
 
 // Legacy win / game over (kept for compatibility)
 
-GameState process_win(InputState state) {
+ForestState process_win(InputState state) {
     (void)state;
-    if (get_state_time() > 3.0) {
-        return STATE_CAVE_WAITING_BEFORE_TALKING;
+    if (get_state_time(current_state_time) > 3.0) {
+        return STATE_FOREST_END;
     }
+    return STATE_FOREST_NONE;
+}
+
+ForestState process_game_over(InputState state) {
+    (void)state;
+    if (get_state_time(current_state_time) > 5.0) {
+        return STATE_FOREST_END;
+    }
+    return STATE_FOREST_NONE;
+}
+
+
+GameState process_forest(InputState state){
+
+    ForestState next_state = STATE_FOREST_NONE;
+
+    switch (current_forest_state) {
+    case STATE_FOREST_WAIT_INTRO:
+        next_state = process_forest_wait_intro(state);
+        break;
+    case STATE_FOREST_PLAYING:
+        next_state = process_forest_playing(state);
+        break;
+    case STATE_FOREST_BRANCH_ANIMATION:
+        next_state = process_forest_branch_animation(state);
+        break;
+    case STATE_FOREST_BRANCH_TALKING:
+        next_state = process_forest_branch_talking(state);
+        break;
+    case STATE_FOREST_FLYING_START:
+        next_state = process_forest_flying_start(state);
+        break;
+    case STATE_FOREST_FLYING_TALKING:
+        next_state = process_forest_flying_talking(state);
+        break;
+    case STATE_FOREST_FLYING_FALLING:
+        next_state = process_forest_flying_falling(state);
+        break;
+    case STATE_FOREST_FLYING_FALLING_HANG_ANIMATION:
+        next_state = process_forest_flying_falling_hang_animation(state);
+        break;
+    case STATE_FOREST_FLYING_FALLING_HANG_TALKING:
+        next_state = process_forest_flying_falling_hang_talking(state);
+        break;
+    case STATE_FOREST_ROCK_ANIMATION:
+        next_state = process_forest_rock_animation(state);
+        break;
+    case STATE_FOREST_ROCK_HIT_ANIMATION:
+        next_state = process_forest_rock_hit_animation(state);
+        break;
+    case STATE_FOREST_ROCK_TALKING:
+        next_state = process_forest_rock_talking(state);
+        break;
+    case STATE_FOREST_TRAP_ANIMATION:
+        next_state = process_forest_trap_animation(state);
+        break;
+    case STATE_FOREST_TRAP_TALKING:
+        next_state = process_forest_trap_talking(state);
+        break;
+    case STATE_FOREST_SCYLLA_BUTTON:
+        next_state = process_forest_scylla_button(state);
+        break;
+    case STATE_FOREST_TALKING_AFTER_HURT:
+        next_state = process_forest_talking_after_hurt(state);
+        break;
+    case STATE_FOREST_TALKING_GAME_OVER:
+        next_state = process_forest_talking_game_over(state);
+        break;
+    case STATE_FOREST_WIN_TALKING:
+        next_state = process_forest_win_talking(state);
+        break;
+    default:
+        break;
+    }
+
+     // Handle state transitions
+    if (next_state != STATE_FOREST_NONE) {
+        if (next_state == STATE_FOREST_END) {
+            return STATE_CAVE;
+        }
+        
+        current_forest_state = next_state;
+        reset_state_events();
+        current_state_time = get_game_time();
+    }
+       
     return STATE_NONE;
 }
 
-GameState process_game_over(InputState state) {
-    (void)state;
-    if (get_state_time() > 5.0) {
-        return STATE_END;
+void render_forest(){
+    switch (current_forest_state) {
+    case STATE_FOREST_WAIT_INTRO:
+        render_forest_wait_intro();
+        break;
+    case STATE_FOREST_PLAYING:
+        render_forest_playing();
+        break;
+    case STATE_FOREST_BRANCH_ANIMATION:
+        render_forest_branch_animation();
+        break;
+    case STATE_FOREST_BRANCH_TALKING:
+        render_forest_branch_talking();
+        break;
+    case STATE_FOREST_FLYING_START:
+        render_forest_flying_start();
+        break;
+    case STATE_FOREST_FLYING_TALKING:
+        render_forest_flying_talking();
+        break;
+    case STATE_FOREST_FLYING_FALLING:
+        render_forest_flying_falling();
+        break;
+    case STATE_FOREST_FLYING_FALLING_HANG_ANIMATION:
+        render_forest_flying_falling_hang_animation();
+        break;
+    case STATE_FOREST_FLYING_FALLING_HANG_TALKING:
+        render_forest_flying_falling_hang_talking();
+        break;
+    case STATE_FOREST_ROCK_ANIMATION:
+        render_forest_rock_animation();
+        break;
+    case STATE_FOREST_ROCK_HIT_ANIMATION:
+        render_forest_rock_hit_animation();
+        break;
+    case STATE_FOREST_ROCK_TALKING:
+        render_forest_rock_talking();
+        break;
+    case STATE_FOREST_TRAP_ANIMATION:
+        render_forest_trap_animation();
+        break;
+    case STATE_FOREST_TRAP_TALKING:
+        render_forest_trap_talking();
+        break;
+    case STATE_FOREST_SCYLLA_BUTTON:
+        render_forest_scylla_button();
+        break;
+    case STATE_FOREST_TALKING_AFTER_HURT:
+        render_forest_talking_after_hurt();
+        break;
+    case STATE_FOREST_TALKING_GAME_OVER:
+        render_forest_talking_game_over();
+        break;
+    case STATE_FOREST_WIN_TALKING:
+        render_forest_win_talking();
+        break;
+    default:
+        break;
     }
-    return STATE_NONE;
+}
+
+void on_enter_forest(){
+    on_enter_forest_playing();
 }

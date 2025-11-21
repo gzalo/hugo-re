@@ -18,6 +18,8 @@ Texture* load_texture(const char* path);
 void render(Texture *texture, int x, int y);
 void render_subtexture(Texture* texture, int sx, int sy, int w, int h, int dx, int dy);
 void play(Audio *audio);
+int play_loop(Audio *audio);
+void stop_audio(int channel);
 
 int get_time_ms();
 

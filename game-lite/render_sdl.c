@@ -82,6 +82,19 @@ void play(Audio *audio){
     }
 }
 
+int play_loop(Audio *audio){
+    if(audio){
+        return Mix_PlayChannel(-1, audio, -1);
+    }
+    return -1;
+}
+
+void stop_audio(int channel){
+    if(channel >= 0){
+        Mix_HaltChannel(channel);
+    }
+}
+
 bool render_init() {
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) < 0) {
         printf("SDL could not initialize! SDL_Error: %s\n", SDL_GetError());

@@ -9,7 +9,7 @@ SDL2_CFLAGS = $(shell pkg-config --cflags sdl2 SDL2_image SDL2_mixer)
 SDL2_LIBS = $(shell pkg-config --libs sdl2 SDL2_image SDL2_mixer)
 
 TARGET = hugo_lite
-SRC = hugo_lite.c cave.c forest.c state.c cJSON.c render_sdl.c
+SRC = hugo_lite.c cave.c forest.c state.c cJSON.c render_sdl.c resources.c
 
 all: $(TARGET)
 

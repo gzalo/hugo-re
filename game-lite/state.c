@@ -2,22 +2,20 @@
 #include "state.h"
 #include "render_sdl.h"
 
-StateInfo state_info;
-
 double get_game_time() {
     return get_time_ms() / 1000.0;
 }
 
-double get_state_time() {
-    return get_game_time() - state_info.state_start_time;
+double get_state_time(double state_start_time) {
+    return get_game_time() - state_start_time;
 }
 
-int get_frame_index() {
-    return (int)(get_state_time() * 10);
+int get_frame_index(double state_start_time) {
+    return (int)(get_state_time(state_start_time) * 10);
 }
 
-int get_frame_index_fast() {
-    return (int)(get_state_time() * 20);
+int get_frame_index_fast(double state_start_time) {
+    return (int)(get_state_time(state_start_time) * 20);
 }
 
 bool audio_played[4] = {false, false, false, false};
@@ -30,8 +28,10 @@ void reset_state_events(){
     }
 }
 
-bool one_shot(double delta, int idx){
-    if(!audio_played[idx]){
+bool one_shot(double state_start_time, double delta, int idx){
+    double current_time = get_state_time(state_start_time);
+
+    if(!audio_played[idx] && current_time > delta){
         audio_played[idx] = true;
         audio_start_time[idx] = delta;
         return true;
@@ -39,8 +39,8 @@ bool one_shot(double delta, int idx){
     return false;
 }
 
-bool every(double delta, int idx, double offset){
-    double current_time = get_state_time();
+bool every(double state_start_time, double delta, int idx, double offset){
+    double current_time = get_state_time(state_start_time);
 
     if(!audio_played[idx]){
         if(current_time > offset){
