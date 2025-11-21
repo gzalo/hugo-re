@@ -1,30 +1,15 @@
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_image.h>
-#include <SDL2/SDL_mixer.h>
+#include "render_sdl.h"
 #include <stdbool.h>
+#include "config.h"
 
 #ifndef COMMON_H
 #define COMMON_H
 
-// Game constants
-#define FOREST_MAX_TIME 60
-#define FOREST_GROUND_SPEED 75
-#define HUGO_X_POS 16
-#define START_LIVES 3
-#define INSTRUCTIONS_TIMEOUT 3
-
-// Screen dimensions
-#define SCREEN_WIDTH 320
-#define SCREEN_HEIGHT 240
-#define WINDOW_SCALE 2
-
-// SDL-related typedefs
-typedef SDL_Texture Texture;
-typedef Mix_Chunk Audio;
-
 typedef enum {
     STATE_NONE,
     STATE_INSTRUCTIONS,
+    STATE_FOREST,
+    STATE_CAVE,
 
     // Forest states
     STATE_FOREST_BRANCH_ANIMATION,
@@ -70,11 +55,6 @@ typedef enum {
     OBS_ROCK = 3,
     OBS_TREE = 4
 } ObstacleType;
-
-typedef enum {
-    RENDER_PRE,
-    RENDER_POST,
-} RenderType;
 
 typedef struct {
     int score;
@@ -124,12 +104,37 @@ typedef struct {
     Texture* leaves1;
     Texture* leaves2;
     Texture* end_mountain;
+
     
     // Hugo animations
     Texture* hugo_side[8];     // walking (0-7)
     Texture* hugo_jump[3];     // jumping (0-2)
     Texture* hugo_crawl[8];    // crawling (0-7)
-    Texture* hugo_telllives[16]; // intro animation (0-15)
+    Animation hugo_telllives; // intro animation (0-15)
+    Texture* hugo_hand1;    // hand frame 1
+    Texture* hugo_hand2;    // hand frame 2
+    
+    // Sync data for talking animations (loaded from .oos.json files)
+    int* sync_start;        // sync for speak_start (005-01)
+    int sync_start_count;
+    int* sync_rock;         // sync for speak_rock (005-02)
+    int sync_rock_count;
+    int* sync_dieonce;      // sync for speak_dieonce (005-03)
+    int sync_dieonce_count;
+    int* sync_trap;         // sync for speak_trap (005-04)
+    int sync_trap_count;
+    int* sync_lastlife;     // sync for speak_lastlife (005-05)
+    int sync_lastlife_count;
+    int* sync_catapult_talktop;  // sync for speak_catapult_talktop (005-08)
+    int sync_catapult_talktop_count;
+    int* sync_catapult_hang;     // sync for speak_catapult_hang (005-10)
+    int sync_catapult_hang_count;
+    int* sync_hitlog;       // sync for speak_hitlog (005-11)
+    int sync_hitlog_count;
+    int* sync_gameover;     // sync for speak_gameover (005-12)
+    int sync_gameover_count;
+    int* sync_levelcompleted;    // sync for speak_levelcompleted (005-13)
+    int sync_levelcompleted_count;
     
     // Obstacles
     Texture* catapult[8];      // catapult (0-7)
@@ -239,14 +244,11 @@ typedef struct {
     Audio* cave_score_counter;
 } GameAudio;
 
-typedef struct {
-    bool key_up;
-    bool key_down;
-    bool key_start;
-    bool cave_rope_1_pressed;
-    bool cave_rope_2_pressed;
-    bool cave_rope_3_pressed;
-} InputState;
+typedef enum {
+    RENDER_NONE,
+    RENDER_PRE,
+    RENDER_POST
+} RenderStage;
 
 extern GameContext game_ctx;
 extern StateInfo state_info;
@@ -256,8 +258,5 @@ extern GameAudio audio;
 typedef GameState (*ProcessFunc)(InputState state);
 typedef void (*RenderFunc)(void);
 typedef void (*OnEnterFunc)(void);
-
-void render(Texture *texture, int x, int y);
-void play(Audio *audio);
 
 #endif

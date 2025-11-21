@@ -41,4 +41,6 @@ void render_forest_talking_game_over();
 void render_forest_wait_intro();
 void render_forest_win_talking();
 
+void on_enter_forest_playing();
+
 #endif
