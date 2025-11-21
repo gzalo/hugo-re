@@ -386,144 +386,88 @@ void on_enter_forest_playing() {
 // ---------------- HURT / TALKING RENDERING ----------------
 
 void render_forest_branch_animation() {
-    if (textures.hugohitlog.frames && textures.hugohitlog.frame_count > 0) {
-        int frame = get_frame_index_fast(current_state_time);
-        if (frame >= textures.hugohitlog.frame_count) frame = textures.hugohitlog.frame_count - 1;
-        Texture *t = textures.hugohitlog.frames[frame];
-        if (t) render(t, 0, 0);
-    }
+    Texture* frame = animation_get_frame(textures.hugohitlog, get_frame_index_fast(current_state_time));
+    render(frame, 0, 0);
 }
 
 void render_forest_branch_talking() {
-    int frame = get_frame_index(current_state_time);
+    // Build animation with sync data for animation_get_sync_frame
+    Animation anim = textures.hugohitlog_talk;
+    anim.sync_data = textures.sync_hitlog;
+    anim.sync_count = textures.sync_hitlog_count;
     
-
-    int sync_idx = frame;
-    if (sync_idx >= textures.sync_hitlog_count) sync_idx = textures.sync_hitlog_count - 1;
-    
-    int anim_frame = textures.sync_hitlog[sync_idx] - 1;
-    if (anim_frame < 0) anim_frame = 0;
-    if (anim_frame >= textures.hugohitlog_talk.frame_count) anim_frame = textures.hugohitlog_talk.frame_count - 1;
-    
-    Texture *t = textures.hugohitlog_talk.frames[anim_frame];
-    render(t, 0, 0);
+    Texture* frame = animation_get_sync_frame(anim, get_frame_index(current_state_time));
+    render(frame, 0, 0);
 }
 
 void render_forest_flying_start() {
-    if (textures.catapult_fly.frames && textures.catapult_fly.frame_count > 0) {
-        int frame = get_frame_index_fast(current_state_time);
-        if (frame >= textures.catapult_fly.frame_count) frame = textures.catapult_fly.frame_count - 1;
-        Texture *t = textures.catapult_fly.frames[frame];
-        if (t) render(t, 0, 0);
-    }
+    Texture* frame = animation_get_frame(textures.catapult_fly, get_frame_index_fast(current_state_time));
+    render(frame, 0, 0);
 }
 
 void render_forest_flying_talking() {
-    int frame = get_frame_index(current_state_time);
+    Animation anim = textures.catapult_airtalk;
+    anim.sync_data = textures.sync_catapult_talktop;
+    anim.sync_count = textures.sync_catapult_talktop_count;
     
-    int sync_idx = frame;
-    if (sync_idx >= textures.sync_catapult_talktop_count) sync_idx = textures.sync_catapult_talktop_count - 1;
-    
-    int anim_frame = textures.sync_catapult_talktop[sync_idx] - 1;
-    if (anim_frame < 0) anim_frame = 0;
-    if (anim_frame >= textures.catapult_airtalk.frame_count) anim_frame = textures.catapult_airtalk.frame_count - 1;
-    
-    Texture *t = textures.catapult_airtalk.frames[anim_frame];
-    render(t, 0, 0);
+    Texture* frame = animation_get_sync_frame(anim, get_frame_index(current_state_time));
+    render(frame, 0, 0);
 }
 
 void render_forest_flying_falling() {
-    if (textures.catapult_fall.frames && textures.catapult_fall.frame_count > 0) {
-        int frame = get_frame_index_fast(current_state_time);
-        if (frame >= textures.catapult_fall.frame_count) frame = textures.catapult_fall.frame_count - 1;
-        Texture *t = textures.catapult_fall.frames[frame];
-        if (t) render(t, 0, 0);
-    }
+    Texture* frame = animation_get_frame(textures.catapult_fall, get_frame_index_fast(current_state_time));
+    render(frame, 0, 0);
 }
 
 void render_forest_flying_falling_hang_animation() {
-    if (textures.catapult_hang.frames && textures.catapult_hang.frame_count > 0) {
-        int frame = get_frame_index_fast(current_state_time);
-        if (frame >= textures.catapult_hang.frame_count) frame = textures.catapult_hang.frame_count - 1;
-        Texture *t = textures.catapult_hang.frames[frame];
-        if (t) render(t, 0, 0);
-    }
+    Texture* frame = animation_get_frame(textures.catapult_hang, get_frame_index_fast(current_state_time));
+    render(frame, 0, 0);
 }
 
 void render_forest_flying_falling_hang_talking() {
-    int frame = get_frame_index(current_state_time);
-    
     // Static hang frame 12 as background
-    if (textures.catapult_hang.frames && textures.catapult_hang.frame_count > 12) {
-        Texture *bg = textures.catapult_hang.frames[12];
-        if (bg) render(bg, 0, 0);
-    }
+    Texture* bg = animation_get_frame(textures.catapult_hang, 12);
+    render(bg, 0, 0);
 
-    int sync_idx = frame;
-    if (sync_idx >= textures.sync_catapult_hang_count) sync_idx = textures.sync_catapult_hang_count - 1;
-
-    int anim_frame = textures.sync_catapult_hang[sync_idx] - 1;
-    if (anim_frame < 0) anim_frame = 0;
-    if (anim_frame >= textures.catapult_hangspeak.frame_count) anim_frame = textures.catapult_hangspeak.frame_count - 1;
-
-    Texture *mouth = textures.catapult_hangspeak.frames[anim_frame];
+    // Animated mouth overlay with sync data
+    Animation mouth_anim = textures.catapult_hangspeak;
+    mouth_anim.sync_data = textures.sync_catapult_hang;
+    mouth_anim.sync_count = textures.sync_catapult_hang_count;
+    
+    Texture* mouth = animation_get_sync_frame(mouth_anim, get_frame_index(current_state_time));
     render(mouth, 115, 117);
 }
 
 void render_forest_rock_animation() {
-    if (textures.hugo_lookrock.frames && textures.hugo_lookrock.frame_count > 0) {
-        int frame = get_frame_index_fast(current_state_time);
-        if (frame >= textures.hugo_lookrock.frame_count) frame = textures.hugo_lookrock.frame_count - 1;
-        Texture *t = textures.hugo_lookrock.frames[frame];
-        if (t) render(t, 0, 0);
-    }
+    Texture* frame = animation_get_frame(textures.hugo_lookrock, get_frame_index_fast(current_state_time));
+    render(frame, 0, 0);
 }
 
 void render_forest_rock_hit_animation() {
-    if (textures.hit_rock.frames && textures.hit_rock.frame_count > 0) {
-        int frame = get_frame_index_fast(current_state_time);
-        if (frame >= textures.hit_rock.frame_count) frame = textures.hit_rock.frame_count - 1;
-        Texture *t = textures.hit_rock.frames[frame];
-        if (t) render(t, 0, 0);
-    }
+    Texture* frame = animation_get_frame(textures.hit_rock, get_frame_index_fast(current_state_time));
+    render(frame, 0, 0);
 }
 
 void render_forest_rock_talking() {
-    int frame = get_frame_index(current_state_time);
+    Animation anim = textures.hugo_telllives;
+    anim.sync_data = textures.sync_rock;
+    anim.sync_count = textures.sync_rock_count;
     
-    int sync_idx = frame;
-    if (sync_idx >= textures.sync_rock_count) sync_idx = textures.sync_rock_count - 1;
-    
-    int anim_frame = textures.sync_rock[sync_idx] - 1;
-    if (anim_frame < 0) anim_frame = 0;
-    if (anim_frame >= textures.hugo_telllives.frame_count) anim_frame = textures.hugo_telllives.frame_count - 1;
-    
-    Texture *t = textures.hugo_telllives.frames[anim_frame];
-    render(t, 0, 0);
-    
+    Texture* frame = animation_get_sync_frame(anim, get_frame_index(current_state_time));
+    render(frame, 0, 0);
 }
 
 void render_forest_trap_animation() {
-    if (textures.hugo_traphurt.frames && textures.hugo_traphurt.frame_count > 0) {
-        int frame = get_frame_index(current_state_time);
-        if (frame >= textures.hugo_traphurt.frame_count) frame = textures.hugo_traphurt.frame_count - 1;
-        Texture *t = textures.hugo_traphurt.frames[frame];
-        if (t) render(t, 0, 0);
-    }
+    render(animation_get_frame(textures.hugo_traphurt, get_frame_index(current_state_time)), 0, 0);
 }
 
 void render_forest_trap_talking() {
-    int frame = get_frame_index(current_state_time);
+    Animation anim = textures.hugo_telllives;
+    anim.sync_data = textures.sync_trap;
+    anim.sync_count = textures.sync_trap_count;
     
-    int sync_idx = frame;
-    if (sync_idx >= textures.sync_trap_count) sync_idx = textures.sync_trap_count - 1;
-    
-    int anim_frame = textures.sync_trap[sync_idx] - 1;
-    if (anim_frame < 0) anim_frame = 0;
-    if (anim_frame >= textures.hugo_telllives.frame_count) anim_frame = textures.hugo_telllives.frame_count - 1;
-    
-    Texture *t = textures.hugo_telllives.frames[anim_frame];
-    render(t, 0, 0);
+    Texture* frame = animation_get_sync_frame(anim, get_frame_index(current_state_time));
+    render(frame, 0, 0);
 }
 
 void render_forest_scylla_button() {
@@ -536,82 +480,46 @@ void render_forest_talking_after_hurt() {
     int frame = get_frame_index(current_state_time);
     
     // Use appropriate sync data based on lives remaining
-    int* sync_data = (game_ctx.lives == 1) ? textures.sync_lastlife : textures.sync_dieonce;
-    int sync_count = (game_ctx.lives == 1) ? textures.sync_lastlife_count : textures.sync_dieonce_count;
+    Animation anim = textures.hugo_telllives;
+    anim.sync_data = (game_ctx.lives == 1) ? textures.sync_lastlife : textures.sync_dieonce;
+    anim.sync_count = (game_ctx.lives == 1) ? textures.sync_lastlife_count : textures.sync_dieonce_count;
     
-    // Get synced frame from hugo_telllives animation
-    if (textures.hugo_telllives.frames && textures.hugo_telllives.frame_count > 0 && sync_data && sync_count > 0) {
-        int sync_idx = frame;
-        if (sync_idx >= sync_count) sync_idx = sync_count - 1;
-        
-        int anim_frame = sync_data[sync_idx] - 1;  // Sync indices are 1-based
-        if (anim_frame < 0) anim_frame = 0;
-        if (anim_frame >= textures.hugo_telllives.frame_count) anim_frame = textures.hugo_telllives.frame_count - 1;
-        
-        Texture *t = textures.hugo_telllives.frames[anim_frame];
-        if (t) render(t, 128, -16);
-    }
+    Texture* hugo_frame = animation_get_sync_frame(anim, frame);
+    render(hugo_frame, 128, -16);
 
     // Hand animation
     if (frame < 8 && frame % 4 == 0) {
-        if (textures.hugo_hand2) render(textures.hugo_hand2, 96, 78);
+        render(textures.hugo_hand2, 96, 78);
     } else {
-        if (textures.hugo_hand1) render(textures.hugo_hand1, 96, 83);
+        render(textures.hugo_hand1, 96, 83);
     }
 }
 
 void render_forest_talking_game_over() {
-    int frame = get_frame_index(current_state_time);
+    Animation anim = textures.hugo_telllives;
+    anim.sync_data = textures.sync_gameover;
+    anim.sync_count = textures.sync_gameover_count;
     
-    // Use sync_gameover data
-    if (textures.hugo_telllives.frames && textures.hugo_telllives.frame_count > 0 && 
-        textures.sync_gameover && textures.sync_gameover_count > 0) {
-        int sync_idx = frame;
-        if (sync_idx >= textures.sync_gameover_count) sync_idx = textures.sync_gameover_count - 1;
-        
-        int anim_frame = textures.sync_gameover[sync_idx] - 1;  // Sync indices are 1-based
-        if (anim_frame < 0) anim_frame = 0;
-        if (anim_frame >= textures.hugo_telllives.frame_count) anim_frame = textures.hugo_telllives.frame_count - 1;
-        
-        Texture *t = textures.hugo_telllives.frames[anim_frame];
-        if (t) render(t, 128, -16);
-    }
+    Texture* frame = animation_get_sync_frame(anim, get_frame_index(current_state_time));
+    render(frame, 128, -16);
 }
 
 void render_forest_win_talking() {
-    int frame = get_frame_index(current_state_time);
+    Animation anim = textures.hugo_telllives;
+    anim.sync_data = textures.sync_levelcompleted;
+    anim.sync_count = textures.sync_levelcompleted_count;
     
-    // Use sync_levelcompleted data
-    if (textures.hugo_telllives.frames && textures.hugo_telllives.frame_count > 0 && 
-        textures.sync_levelcompleted && textures.sync_levelcompleted_count > 0) {
-        int sync_idx = frame;
-        if (sync_idx >= textures.sync_levelcompleted_count) sync_idx = textures.sync_levelcompleted_count - 1;
-        
-        int anim_frame = textures.sync_levelcompleted[sync_idx] - 1;  // Sync indices are 1-based
-        if (anim_frame < 0) anim_frame = 0;
-        if (anim_frame >= textures.hugo_telllives.frame_count) anim_frame = textures.hugo_telllives.frame_count - 1;
-        
-        Texture *t = textures.hugo_telllives.frames[anim_frame];
-        if (t) render(t, 128, -16);
-    }
+    Texture* frame = animation_get_sync_frame(anim, get_frame_index(current_state_time));
+    render(frame, 128, -16);
 }
 
 void render_forest_wait_intro() {
-    int frame = get_frame_index(current_state_time);
+    Animation anim = textures.hugo_telllives;
+    anim.sync_data = textures.sync_start;
+    anim.sync_count = textures.sync_start_count;
     
-    // Use sync_start data for intro talking
-    if (textures.hugo_telllives.frames && textures.hugo_telllives.frame_count > 0 && 
-        textures.sync_start && textures.sync_start_count > 0) {
-        int sync_idx = frame;
-        if (sync_idx >= textures.sync_start_count) sync_idx = textures.sync_start_count - 1;
-        
-        int anim_frame = textures.sync_start[sync_idx] - 1;  // Sync indices are 1-based
-        if (anim_frame < 0) anim_frame = 0;
-        if (anim_frame >= textures.hugo_telllives.frame_count) anim_frame = textures.hugo_telllives.frame_count - 1;
-        
-        Texture *t = textures.hugo_telllives.frames[anim_frame];
-        if (t) render(t, 128, -16);
-    }
+    Texture* frame = animation_get_sync_frame(anim, get_frame_index(current_state_time));
+    render(frame, 128, -16);
 }
 
 // ---------------- COLLISION ----------------
@@ -833,7 +741,7 @@ ForestState process_forest_flying_falling(InputState state) {
 ForestState process_forest_flying_falling_hang_animation(InputState state) {
     (void)state;
     if (one_shot(current_state_time, 0.0, 0)) {
-        if (audio.sfx_hugo_hangstart) play(audio.sfx_hugo_hangstart);
+        play(audio.sfx_hugo_hangstart);
     }
 
     if (get_frame_index_fast(current_state_time) >= textures.catapult_hang.frame_count) {
@@ -845,8 +753,8 @@ ForestState process_forest_flying_falling_hang_animation(InputState state) {
 ForestState process_forest_flying_falling_hang_talking(InputState state) {
     (void)state;
     if (one_shot(current_state_time, 0.0, 0)) {
-        if (audio.speak_catapult_hang) play(audio.speak_catapult_hang);
-        if (audio.sfx_hugo_hang)       play(audio.sfx_hugo_hang);
+        play(audio.speak_catapult_hang);
+        play(audio.sfx_hugo_hang);
     }
 
     // Use sync data to determine transition
@@ -1181,6 +1089,7 @@ void render_forest(){
 }
 
 void on_enter_forest(){
+    current_state_time = get_game_time();
     on_enter_forest_playing();
 }
 

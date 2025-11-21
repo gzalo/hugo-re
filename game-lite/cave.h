@@ -73,7 +73,6 @@ void on_enter_cave_lost();
 void on_enter_cave_lost_spring();
 void on_enter_cave_scylla_lost();
 void on_enter_cave_scylla_spring();
-void on_enter_cave_family_cage_opens();
 void on_enter_cave_family_happy();
 
 // Helper functions

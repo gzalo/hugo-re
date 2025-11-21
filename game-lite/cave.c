@@ -22,29 +22,8 @@ void on_enter_cave_state(CaveState state) {
         case STATE_CAVE_TALKING_BEFORE_CLIMB:
             on_enter_cave_talking_before_climb();
             break;
-        case STATE_CAVE_CLIMBING:
-            on_enter_cave_climbing();
-            break;
-        case STATE_CAVE_WAITING_INPUT:
-            on_enter_cave_waiting_input();
-            break;
-        case STATE_CAVE_GOING_ROPE:
-            on_enter_cave_going_rope();
-            break;
-        case STATE_CAVE_LOST:
-            on_enter_cave_lost();
-            break;
         case STATE_CAVE_LOST_SPRING:
             on_enter_cave_lost_spring();
-            break;
-        case STATE_CAVE_SCYLLA_LOST:
-            on_enter_cave_scylla_lost();
-            break;
-        case STATE_CAVE_SCYLLA_SPRING:
-            on_enter_cave_scylla_spring();
-            break;
-        case STATE_CAVE_FAMILY_CAGE_OPENS:
-            on_enter_cave_family_cage_opens();
             break;
         case STATE_CAVE_FAMILY_HAPPY:
             on_enter_cave_family_happy();
@@ -106,8 +85,7 @@ void on_enter_cave_waiting_before_talking(){
 //--------------------------
 
 CaveState process_cave_talking_before_climb(InputState state) {
-    // Play audio once at 4.0 seconds (not at start)
-    if (one_shot(current_state_time, .0, 0)) {
+    if (one_shot(current_state_time, 4.0, 0)) {
         play(audio.cave_trappe_grin);
     }
     
@@ -119,7 +97,7 @@ CaveState process_cave_talking_before_climb(InputState state) {
 
 void render_cave_talking_before_climb() {
     Texture* texture = animation_get_sync_frame(textures.cave_talks, get_frame_index(current_state_time));
-    render(texture,0,0);
+    render(texture, 0, 0);
     render_cave_scoreboard();
 }
 
@@ -146,12 +124,10 @@ CaveState process_cave_climbing(InputState state) {
 
 void render_cave_climbing() {
     Texture* texture = animation_get_frame(textures.cave_climbs, get_frame_index(current_state_time));
-    render(texture,0,0);
+    render(texture, 0, 0);
     render_cave_scoreboard();
 }
 
-void on_enter_cave_climbing(){
-}
 
 //--------------------------
 
@@ -162,12 +138,15 @@ CaveState process_cave_waiting_input(InputState state) {
 
     if(state.cave_rope_1_pressed) {
         game_ctx.cave_selected_rope = 0;
+        play(audio.cave_tast_trykket);
         return STATE_CAVE_GOING_ROPE;
     } else if(state.cave_rope_2_pressed) {
         game_ctx.cave_selected_rope = 1;
+        play(audio.cave_tast_trykket);
         return STATE_CAVE_GOING_ROPE;
     } else if(state.cave_rope_3_pressed) {
         game_ctx.cave_selected_rope = 2;
+        play(audio.cave_tast_trykket);
         return STATE_CAVE_GOING_ROPE;
     }
     return STATE_CAVE_NONE;
@@ -178,9 +157,6 @@ void render_cave_waiting_input() {
     render_cave_scoreboard();
 }
 
-void on_enter_cave_waiting_input(){
-    play(audio.cave_tast_trykket);
-}
 
 //--------------------------
 
@@ -203,10 +179,10 @@ CaveState process_cave_going_rope(InputState state) {
     }
     
     // Footstep sounds alternating every 0.4 seconds
-    if (every(current_state_time, 0.4, 0, 0.0)) {
+    if (every(current_state_time, 0.4, 1, 0.0)) {
         play(audio.cave_fodtrin1);
     }
-    if (every(current_state_time, 0.4, 1, 0.4)) {
+    if (every(current_state_time, 0.4, 2, 0.4)) {
         play(audio.cave_fodtrin2);
     }
     
@@ -235,134 +211,80 @@ CaveState process_cave_going_rope(InputState state) {
     return STATE_CAVE_NONE;
 }
 
-void render_cave_going_rope() {   
-    Texture *frame = animation_get_frame(get_rope_animation(), get_frame_index(current_state_time));
+void render_cave_going_rope() {
+    Texture* frame = animation_get_frame(get_rope_animation(), get_frame_index(current_state_time));
     render(frame, 0, 0);
     render_cave_scoreboard();
 }
 
-void on_enter_cave_going_rope(){
-}
-
 //--------------------------
-
-void on_enter_cave_family_cage_opens(){
-}
 
 void on_enter_cave_family_happy(){
     play(audio.cave_fanfare);
-}
-
-void on_enter_cave_lost(){
 }
 
 void on_enter_cave_lost_spring(){
     play(audio.cave_hugo_katapult);
 }
 
-void on_enter_cave_scylla_lost(){
-}
-
-void on_enter_cave_scylla_spring(){
-}
 
 void render_cave_lost() {
-    Texture** puff_animation = NULL;
-    int puff_count = 0;
+    Animation puff_animation = (Animation){0};
     
     if (game_ctx.cave_selected_rope == 0) {
-        puff_animation = textures.cave_hugo_puff_first.frames;
-        puff_count = textures.cave_hugo_puff_first.frame_count;
+        puff_animation = textures.cave_hugo_puff_first;
     } else if (game_ctx.cave_selected_rope == 1) {
-        puff_animation = textures.cave_hugo_puff_second.frames;
-        puff_count = textures.cave_hugo_puff_second.frame_count;
+        puff_animation = textures.cave_hugo_puff_second;
     } else if (game_ctx.cave_selected_rope == 2) {
-        puff_animation = textures.cave_hugo_puff_third.frames;
-        puff_count = textures.cave_hugo_puff_third.frame_count;
+        puff_animation = textures.cave_hugo_puff_third;
     }
     
-    if (puff_animation && puff_count > 0) {
-        int frame = get_frame_index(current_state_time);
-        if (frame >= puff_count) frame = puff_count - 1;
-        if (puff_animation[frame]) {
-            render(puff_animation[frame],0,0);
-        }
-    }
+    Texture* frame = animation_get_frame(puff_animation, get_frame_index(current_state_time));
+    render(frame, 0, 0);
     render_cave_scoreboard();
 }
 
 void render_cave_lost_spring() {
-    if (textures.cave_hugo_spring.frames && textures.cave_hugo_spring.frame_count > 0) {
-        int frame = get_frame_index(current_state_time);
-        if (frame >= textures.cave_hugo_spring.frame_count) frame = textures.cave_hugo_spring.frame_count - 1;
-        if (textures.cave_hugo_spring.frames[frame]) {
-            render(textures.cave_hugo_spring.frames[frame],0,0);
-        }
-    }
+    Texture* frame = animation_get_frame(textures.cave_hugo_spring, get_frame_index(current_state_time));
+    render(frame, 0, 0);
     render_cave_scoreboard();
 }
 
 void render_cave_scylla_lost() {
-    Texture** scylla_animation = NULL;
-    int scylla_count = 0;
+    Animation scylla_animation = (Animation){0};
     
     if (game_ctx.cave_win_type == 0) {
-        scylla_animation = textures.cave_scylla_bird.frames;
-        scylla_count = textures.cave_scylla_bird.frame_count;
+        scylla_animation = textures.cave_scylla_bird;
     } else if (game_ctx.cave_win_type == 1) {
-        scylla_animation = textures.cave_scylla_leaves.frames;
-        scylla_count = textures.cave_scylla_leaves.frame_count;
+        scylla_animation = textures.cave_scylla_leaves;
     } else if (game_ctx.cave_win_type == 2) {
-        scylla_animation = textures.cave_scylla_ropes.frames;
-        scylla_count = textures.cave_scylla_ropes.frame_count;
+        scylla_animation = textures.cave_scylla_ropes;
     }
     
-    if (scylla_animation && scylla_count > 0) {
-        int frame = get_frame_index(current_state_time);
-        if (frame >= scylla_count) frame = scylla_count - 1;
-        if (scylla_animation[frame]) {
-            render(scylla_animation[frame],0,0);
-        }
-    }
+    Texture* frame = animation_get_frame(scylla_animation, get_frame_index(current_state_time));
+    render(frame, 0, 0);
     
     // Render Hugo sprite on top
-    if (textures.cave_hugo_sprite) {
-        int hugo_positions[3][2] = {{25, 105}, {97, 100}, {172, 102}};
-        render(textures.cave_hugo_sprite, hugo_positions[game_ctx.cave_selected_rope][0], hugo_positions[game_ctx.cave_selected_rope][1]);
-    }
+    int hugo_positions[3][2] = {{25, 105}, {97, 100}, {172, 102}};
+    render(textures.cave_hugo_sprite, hugo_positions[game_ctx.cave_selected_rope][0], hugo_positions[game_ctx.cave_selected_rope][1]);
     render_cave_scoreboard();
 }
 
 void render_cave_scylla_spring() {
-    if (textures.cave_scylla_spring.frames && textures.cave_scylla_spring.frame_count > 0) {
-        int frame = get_frame_index(current_state_time);
-        if (frame >= textures.cave_scylla_spring.frame_count) frame = textures.cave_scylla_spring.frame_count - 1;
-        if (textures.cave_scylla_spring.frames[frame]) {
-            render(textures.cave_scylla_spring.frames[frame],0,0);
-        }
-    }
+    Texture* frame = animation_get_frame(textures.cave_scylla_spring, get_frame_index(current_state_time));
+    render(frame, 0, 0);
     render_cave_scoreboard();
 }
 
 void render_cave_family_cage_opens() {
-    if (textures.cave_family_cage.frames && textures.cave_family_cage.frame_count > 0) {
-        int frame = get_frame_index(current_state_time);
-        if (frame >= textures.cave_family_cage.frame_count) frame = textures.cave_family_cage.frame_count - 1;
-        if (textures.cave_family_cage.frames[frame]) {
-            render(textures.cave_family_cage.frames[frame],0,0);
-        }
-    }
+    Texture* frame = animation_get_frame(textures.cave_family_cage, get_frame_index(current_state_time));
+    render(frame, 0, 0);
     render_cave_scoreboard();
 }
 
 void render_cave_family_happy() {
-    if (textures.cave_happy.frames && textures.cave_happy.frame_count > 0) {
-        int frame = get_frame_index(current_state_time);
-        if (frame >= textures.cave_happy.frame_count) frame = textures.cave_happy.frame_count - 1;
-        if (textures.cave_happy.frames[frame]) {
-            render(textures.cave_happy.frames[frame],0,0);
-        }
-    }
+    Texture* frame = animation_get_frame(textures.cave_happy, get_frame_index(current_state_time));
+    render(frame, 0, 0);
     render_cave_scoreboard();
 }
 
@@ -611,12 +533,12 @@ void render_cave() {
 }
 
 void on_enter_cave() {
+    current_state_time = get_game_time();
     current_cave_state = STATE_CAVE_WAITING_BEFORE_TALKING;
     sounding_score = false;
     cave_score_counter_id = -1;
     game_ctx.rolling_score = game_ctx.score;
     on_enter_cave_state(current_cave_state);
-    current_state_time = get_game_time();
 }
 
 void set_cave_score(int score) {
