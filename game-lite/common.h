@@ -160,12 +160,6 @@ typedef struct {
     Audio* cave_score_counter;
 } GameAudio;
 
-typedef enum {
-    RENDER_NONE,
-    RENDER_PRE,
-    RENDER_POST
-} RenderStage;
-
 extern GameTextures textures;
 extern GameAudio audio;
 

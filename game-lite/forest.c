@@ -12,9 +12,60 @@
 #define M_PI 3.14159265358979323846
 #endif
 
+typedef enum {
+    STATE_FOREST_NONE,
+    STATE_FOREST_BRANCH_ANIMATION,
+    STATE_FOREST_BRANCH_TALKING,
+    STATE_FOREST_FLYING_FALLING,
+    STATE_FOREST_FLYING_FALLING_HANG_ANIMATION,
+    STATE_FOREST_FLYING_FALLING_HANG_TALKING,
+    STATE_FOREST_FLYING_START,
+    STATE_FOREST_FLYING_TALKING,
+    STATE_FOREST_ROCK_ANIMATION,
+    STATE_FOREST_ROCK_HIT_ANIMATION,
+    STATE_FOREST_ROCK_TALKING,
+    STATE_FOREST_TRAP_ANIMATION,
+    STATE_FOREST_TRAP_TALKING,
+    STATE_FOREST_PLAYING,
+    STATE_FOREST_SCYLLA_BUTTON,
+    STATE_FOREST_TALKING_AFTER_HURT,
+    STATE_FOREST_TALKING_GAME_OVER,
+    STATE_FOREST_WAIT_INTRO,
+    STATE_FOREST_WIN_TALKING,
+    STATE_FOREST_END
+} ForestState;
+
+typedef enum {
+    OBS_NONE = 0,
+    OBS_CATAPULT = 1,
+    OBS_TRAP = 2,
+    OBS_ROCK = 3,
+    OBS_TREE = 4
+} ObstacleType;
+
+typedef struct {
+    int score;
+    int lives;
+    double parallax_pos;
+    ObstacleType obstacles[FOREST_MAX_TIME];
+    int sacks[FOREST_MAX_TIME];
+    int leaves[FOREST_MAX_TIME];
+    bool arrow_up_focus;
+    bool arrow_down_focus;
+    double hugo_jumping_time;
+    double hugo_crawling_time;
+    double last_time;
+    int old_second;
+    
+    // Cave game state (shared context)
+    int cave_selected_rope;
+    int cave_win_type;
+    int rolling_score;
+} ForestContext;
+
 static ForestContext game_ctx = {0};
 static ForestState current_forest_state = STATE_FOREST_WAIT_INTRO;
-static double current_state_time = 0.0;
+static StateMetadata state_metadata;
 
 #define FOREST_BG_SPEED_MULTIPLIER 1.0
 
@@ -173,7 +224,7 @@ void render_forest_bottom() {
 // ---------------- RENDERING: BACKGROUND / OBSTACLES / SACKS / HUGO / CONTROLS ----------------
 
 void render_obstacles() {
-    int frame = get_frame_index(current_state_time);
+    int frame = get_frame_index(&state_metadata);
     double fract = game_ctx.parallax_pos - floor(game_ctx.parallax_pos);
 
     for (int i = 0; i < FOREST_MAX_TIME; i++) {
@@ -222,7 +273,7 @@ void render_obstacles() {
 }
 
 void render_sacks() {
-    (void)get_frame_index(current_state_time); // frame not used but kept for parity
+    (void)get_frame_index(&state_metadata); // frame not used but kept for parity
 
     for (int i = 0; i < FOREST_MAX_TIME; i++) {
         if (game_ctx.sacks[i] == 0) continue;
@@ -260,7 +311,7 @@ void render_leaves() {
 }
 
 void render_hugo() {
-    int frame = get_frame_index(current_state_time);
+    int frame = get_frame_index(&state_metadata);
     int hugo_x = HUGO_X_POS;
     double now = get_game_time();
 
@@ -386,7 +437,7 @@ void on_enter_forest_playing() {
 // ---------------- HURT / TALKING RENDERING ----------------
 
 void render_forest_branch_animation() {
-    Texture* frame = animation_get_frame(textures.hugohitlog, get_frame_index_fast(current_state_time));
+    Texture* frame = animation_get_frame(textures.hugohitlog, get_frame_index_fast(&state_metadata));
     render(frame, 0, 0);
 }
 
@@ -396,12 +447,12 @@ void render_forest_branch_talking() {
     anim.sync_data = textures.sync_hitlog;
     anim.sync_count = textures.sync_hitlog_count;
     
-    Texture* frame = animation_get_sync_frame(anim, get_frame_index(current_state_time));
+    Texture* frame = animation_get_sync_frame(anim, get_frame_index(&state_metadata));
     render(frame, 0, 0);
 }
 
 void render_forest_flying_start() {
-    Texture* frame = animation_get_frame(textures.catapult_fly, get_frame_index_fast(current_state_time));
+    Texture* frame = animation_get_frame(textures.catapult_fly, get_frame_index_fast(&state_metadata));
     render(frame, 0, 0);
 }
 
@@ -410,17 +461,17 @@ void render_forest_flying_talking() {
     anim.sync_data = textures.sync_catapult_talktop;
     anim.sync_count = textures.sync_catapult_talktop_count;
     
-    Texture* frame = animation_get_sync_frame(anim, get_frame_index(current_state_time));
+    Texture* frame = animation_get_sync_frame(anim, get_frame_index(&state_metadata));
     render(frame, 0, 0);
 }
 
 void render_forest_flying_falling() {
-    Texture* frame = animation_get_frame(textures.catapult_fall, get_frame_index_fast(current_state_time));
+    Texture* frame = animation_get_frame(textures.catapult_fall, get_frame_index_fast(&state_metadata));
     render(frame, 0, 0);
 }
 
 void render_forest_flying_falling_hang_animation() {
-    Texture* frame = animation_get_frame(textures.catapult_hang, get_frame_index_fast(current_state_time));
+    Texture* frame = animation_get_frame(textures.catapult_hang, get_frame_index_fast(&state_metadata));
     render(frame, 0, 0);
 }
 
@@ -434,17 +485,17 @@ void render_forest_flying_falling_hang_talking() {
     mouth_anim.sync_data = textures.sync_catapult_hang;
     mouth_anim.sync_count = textures.sync_catapult_hang_count;
     
-    Texture* mouth = animation_get_sync_frame(mouth_anim, get_frame_index(current_state_time));
+    Texture* mouth = animation_get_sync_frame(mouth_anim, get_frame_index(&state_metadata));
     render(mouth, 115, 117);
 }
 
 void render_forest_rock_animation() {
-    Texture* frame = animation_get_frame(textures.hugo_lookrock, get_frame_index_fast(current_state_time));
+    Texture* frame = animation_get_frame(textures.hugo_lookrock, get_frame_index_fast(&state_metadata));
     render(frame, 0, 0);
 }
 
 void render_forest_rock_hit_animation() {
-    Texture* frame = animation_get_frame(textures.hit_rock, get_frame_index_fast(current_state_time));
+    Texture* frame = animation_get_frame(textures.hit_rock, get_frame_index_fast(&state_metadata));
     render(frame, 0, 0);
 }
 
@@ -453,12 +504,12 @@ void render_forest_rock_talking() {
     anim.sync_data = textures.sync_rock;
     anim.sync_count = textures.sync_rock_count;
     
-    Texture* frame = animation_get_sync_frame(anim, get_frame_index(current_state_time));
+    Texture* frame = animation_get_sync_frame(anim, get_frame_index(&state_metadata));
     render(frame, 0, 0);
 }
 
 void render_forest_trap_animation() {
-    render(animation_get_frame(textures.hugo_traphurt, get_frame_index(current_state_time)), 0, 0);
+    render(animation_get_frame(textures.hugo_traphurt, get_frame_index(&state_metadata)), 0, 0);
 }
 
 void render_forest_trap_talking() {
@@ -466,7 +517,7 @@ void render_forest_trap_talking() {
     anim.sync_data = textures.sync_trap;
     anim.sync_count = textures.sync_trap_count;
     
-    Texture* frame = animation_get_sync_frame(anim, get_frame_index(current_state_time));
+    Texture* frame = animation_get_sync_frame(anim, get_frame_index(&state_metadata));
     render(frame, 0, 0);
 }
 
@@ -477,7 +528,7 @@ void render_forest_scylla_button() {
 }
 
 void render_forest_talking_after_hurt() {
-    int frame = get_frame_index(current_state_time);
+    int frame = get_frame_index(&state_metadata);
     
     // Use appropriate sync data based on lives remaining
     Animation anim = textures.hugo_telllives;
@@ -500,7 +551,7 @@ void render_forest_talking_game_over() {
     anim.sync_data = textures.sync_gameover;
     anim.sync_count = textures.sync_gameover_count;
     
-    Texture* frame = animation_get_sync_frame(anim, get_frame_index(current_state_time));
+    Texture* frame = animation_get_sync_frame(anim, get_frame_index(&state_metadata));
     render(frame, 128, -16);
 }
 
@@ -509,7 +560,7 @@ void render_forest_win_talking() {
     anim.sync_data = textures.sync_levelcompleted;
     anim.sync_count = textures.sync_levelcompleted_count;
     
-    Texture* frame = animation_get_sync_frame(anim, get_frame_index(current_state_time));
+    Texture* frame = animation_get_sync_frame(anim, get_frame_index(&state_metadata));
     render(frame, 128, -16);
 }
 
@@ -518,7 +569,7 @@ void render_forest_wait_intro() {
     anim.sync_data = textures.sync_start;
     anim.sync_count = textures.sync_start_count;
     
-    Texture* frame = animation_get_sync_frame(anim, get_frame_index(current_state_time));
+    Texture* frame = animation_get_sync_frame(anim, get_frame_index(&state_metadata));
     render(frame, 128, -16);
 }
 
@@ -636,7 +687,7 @@ ForestState process_forest_playing(InputState state) {
     }
 
     // Footstep SFX every 8 frames if not jumping
-    if (get_frame_index(current_state_time) % 8 == 0 && !game_ctx.arrow_up_focus) {
+    if (get_frame_index(&state_metadata) % 8 == 0 && !game_ctx.arrow_up_focus) {
         int r = rand() % 5;
         Audio *walk_sfx[5] = {
             audio.sfx_hugo_walk[0],
@@ -667,11 +718,11 @@ ForestState reduce_lives_and_transition() {
 
 ForestState process_forest_branch_animation(InputState state) {
     (void)state;
-    if (one_shot(current_state_time, 0.0, 0)) {
+    if (one_shot(&state_metadata, 0.0, 0)) {
         if (audio.sfx_birds) play(audio.sfx_birds);
     }
 
-    if (get_frame_index_fast(current_state_time) >= textures.hugohitlog.frame_count) {
+    if (get_frame_index_fast(&state_metadata) >= textures.hugohitlog.frame_count) {
         return STATE_FOREST_BRANCH_TALKING;
     }
     return STATE_FOREST_NONE;
@@ -679,12 +730,12 @@ ForestState process_forest_branch_animation(InputState state) {
 
 ForestState process_forest_branch_talking(InputState state) {
     (void)state;
-    if (one_shot(current_state_time, 0.0, 0)) {
+    if (one_shot(&state_metadata, 0.0, 0)) {
         if (audio.speak_hitlog) play(audio.speak_hitlog);
     }
 
     // Use sync data to determine transition
-    if (textures.sync_hitlog_count > 0 && get_frame_index(current_state_time) >= textures.sync_hitlog_count) {
+    if (textures.sync_hitlog_count > 0 && get_frame_index(&state_metadata) >= textures.sync_hitlog_count) {
         return reduce_lives_and_transition();
     }
 
@@ -693,19 +744,19 @@ ForestState process_forest_branch_talking(InputState state) {
 
 ForestState process_forest_flying_start(InputState state) {
     (void)state;
-    if (one_shot(current_state_time, 0.0, 0)) {
+    if (one_shot(&state_metadata, 0.0, 0)) {
         if (audio.speak_catapult_up) play(audio.speak_catapult_up);
     }
 
-    if (one_shot(current_state_time, 2.7, 1)) {
+    if (one_shot(&state_metadata, 2.7, 1)) {
         if (audio.sfx_hugo_screenklir) play(audio.sfx_hugo_screenklir);
     }
 
-    if (one_shot(current_state_time, 2.7, 2)) {
+    if (one_shot(&state_metadata, 2.7, 2)) {
         if (audio.speak_catapult_hit) play(audio.speak_catapult_hit);
     }
 
-    if (get_frame_index_fast(current_state_time) >= textures.catapult_fly.frame_count) {
+    if (get_frame_index_fast(&state_metadata) >= textures.catapult_fly.frame_count) {
         return STATE_FOREST_FLYING_TALKING;
     }
     return STATE_FOREST_NONE;
@@ -713,12 +764,12 @@ ForestState process_forest_flying_start(InputState state) {
 
 ForestState process_forest_flying_talking(InputState state) {
     (void)state;
-    if (one_shot(current_state_time, 0.0, 0)) {
+    if (one_shot(&state_metadata, 0.0, 0)) {
         if (audio.speak_catapult_talktop) play(audio.speak_catapult_talktop);
     }
 
     // Use sync data to determine transition
-    if (textures.sync_catapult_talktop_count > 0 && get_frame_index(current_state_time) >= textures.sync_catapult_talktop_count) {
+    if (textures.sync_catapult_talktop_count > 0 && get_frame_index(&state_metadata) >= textures.sync_catapult_talktop_count) {
         return STATE_FOREST_FLYING_FALLING;
     }
 
@@ -727,12 +778,12 @@ ForestState process_forest_flying_talking(InputState state) {
 
 ForestState process_forest_flying_falling(InputState state) {
     (void)state;
-    if (one_shot(current_state_time, 0.0, 0)) {
+    if (one_shot(&state_metadata, 0.0, 0)) {
         if (audio.speak_catapult_down) play(audio.speak_catapult_down);
         if (audio.sfx_hugo_crash)       play(audio.sfx_hugo_crash);
     }
 
-    if (get_frame_index_fast(current_state_time) >= textures.catapult_fall.frame_count) {
+    if (get_frame_index_fast(&state_metadata) >= textures.catapult_fall.frame_count) {
         return STATE_FOREST_FLYING_FALLING_HANG_ANIMATION;
     }
     return STATE_FOREST_NONE;
@@ -740,11 +791,11 @@ ForestState process_forest_flying_falling(InputState state) {
 
 ForestState process_forest_flying_falling_hang_animation(InputState state) {
     (void)state;
-    if (one_shot(current_state_time, 0.0, 0)) {
+    if (one_shot(&state_metadata, 0.0, 0)) {
         play(audio.sfx_hugo_hangstart);
     }
 
-    if (get_frame_index_fast(current_state_time) >= textures.catapult_hang.frame_count) {
+    if (get_frame_index_fast(&state_metadata) >= textures.catapult_hang.frame_count) {
         return STATE_FOREST_FLYING_FALLING_HANG_TALKING;
     }
     return STATE_FOREST_NONE;
@@ -752,13 +803,13 @@ ForestState process_forest_flying_falling_hang_animation(InputState state) {
 
 ForestState process_forest_flying_falling_hang_talking(InputState state) {
     (void)state;
-    if (one_shot(current_state_time, 0.0, 0)) {
+    if (one_shot(&state_metadata, 0.0, 0)) {
         play(audio.speak_catapult_hang);
         play(audio.sfx_hugo_hang);
     }
 
     // Use sync data to determine transition
-    if (textures.sync_catapult_hang_count > 0 && get_frame_index(current_state_time) >= textures.sync_catapult_hang_count) {
+    if (textures.sync_catapult_hang_count > 0 && get_frame_index(&state_metadata) >= textures.sync_catapult_hang_count) {
         return reduce_lives_and_transition();
     }
     return STATE_FOREST_NONE;
@@ -766,7 +817,7 @@ ForestState process_forest_flying_falling_hang_talking(InputState state) {
 
 ForestState process_forest_rock_animation(InputState state) {
     (void)state;
-    if (get_frame_index_fast(current_state_time) >= textures.hugo_lookrock.frame_count) {
+    if (get_frame_index_fast(&state_metadata) >= textures.hugo_lookrock.frame_count) {
         return STATE_FOREST_ROCK_HIT_ANIMATION;
     }
     return STATE_FOREST_NONE;
@@ -774,7 +825,7 @@ ForestState process_forest_rock_animation(InputState state) {
 
 ForestState process_forest_rock_hit_animation(InputState state) {
     (void)state;
-    if (get_frame_index_fast(current_state_time) >= textures.hit_rock.frame_count) {
+    if (get_frame_index_fast(&state_metadata) >= textures.hit_rock.frame_count) {
         return STATE_FOREST_ROCK_TALKING;
     }
     return STATE_FOREST_NONE;
@@ -782,12 +833,12 @@ ForestState process_forest_rock_hit_animation(InputState state) {
 
 ForestState process_forest_rock_talking(InputState state) {
     (void)state;
-    if (one_shot(current_state_time, 0.0, 0)) {
+    if (one_shot(&state_metadata, 0.0, 0)) {
         if (audio.speak_rock) play(audio.speak_rock);
     }
 
     // Use sync data if available
-    if (textures.sync_rock_count > 0 && get_frame_index(current_state_time) >= textures.sync_rock_count) {
+    if (textures.sync_rock_count > 0 && get_frame_index(&state_metadata) >= textures.sync_rock_count) {
         return reduce_lives_and_transition();
     }
     return STATE_FOREST_NONE;
@@ -795,7 +846,7 @@ ForestState process_forest_rock_talking(InputState state) {
 
 ForestState process_forest_trap_animation(InputState state) {
     (void)state;
-    if (get_frame_index(current_state_time) >= textures.hugo_traphurt.frame_count) {
+    if (get_frame_index(&state_metadata) >= textures.hugo_traphurt.frame_count) {
         return STATE_FOREST_TRAP_TALKING;
     }
     return STATE_FOREST_NONE;
@@ -803,12 +854,12 @@ ForestState process_forest_trap_animation(InputState state) {
 
 ForestState process_forest_trap_talking(InputState state) {
     (void)state;
-    if (one_shot(current_state_time, 0.0, 0)) {
+    if (one_shot(&state_metadata, 0.0, 0)) {
         if (audio.speak_trap) play(audio.speak_trap);
     }
 
     // Use sync data if available
-    if (textures.sync_trap_count > 0 && get_frame_index(current_state_time) >= textures.sync_trap_count) {
+    if (textures.sync_trap_count > 0 && get_frame_index(&state_metadata) >= textures.sync_trap_count) {
         return reduce_lives_and_transition();
     }
     return STATE_FOREST_NONE;
@@ -816,11 +867,11 @@ ForestState process_forest_trap_talking(InputState state) {
 
 ForestState process_forest_scylla_button(InputState state) {
     (void)state;
-    if (one_shot(current_state_time, 0.5, 0)) {
+    if (one_shot(&state_metadata, 0.5, 0)) {
         if (audio.sfx_lightning_warning) play(audio.sfx_lightning_warning);
     }
 
-    if (get_state_time(current_state_time) > 2.0) {
+    if (get_state_time(&state_metadata) > 2.0) {
         return STATE_FOREST_PLAYING;
     }
     return STATE_FOREST_NONE;
@@ -828,11 +879,11 @@ ForestState process_forest_scylla_button(InputState state) {
 
 ForestState process_forest_talking_after_hurt(InputState state) {
     (void)state;
-    if (one_shot(current_state_time, 0.5, 0)) {
+    if (one_shot(&state_metadata, 0.5, 0)) {
         if (audio.sfx_hugo_knock) play(audio.sfx_hugo_knock);
     }
 
-    if (one_shot(current_state_time, 0.0, 1)) {
+    if (one_shot(&state_metadata, 0.0, 1)) {
         if (audio.sfx_hugo_knock) play(audio.sfx_hugo_knock);
         if (game_ctx.lives == 1) {
             if (audio.speak_lastlife) play(audio.speak_lastlife);
@@ -843,7 +894,7 @@ ForestState process_forest_talking_after_hurt(InputState state) {
 
     // Use sync data to determine when to transition
     int sync_count = (game_ctx.lives == 1) ? textures.sync_lastlife_count : textures.sync_dieonce_count;
-    if (sync_count > 0 && get_frame_index(current_state_time) >= sync_count) {
+    if (sync_count > 0 && get_frame_index(&state_metadata) >= sync_count) {
         return STATE_FOREST_PLAYING;
     }
     return STATE_FOREST_NONE;
@@ -851,12 +902,12 @@ ForestState process_forest_talking_after_hurt(InputState state) {
 
 ForestState process_forest_talking_game_over(InputState state) {
     (void)state;
-    if (one_shot(current_state_time, 0.0, 0)) {
+    if (one_shot(&state_metadata, 0.0, 0)) {
         if (audio.speak_gameover) play(audio.speak_gameover);
     }
 
     // Use sync data to determine when to transition
-    if (textures.sync_gameover_count > 0 && get_frame_index(current_state_time) >= textures.sync_gameover_count) {
+    if (textures.sync_gameover_count > 0 && get_frame_index(&state_metadata) >= textures.sync_gameover_count) {
         return STATE_FOREST_END;
     }
     return STATE_FOREST_NONE;
@@ -864,12 +915,12 @@ ForestState process_forest_talking_game_over(InputState state) {
 
 ForestState process_forest_wait_intro(InputState state) {
     (void)state;
-    if (one_shot(current_state_time, 0.0, 0)) {
+    if (one_shot(&state_metadata, 0.0, 0)) {
         if (audio.speak_start) play(audio.speak_start);
     }
 
     // Use sync data to determine when to transition to playing
-    if (textures.sync_start_count > 0 && get_frame_index(current_state_time) >= textures.sync_start_count) {
+    if (textures.sync_start_count > 0 && get_frame_index(&state_metadata) >= textures.sync_start_count) {
         return STATE_FOREST_PLAYING;
     }
     return STATE_FOREST_NONE;
@@ -877,12 +928,12 @@ ForestState process_forest_wait_intro(InputState state) {
 
 ForestState process_forest_win_talking(InputState state) {
     (void)state;
-    if (one_shot(current_state_time, 0.0, 0)) {
+    if (one_shot(&state_metadata, 0.0, 0)) {
         if (audio.speak_levelcompleted) play(audio.speak_levelcompleted);
     }
 
     // Use sync data to determine when to transition
-    if (textures.sync_levelcompleted_count > 0 && get_frame_index(current_state_time) >= textures.sync_levelcompleted_count) {
+    if (textures.sync_levelcompleted_count > 0 && get_frame_index(&state_metadata) >= textures.sync_levelcompleted_count) {
         return STATE_FOREST_END;
     }
     return STATE_FOREST_NONE;
@@ -892,7 +943,7 @@ ForestState process_forest_win_talking(InputState state) {
 
 ForestState process_win(InputState state) {
     (void)state;
-    if (get_state_time(current_state_time) > 3.0) {
+    if (get_state_time(&state_metadata) > 3.0) {
         return STATE_FOREST_END;
     }
     return STATE_FOREST_NONE;
@@ -900,7 +951,7 @@ ForestState process_win(InputState state) {
 
 ForestState process_game_over(InputState state) {
     (void)state;
-    if (get_state_time(current_state_time) > 5.0) {
+    if (get_state_time(&state_metadata) > 5.0) {
         return STATE_FOREST_END;
     }
     return STATE_FOREST_NONE;
@@ -977,8 +1028,7 @@ GameState process_forest(InputState state){
         }
         
         current_forest_state = next_state;
-        reset_state_events();
-        current_state_time = get_game_time();
+        reset_state(&state_metadata);
     }
        
     return STATE_NONE;
@@ -1089,7 +1139,7 @@ void render_forest(){
 }
 
 void on_enter_forest(){
-    current_state_time = get_game_time();
+    reset_state(&state_metadata);
     on_enter_forest_playing();
 }
 

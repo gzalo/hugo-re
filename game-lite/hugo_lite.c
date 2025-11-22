@@ -19,11 +19,11 @@
 
 GameTextures textures;
 GameAudio audio;
-GameState current_state;
-double current_state_start_time;
+static GameState current_state;
+static StateMetadata state_metadata;
 
 GameState process_instructions(InputState state) {
-    if (state.key_start || get_state_time(current_state_start_time) > 3) {
+    if (state.key_start || get_state_time(&state_metadata) > 3) {
         return STATE_FOREST;
     }
     return STATE_NONE;
@@ -33,38 +33,13 @@ void render_instructions() {
     render(textures.instruction_screen, 0, 0);
 }
 
-typedef GameState (*ProcessFunc)(InputState state);
-typedef void (*RenderFunc)(void);
-typedef void (*OnEnterFunc)(void);
-
-ProcessFunc process_funcs[STATE_END] = {
-    NULL,
-    process_instructions,
-    process_forest,
-    process_cave
-};
-
-RenderFunc render_funcs[STATE_END] = {
-    NULL,
-    render_instructions,
-    render_forest,
-    render_cave
-};
-
-OnEnterFunc on_enter_funcs[STATE_END] = {
-    NULL,
-    NULL,
-    on_enter_forest,
-    on_enter_cave
-};
-
 // Main game loop
 void game_loop() {
     bool quit = false;
         
     // Initialize
     current_state = STATE_INSTRUCTIONS;
-    current_state_start_time = get_game_time();
+    reset_state(&state_metadata);
     srand(time(NULL));
     InputState input_state = {0};
     
@@ -76,7 +51,14 @@ void game_loop() {
             break;
         }
 
-        GameState new_state = process_funcs[current_state](input_state);
+        GameState new_state = STATE_NONE;
+        if(current_state == STATE_INSTRUCTIONS){
+            new_state = process_instructions(input_state);
+        } else if(current_state == STATE_FOREST){
+            new_state = process_forest(input_state);
+        } else if(current_state == STATE_CAVE){
+            new_state = process_cave(input_state);
+        }
         
         if(new_state != STATE_NONE) {
             printf("State transition: %d -> %d\n", current_state, new_state);
@@ -87,23 +69,27 @@ void game_loop() {
                 printf("Passing forest score to cave: %d\n", forest_score);
                 set_cave_score(forest_score);
             }
-            
             current_state = new_state;
-            current_state_start_time = get_game_time();
-            reset_state_events();
-            OnEnterFunc on_enter_func = on_enter_funcs[current_state];
-            if (on_enter_func != NULL) {
-                on_enter_func();
+            reset_state(&state_metadata);
+            if(current_state == STATE_FOREST){
+                on_enter_forest();
+            } else if(current_state == STATE_CAVE){
+                on_enter_cave();
             }
         }
 
-        render_funcs[current_state]();
+        if(current_state == STATE_INSTRUCTIONS){
+            render_instructions();
+        } else if(current_state == STATE_FOREST) {
+            render_forest();
+        } else if(current_state == STATE_CAVE) {
+            render_cave();
+        }
         render_step();
     }
     
     printf("Game ended\n");
 }
-
 
 int main(int argc, char* argv[]) {
     if (argc < 2) {
