@@ -1,0 +1,4 @@
+sudo nano /etc/modules-load.d/snd-aloop.conf
+snd-aloop
+
+(or manually `sudo modprobe snd-aloop` before doing anything)
