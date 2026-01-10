@@ -36,8 +36,13 @@ class ForestGame:
         self.context.forest_bg_atmosphere_id = AudioHelper.play(ForestResources.sfx_bg_atmosphere, context.audio_port, loops=-1)
 
     def process_events(self, phone_events: PhoneEvents):
-        if self.effect_status == EffectType.INVERT and global_state.frame_time - self.effect_start > Config.EFFECT_DURATION_ORB:
+        invert_active = (self.effect_status == EffectType.INVERT and
+                         global_state.frame_time - self.effect_start > Config.EFFECT_DURATION_ORB)
+
+        if invert_active:
             [phone_events.press_2, phone_events.press_8] = [phone_events.press_8, phone_events.press_2]
+
+        self.context.forest_controls_inverted = invert_active
 
         next_state = self._state.process_events(phone_events)
 
@@ -45,6 +50,7 @@ class ForestGame:
             self.effect_status = None
         if self.effect_status == EffectType.INVERT and global_state.frame_time - self.effect_start > Config.EFFECT_DURATION_INVERT:
             self.effect_status = None
+            self.context.forest_controls_inverted = False
 
         if next_state is not None:
             self._state.on_exit()

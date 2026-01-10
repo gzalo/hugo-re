@@ -25,6 +25,8 @@ class Playing(State):
 
     def on_exit(self):
         super().on_exit()
+        if self.forest is not None and not self.forest.ended:
+            self.forest.end()
         self.forest = None
 
     def external_effect(self, effect):

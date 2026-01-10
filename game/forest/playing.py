@@ -20,6 +20,9 @@ from state import State
 
 
 class Playing(State):
+    HINT_LOOKAHEAD = 1  # seconds ahead to look for obstacles
+    HINT_DURATION = 1.0  # how long to show the hint overlay
+
     def __init__(self, context: GameData):
         super().__init__(context)
 
@@ -33,6 +36,11 @@ class Playing(State):
 
         self.needs_bottom = RenderType.PRE
         self.needs_background = RenderType.PRE
+
+        # Hint system state
+        self.hint_shown_for_index = -1
+        self.hint_start_time = None
+        self.hint_type = None  # "dos" or "ocho"
 
     def process_events(self, phone_events: PhoneEvents):
         if not self.arrow_up_focus and not self.arrow_down_focus:
@@ -59,6 +67,38 @@ class Playing(State):
 
         if self.old_second is None:
             self.old_second = math.floor(self.context.forest_parallax_pos)
+
+        # Hint system: check for upcoming obstacles and show hint ~1 second before
+        hint_check_index = integer + self.HINT_LOOKAHEAD
+        if hint_check_index < len(self.context.forest_obstacles) and hint_check_index != self.hint_shown_for_index:
+            upcoming_obstacle = self.context.forest_obstacles[hint_check_index]
+            if upcoming_obstacle != 0:
+                # Determine what action is needed
+                # Types 1, 2, 3 (catapult, trap, rock) = need to JUMP (press 2)
+                # Type 4 (tree branch) = need to DUCK (press 8)
+                needs_jump = upcoming_obstacle in [1, 2, 3]
+
+                # Account for inverted controls
+                if self.context.forest_controls_inverted:
+                    # When inverted: to jump, press 8; to duck, press 2
+                    hint_type = "ocho" if needs_jump else "dos"
+                else:
+                    # Normal: to jump, press 2; to duck, press 8
+                    hint_type = "dos" if needs_jump else "ocho"
+
+                # Play the hint sfx
+                if hint_type == "dos":
+                    AudioHelper.play(ForestResources.sfx_hint_dos, self.context.audio_port)
+                else:
+                    AudioHelper.play(ForestResources.sfx_hint_ocho, self.context.audio_port)
+
+                self.hint_shown_for_index = hint_check_index
+                self.hint_start_time = global_state.frame_time
+                self.hint_type = hint_type
+
+        # Clear hint after duration expires
+        if self.hint_start_time and global_state.frame_time - self.hint_start_time > self.HINT_DURATION:
+            self.hint_type = None
 
         if self.arrow_up_focus and global_state.frame_time - self.hugo_jumping_time > 0.75:
             self.hugo_jumping_time = None
@@ -164,4 +204,11 @@ class Playing(State):
             screen.blit(ForestResources.hugo_crawl[self.get_frame_index() % len(ForestResources.hugo_crawl)], (self.HUGO_X_POS, 105))
         else:
             screen.blit(ForestResources.hugo_side[self.get_frame_index() % len(ForestResources.hugo_side)], (self.HUGO_X_POS, 90))
+
+        # Render hint overlay if active
+        if self.hint_type:
+            if self.hint_type == "dos":
+                screen.blit(ForestResources.hint_overlay_dos, (0, 0))
+            else:
+                screen.blit(ForestResources.hint_overlay_ocho, (0, 0))
 

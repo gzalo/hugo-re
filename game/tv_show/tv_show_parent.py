@@ -41,3 +41,8 @@ class TvShowParent:
     def external_effect(self, effect):
         if isinstance(self._state, Playing):
             self._state.external_effect(effect)
+
+    def cleanup(self):
+        if self._state is not None:
+            self._state.on_exit()
+            self._state = None

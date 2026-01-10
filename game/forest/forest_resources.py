@@ -107,7 +107,12 @@ class ForestResources:
 
     # sfx_rockroll = None
 
+    sfx_hint_dos = None
+    sfx_hint_ocho = None
+
     inverted_arrows = None
+    hint_overlay_dos = None
+    hint_overlay_ocho = None
 
     @staticmethod
     def init():
@@ -223,3 +228,8 @@ class ForestResources:
         # ForestResources.sfx_rockroll = Resource.load_sfx("ForestData", "rumle-lp.wav")
 
         ForestResources.inverted_arrows = pygame.image.load("resources/fixed_assets/inverted_arrows.png").convert_alpha()
+
+        ForestResources.sfx_hint_dos = Resource.load_sfx("ForestData", "dos.wav")
+        ForestResources.sfx_hint_ocho = Resource.load_sfx("ForestData", "ocho.wav")
+        ForestResources.hint_overlay_dos = pygame.image.load("resources/fixed_assets/hint_dos.png").convert_alpha()
+        ForestResources.hint_overlay_ocho = pygame.image.load("resources/fixed_assets/hint_ocho.png").convert_alpha()

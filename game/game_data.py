@@ -12,6 +12,7 @@ class GameData:
     forest_sacks: list
     forest_obstacles: list
     forest_leaves: list
+    forest_controls_inverted: bool
 
     cave_selected_rope: int
     cave_win_type: int
