@@ -14,6 +14,7 @@ from effects.splat import Splat
 from forest.forest_resources import ForestResources
 from game_data import GameData
 from post_processing import PostProcessing
+from scoreboard.scoreboard_resources import ScoreboardResources
 from scores.scores import Scores
 from tv_show.tv_show_parent import TvShowParent
 from phone_events import PhoneEvents
@@ -84,6 +85,7 @@ class Game:
 
         CaveResources.init()
         ForestResources.init()
+        ScoreboardResources.init()
         TvShowResources.init()
         Splat.init()
 

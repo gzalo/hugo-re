@@ -3,7 +3,7 @@ from game_data import GameData
 from phone_events import PhoneEvents
 from state import State
 from tv_show.attract import Attract
-from tv_show.going_cave import GoingCave
+from tv_show.in_scoreboard import InScoreboard
 
 
 class Playing(State):
@@ -16,7 +16,7 @@ class Playing(State):
             return Attract
 
         if self.forest.ended:
-            return GoingCave
+            return InScoreboard
 
         return self.forest.process_events(phone_events)
 

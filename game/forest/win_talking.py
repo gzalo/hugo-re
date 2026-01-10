@@ -22,6 +22,7 @@ class WinTalking(State):
 
     def on_enter(self) -> None:
         super().on_enter()
+        self.context.forest_reached_end = True
         AudioHelper.play(ForestResources.speak_levelcompleted, self.context.audio_port)
 
     def render(self, screen):

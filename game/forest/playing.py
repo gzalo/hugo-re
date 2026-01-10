@@ -134,11 +134,13 @@ class Playing(State):
             if self.arrow_up_focus and self.context.forest_sacks[integer] != 0:
                 if self.context.forest_sacks[integer] == 1:
                     self.context.forest_score += 100
+                    self.context.forest_normal_sacks_collected += 1
                     AudioHelper.play(ForestResources.sfx_sack_normal, self.context.audio_port)
                     self.context.forest_sacks[integer] = 0
                     global_state.attacks.append((self.context.country, EffectType.SPLAT, global_state.frame_time))
                 elif self.context.forest_sacks[integer] == 2:
                     self.context.forest_score += 250
+                    self.context.forest_golden_sacks_collected += 1
                     AudioHelper.play(ForestResources.sfx_sack_bonus, self.context.audio_port)
                     self.context.forest_sacks[integer] = 0
                     global_state.attacks.append((self.context.country, EffectType.INVERT, global_state.frame_time))

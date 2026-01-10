@@ -131,18 +131,23 @@ class ForestGame:
         for i in range(self.context.forest_lives):
             screen.blit(ForestResources.hugo_lives[0], (i * 40 + 32, 188))
 
-        x_score = 200
+        x_score_right = 150 + 24 * 6  # Right edge position (6 digits max)
         y_score = 194
         x_space = 24
-        thousands = self.context.forest_score // 1000
-        hundreds = (self.context.forest_score - thousands * 1000) // 100
-        tens = (self.context.forest_score - thousands * 1000 - hundreds * 100) // 10
-        ones = self.context.forest_score - thousands * 1000 - hundreds * 100 - tens * 10
 
-        screen.blit(ForestResources.score_numbers[0], (x_score + x_space * 0, y_score), self.get_spritesheet_area(thousands))
-        screen.blit(ForestResources.score_numbers[0], (x_score + x_space * 1, y_score), self.get_spritesheet_area(hundreds))
-        screen.blit(ForestResources.score_numbers[0], (x_score + x_space * 2, y_score), self.get_spritesheet_area(tens))
-        screen.blit(ForestResources.score_numbers[0], (x_score + x_space * 3, y_score), self.get_spritesheet_area(ones))
+        score = int(self.context.forest_score)
+        if score == 0:
+            screen.blit(ForestResources.score_numbers[0], (x_score_right - x_space, y_score), self.get_spritesheet_area(0))
+            return
+
+        digits = []
+        temp = score
+        while temp > 0:
+            digits.append(temp % 10)
+            temp //= 10
+
+        for i, digit in enumerate(digits):
+            screen.blit(ForestResources.score_numbers[0], (x_score_right - x_space * (i + 1), y_score), self.get_spritesheet_area(digit))
 
     def end(self):
         self._state.on_exit()

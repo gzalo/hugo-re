@@ -44,17 +44,23 @@ class CaveGame:
         self.render_score(screen)
 
     def render_score(self, screen):
-        x_score = 243
+        x_score_right = 210 + 16 * 6  # Right edge position (6 digits max)
         y_score = 203
         x_space = 16
-        thousands = self.rolling_score // 1000
-        hundreds = (self.rolling_score - thousands * 1000) // 100
-        tens = (self.rolling_score - thousands * 1000 - hundreds * 100) // 10
-        ones = self.rolling_score - thousands * 1000 - hundreds * 100 - tens * 10
-        screen.blit(CaveResources.score_font[thousands], (x_score + x_space * 0, y_score))
-        screen.blit(CaveResources.score_font[hundreds], (x_score + x_space * 1, y_score))
-        screen.blit(CaveResources.score_font[tens], (x_score + x_space * 2, y_score))
-        screen.blit(CaveResources.score_font[ones], (x_score + x_space * 3, y_score))
+
+        score = int(self.rolling_score)
+        if score == 0:
+            screen.blit(CaveResources.score_font[0], (x_score_right - x_space, y_score))
+            return
+
+        digits = []
+        temp = score
+        while temp > 0:
+            digits.append(temp % 10)
+            temp //= 10
+
+        for i, digit in enumerate(digits):
+            screen.blit(CaveResources.score_font[digit], (x_score_right - x_space * (i + 1), y_score))
 
     def end(self):
         self._state.on_exit()

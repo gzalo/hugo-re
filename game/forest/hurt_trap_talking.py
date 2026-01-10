@@ -10,7 +10,7 @@ from state import State
 class HurtTrapTalking(State):
     def process_events(self, events):
         if self.get_frame_index() >= len(ForestResources.sync_trap):
-            return ForestUtils.reduce_lives(self.context)
+            return ForestUtils.reduce_lives(self.context, obstacle_type=2)  # Trap
 
         return None
 
