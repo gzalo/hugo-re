@@ -18,12 +18,20 @@ class Attract(VideoState):
         from tv_show.initial import Initial
         from tv_show.playing import Playing
         from tv_show.in_cave import InCave
+        from tv_show.in_scoreboard import InScoreboard
 
         if phone_events.offhook:
             return Initial
 
         if phone_events.press_5:
             return Playing
+        if phone_events.press_4:
+            self.context.forest_score = 1000
+            self.context.forest_normal_sacks_collected = 5
+            self.context.forest_reached_end = True
+            self.context.forest_golden_sacks_collected = 1
+            self.context.forest_obstacles_hit = [1]
+            return InScoreboard
         if phone_events.press_6:
             self.context.forest_score = 1000
             return InCave

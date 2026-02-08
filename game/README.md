@@ -1,13 +1,18 @@
 # Hugo - into the multiverse
 
-Requires Python 3 and `ffmpeg.exe` or similar, can be the ["essentials" version](https://www.gyan.dev/ffmpeg/builds/)
-
-- [Game can be downloaded from here (gold version)](https://sites.google.com/view/ajugarconhugopc/juegos?authuser=0)
-- [Resources need to be converted using this converter](../converter)
+Requires Python 3 and ffmpeg installed in the system. In windows, it requires `ffmpeg.exe` or similar to be present in this directory, it can be the ["essentials" version](https://www.gyan.dev/ffmpeg/builds/)
 
 ## Usage:
+- [Game can be downloaded from here (gold version)](https://sites.google.com/view/ajugarconhugopc/juegos?authuser=0)
+- [Resources need to be converted using this converter](../converter)
+- Download scoreboard resource from here: [Part 1](https://i.imgur.com/X2kpAqX.png) and [Part 2](https://i.imgur.com/VQnPYWx.png), store them in a new "ScoreboardData/gfx" folder in the converted resources folder, with the names "sprite1.png" and "sprite2.png" respectively.
 - Install requirements using `pip install -r requirements.txt`
+
+## Audios
+Game audio and music is not mandatory, if you want to enable it you need to run a few extra things:
+
 - Download mp3 from here: https://www.youtube.com/watch?v=maJVRkefBhw and place in `RopeOutroData/SFX/a_party_for_me.mp3` inside the converted resource folder
+- Run [Audio Server](../audio-server) if you want to play the audios from the game.
 - Extract the audios from the videos using the following ffmpeg commands:
 ```
 mkdir -p converted_resources/audio_for_videos/ar

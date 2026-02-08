@@ -21,8 +21,25 @@ pip install -r requirements.txt
 ## Usage
 
 ```bash
+python audio_server.py --list-devices
+```
+
+Detech which audio devices are available and choose four to use with the `--device` argument:
+
+```bash
 python audio_server.py --host 0.0.0.0 --port 9001 --assets ./resources/ --device "audio_device_name"
 ```
+
+For example
+
+```bash
+python audio_server.py \
+        --host 0.0.0.0 \
+        --assets /home/gzalo/BigFileConverted \
+        --sinks vCable1_Out,vCable2_Out,vCable3_Out,vCable4_Out
+```
+
+Audio devices can be repeated to make all player audios play through the same device, or you can specify different devices for each player. 
 
 ### Command Line Arguments
 
@@ -30,7 +47,7 @@ python audio_server.py --host 0.0.0.0 --port 9001 --assets ./resources/ --device
 - `--port`: Port to listen on (default: 9001)
 - `--assets`: Path to assets directory (required)
 - `--device`: Audio device name (optional)
-- `--list-devices`: List available audio devices and exit
+- `--list-devices`: Comma separated list of available audio devices and exit
 
 ## API
 
