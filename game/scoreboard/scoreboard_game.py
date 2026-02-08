@@ -22,6 +22,7 @@ class ScoreboardGame:
     # Timing constants
     ROW_DELAY = 1.5  # seconds between starting each row
     ROLL_SPEED = 50  # points per frame to roll
+    HUGO_ANIM_FPS = 20  # Hugo animation frame rate
 
     # Score values
     SACK_SCORE = 100
@@ -30,16 +31,16 @@ class ScoreboardGame:
     LIFE_LOST_PENALTY = 100
 
     # Layout constants
-    SCORE_X = 200  # X position for score numbers (right-aligned area)
+    SCORE_X = 192  # X position for score numbers (right-aligned area)
     SCORE_DIGIT_SPACING = 16
-    ICON_X = 32  # X position for row icons
-    ROW_HEIGHT = 40  # Vertical spacing between rows
-    FIRST_ROW_Y = 20  # Y position of first row
+    ICON_X = 100  # X position for row icons (right of Hugo)
+    ROW_HEIGHT = 49  # Vertical spacing between rows
+    FIRST_ROW_Y = 3  # Y position of first row
 
     # Hugo position
-    HUGO_X = 8
-    HUGO_START_Y = 10
-    HUGO_END_Y = 160
+    HUGO_X = 0
+    HUGO_START_Y = 0
+    HUGO_END_Y = 180
 
     def __init__(self, context: GameData):
         self.context = context
@@ -66,37 +67,49 @@ class ScoreboardGame:
         # Current row being displayed (0-4, 5 = done)
         self.current_row = 0
         self.row_start_time = global_state.frame_time
+        self.row_phase = 0  # 0=forward_anim, 1=rolling, 2=reverse_anim
+        self.phase_start_time = global_state.frame_time
 
         # Sound state
         self.is_rolling = False
 
-    def get_frame_index(self):
-        return int((global_state.frame_time - self.start_time) * 10)
+    def _hugo_forward_time(self):
+        return len(ScoreboardResources.hugo_side) / self.HUGO_ANIM_FPS
 
     def process_events(self, phone_events: PhoneEvents):
-        row_time = global_state.frame_time - self.row_start_time
+        phase_time = global_state.frame_time - self.phase_start_time
+        forward_time = self._hugo_forward_time()
 
         if self.current_row < 5:
-            row_complete = self._is_row_complete()
+            if self.row_phase == 0:  # Hugo forward animation
+                if phase_time >= forward_time:
+                    self.row_phase = 1
+                    self.phase_start_time = global_state.frame_time
+            elif self.row_phase == 1:  # Score rolling
+                self._update_rolling()
+                if self._is_row_complete():
+                    self.row_phase = 2
+                    self.phase_start_time = global_state.frame_time
+            elif self.row_phase == 2:  # Hugo reverse animation
+                if phase_time >= forward_time:
+                    self.current_row += 1
+                    self.row_phase = 0
+                    self.phase_start_time = global_state.frame_time
+                    self.row_start_time = global_state.frame_time
 
-            if row_complete and row_time > self.ROW_DELAY:
-                self.current_row += 1
-                self.row_start_time = global_state.frame_time
-
-        self._update_rolling()
-
-        # Handle sound
-        if self._any_rolling() and not self.is_rolling:
+        # Handle sound (only during rolling phase)
+        rolling_active = self.row_phase == 1 and self.current_row < 5 and self._any_rolling()
+        if rolling_active and not self.is_rolling:
             self.context.scoreboard_score_counter_id = AudioHelper.play(
                 ScoreboardResources.score_counter, self.context.audio_port, loops=-1
             )
             self.is_rolling = True
-        elif not self._any_rolling() and self.is_rolling:
+        elif not rolling_active and self.is_rolling:
             AudioHelper.stop(self.context.scoreboard_score_counter_id, self.context.audio_port)
             self.is_rolling = False
 
         # Exit after showing total for a while
-        if self.current_row >= 5 and row_time > 2.0:
+        if self.current_row >= 5 and phase_time > 2.0:
             self.context.forest_score = self.total_score
             self.end()
 
@@ -151,14 +164,27 @@ class ScoreboardGame:
             self._render_row(screen, 2, ScoreboardResources.icon_golden_sack, self.rolling_golden, False)
         if self.current_row >= 3:
             self._render_lives_lost_row(screen, 3)
-        if self.current_row >= 4:
-            self._render_total_row(screen, 4)
+        self._render_total_row(screen, 4)
 
     def _render_hugo(self, screen):
-        progress = min(1.0, self.current_row / 4.0) if self.current_row >= 0 else 0
+        if self.current_row >= 5:
+            return
+
+        progress = min(1.0, self.current_row / 4.0)
         hugo_y = self.HUGO_START_Y + (self.HUGO_END_Y - self.HUGO_START_Y) * progress
 
-        frame_idx = self.get_frame_index() % len(ScoreboardResources.hugo_side)
+        phase_time = global_state.frame_time - self.phase_start_time
+        num_frames = len(ScoreboardResources.hugo_side)
+
+        if self.row_phase == 0:  # Forward animation
+            frame_idx = min(int(phase_time * self.HUGO_ANIM_FPS), num_frames - 1)
+        elif self.row_phase == 1:  # Rolling - hold last frame
+            frame_idx = num_frames - 1
+        elif self.row_phase == 2:  # Reverse animation
+            frame_idx = max(num_frames - 1 - int(phase_time * self.HUGO_ANIM_FPS), 0)
+        else:
+            frame_idx = 0
+
         screen.blit(ScoreboardResources.hugo_side[frame_idx], (self.HUGO_X, int(hugo_y)))
 
     def _render_row(self, screen, row_index, icon, score, is_negative):
@@ -182,16 +208,23 @@ class ScoreboardGame:
         for i, obstacle_type in enumerate(obstacles_hit[:3]):
             icon = obstacle_icons.get(obstacle_type)
             if icon:
-                screen.blit(icon, (icon_x + i * 36, y))
+                ix = icon_x + i * 28
+                # Draw background square behind obstacle icon
+                screen.blit(ScoreboardResources.icon_death_bg, (ix - 2, y - 1))
+                screen.blit(icon, (ix, y))
 
         self._render_score(screen, self.SCORE_X, y + 8, self.rolling_penalty, is_negative=True)
 
     def _render_total_row(self, screen, row_index):
         y = self.FIRST_ROW_Y + row_index * self.ROW_HEIGHT
+        screen.blit(ScoreboardResources.icon_total, (self.ICON_X-10, y+15))
         self._render_score(screen, self.SCORE_X, y + 8, self.rolling_total, is_negative=False)
 
     def _render_score(self, screen, x, y, score, is_negative=False):
         score = int(score)
+
+        if is_negative and score > 0:
+            screen.blit(ScoreboardResources.icon_negative, (x - 17, y))
 
         digits = []
         temp = abs(score)
