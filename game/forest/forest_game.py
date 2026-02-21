@@ -33,7 +33,8 @@ class ForestGame:
         self.effect_status = None
         self.effect_start = None
 
-        self.context.forest_bg_atmosphere_id = AudioHelper.play(ForestResources.sfx_bg_atmosphere, context.audio_port, loops=-1)
+        self.context.forest_bg_atmosphere_id = AudioHelper.play(ForestResources.sfx_bg_atmosphere, context.audio_port)
+        self.forest_bg_atmosphere_start = global_state.frame_time
 
     def process_events(self, phone_events: PhoneEvents):
         invert_active = (self.effect_status == EffectType.INVERT and
@@ -59,6 +60,10 @@ class ForestGame:
             else:
                 self._state = next_state(self.context)
                 self._state.on_enter()
+
+        if not self.ended and global_state.frame_time - self.forest_bg_atmosphere_start >= 5.5:
+            self.context.forest_bg_atmosphere_id = AudioHelper.play(ForestResources.sfx_bg_atmosphere, self.context.audio_port)
+            self.forest_bg_atmosphere_start = global_state.frame_time
 
     def render(self, screen):
         if getattr(self._state, 'needs_background', None) == RenderType.PRE:

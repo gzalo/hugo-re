@@ -72,6 +72,7 @@ class ScoreboardGame:
 
         # Sound state
         self.is_rolling = False
+        self.score_counter_start = None
 
     def _hugo_forward_time(self):
         return len(ScoreboardResources.hugo_side) / self.HUGO_ANIM_FPS
@@ -101,9 +102,15 @@ class ScoreboardGame:
         rolling_active = self.row_phase == 1 and self.current_row < 5 and self._any_rolling()
         if rolling_active and not self.is_rolling:
             self.context.scoreboard_score_counter_id = AudioHelper.play(
-                ScoreboardResources.score_counter, self.context.audio_port, loops=-1
+                ScoreboardResources.score_counter, self.context.audio_port
             )
+            self.score_counter_start = global_state.frame_time
             self.is_rolling = True
+        elif rolling_active and self.is_rolling and global_state.frame_time - self.score_counter_start >= 0.1:
+            self.context.scoreboard_score_counter_id = AudioHelper.play(
+                ScoreboardResources.score_counter, self.context.audio_port
+            )
+            self.score_counter_start = global_state.frame_time
         elif not rolling_active and self.is_rolling:
             AudioHelper.stop(self.context.scoreboard_score_counter_id, self.context.audio_port)
             self.is_rolling = False
