@@ -6,6 +6,7 @@ from cave.cave_resources import CaveResources
 from null_state import NullState
 from phone_events import PhoneEvents
 from state import State
+from config import Config
 
 
 class LostSpring(State):
@@ -24,3 +25,10 @@ class LostSpring(State):
     def on_enter(self) -> None:
         super().on_enter()
         AudioHelper.play(CaveResources.hugo_katapult, self.context.audio_port)
+
+    def on_exit(self) -> None:
+        super().on_exit()
+        if Config.ARGENTINE_VERSION:
+            AudioHelper.fadeout(self.context.cave_bg_music_id, self.context.audio_port, 1)
+        else:
+            AudioHelper.fadeout(self.context.cave_stemning_id, self.context.audio_port, 1)
