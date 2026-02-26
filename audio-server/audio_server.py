@@ -135,10 +135,12 @@ class AudioServer:
     BLOCKSIZE = 1024
 
     def __init__(self, host: str, ports: List[int], assets_path: str,
+                 resources_path: Optional[str] = None,
                  sinks: Optional[List[str]] = None, device_names: Optional[List[str]] = None):
         self.host = host
         self.ports = ports if isinstance(ports, list) else [ports]
         self.assets_path = os.path.abspath(assets_path)
+        self.resources_path = os.path.abspath(resources_path) if resources_path else None
         self.running = False
         self.lock = threading.Lock()
 
@@ -236,7 +238,10 @@ class AudioServer:
 
             audio_path = os.path.join(self.assets_path, resource)
             if not os.path.exists(audio_path):
-                return {"error": f"Audio file not found: {audio_path}"}
+                if self.resources_path:
+                    audio_path = os.path.join(self.resources_path, resource)
+                if not os.path.exists(audio_path):
+                    return {"error": f"Audio file not found: {resource}"}
 
             data, samplerate = sf.read(audio_path, dtype='float32')
             # Downmix to mono immediately
@@ -381,6 +386,8 @@ class AudioServer:
         """Start the audio server."""
         print(f"Starting Audio Server on {self.host} ports {self.ports}")
         print(f"Assets path: {self.assets_path}")
+        if self.resources_path:
+            print(f"Resources path (fallback): {self.resources_path}")
         print(f"Sinks mapping (ports -> sinks):")
         for p, s in zip(self.ports, self.sinks):
             print(f"  {p} -> {s}")
@@ -454,6 +461,11 @@ def main():
         required=True
     )
     parser.add_argument(
+        "--resources",
+        help="Path to resources directory (fallback if file not found in assets)",
+        default=None
+    )
+    parser.add_argument(
         "--sinks",
         type=str,
         default=",".join(DEFAULT_SINKS),
@@ -489,7 +501,12 @@ def main():
         print(f"Error: Assets path does not exist: {args.assets}")
         return
 
-    server = AudioServer(args.host, ports, args.assets, sinks=sinks)
+    # Validate resources path if provided
+    if args.resources and not os.path.exists(args.resources):
+        print(f"Error: Resources path does not exist: {args.resources}")
+        return
+
+    server = AudioServer(args.host, ports, args.assets, resources_path=args.resources, sinks=sinks)
     server.start()
 
 

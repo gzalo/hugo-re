@@ -98,4 +98,4 @@ class CaveResources:
         CaveResources.trappe_grin = Resource.load_sfx("RopeOutroData", "HEXHAHA.WAV")  # Odd laugh
         CaveResources.skrig = Resource.load_sfx("RopeOutroData", "SKRIG.WAV")  # Scilla screams
         CaveResources.score_counter = Resource.load_sfx("RopeOutroData", "COUNTER.WAV")  # Score counter increase
-        CaveResources.bg_music = Resource.load_sfx("RopeOutroData",  "a_party_for_me.mp3")  # BG music, downloaded from https://www.youtube.com/watch?v=maJVRkefBhw
+        CaveResources.bg_music = "music/a_party_for_me.mp3"  # BG music, downloaded from https://www.youtube.com/watch?v=maJVRkefBhw

@@ -27,16 +27,17 @@ python audio_server.py --list-devices
 Detech which audio devices are available and choose four to use with the `--device` argument:
 
 ```bash
-python audio_server.py --host 0.0.0.0 --port 9001 --assets ./resources/ --device "audio_device_name"
-```
-
-For example
-
-```bash
 python audio_server.py \
         --host 0.0.0.0 \
-        --assets /home/gzalo/BigFileConverted \
+        --assets /home/gzalo/BigFile \
+        --resources ../game/resources \
         --sinks vCable1_Out,vCable2_Out,vCable3_Out,vCable4_Out
+```
+
+In windows, something like 
+
+```
+python audio_server.py --host 0.0.0.0 --assets "D:\Juegos\HugoGoldFlashparty\BigFile" --resources ../game/resources/ --sinks "Altavoces (High Definition Audi, MME,Altavoces (High Definition Audi, MME,Altavoces (High Definition Audi, MME,Altavoces (High Definition Audi, MME"
 ```
 
 Audio devices can be repeated to make all player audios play through the same device, or you can specify different devices for each player. 
@@ -46,6 +47,7 @@ Audio devices can be repeated to make all player audios play through the same de
 - `--host`: Host to bind to (default: 0.0.0.0)
 - `--port`: Port to listen on (default: 9001)
 - `--assets`: Path to assets directory (required)
+- `--resources`: Path to resources directory (required)
 - `--device`: Audio device name (optional)
 - `--list-devices`: Comma separated list of available audio devices and exit
 
