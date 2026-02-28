@@ -1,6 +1,8 @@
-import json
 import sys
 import pygame
+
+import converter
+
 
 class Resource:
     if len(sys.argv) > 1:
@@ -10,8 +12,8 @@ class Resource:
 
     @staticmethod
     def load_sync(game, filename):
-        with open(Resource.DATA_DIR + "/" + game + "/Syncs/" + filename + ".json") as f:
-            return json.load(f)["frameIndices"]
+        path = Resource.DATA_DIR + "/" + game + "/Syncs/" + filename
+        return converter.decode_oos(path)
 
     @staticmethod
     def load_speak(game, filename):
@@ -33,20 +35,21 @@ class Resource:
 
     @staticmethod
     def load_surfaces(game, name, start, end):
-        out = []
-
         if game == "RopeOutroData":
             gfx = "GFX"
         else:
             gfx = "gfx"
 
-        for frame in range(start, end + 1):
-            filename = Resource.DATA_DIR + "/" + game + "/" + gfx + "/" + name + "_" + str(frame) + ".png"
-            out.append(pygame.image.load(filename).convert_alpha())
-
-        return out
+        file_path = Resource.DATA_DIR + "/" + game + "/" + gfx + "/" + name
+        all_frames = converter.decode_surfaces(file_path)
+        return all_frames[start:end + 1]
 
     @staticmethod
     def load_surface_raw(game, name):
         filename = Resource.DATA_DIR + "/" + game + "/gfx/" + name
+        return pygame.image.load(filename).convert_alpha()
+
+    @staticmethod
+    def load_surface_res(name):
+        filename = "resources/" + name
         return pygame.image.load(filename).convert_alpha()

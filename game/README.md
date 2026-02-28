@@ -3,51 +3,16 @@
 Requires Python 3 and ffmpeg installed in the system. In windows, it requires `ffmpeg.exe` or similar to be present in this directory, it can be the ["essentials" version](https://www.gyan.dev/ffmpeg/builds/)
 
 ## Usage:
-- [Game can be downloaded from here (gold version)](https://sites.google.com/view/ajugarconhugopc/juegos?authuser=0)
-- [Resources need to be converted using this converter](../converter)
-- Download scoreboard resource from here: [Part 1](https://i.imgur.com/X2kpAqX.png) and [Part 2](https://i.imgur.com/VQnPYWx.png), store them in a new "ScoreboardData/gfx" folder in the converted resources folder, with the names "sprite1.png" and "sprite2.png" respectively.
+- [Game assets can be downloaded from here (gold version)](https://sites.google.com/view/ajugarconhugopc/juegos?authuser=0)
+- Download scoreboard resource from here: [Part 1](https://i.imgur.com/X2kpAqX.png) and [Part 2](https://i.imgur.com/VQnPYWx.png), store them in `resources/scores` folder, with the names "sprite1.png" and "sprite2.png" respectively.
 - Install requirements using `pip install -r requirements.txt`
 
 ## Audios
 Game audio and music is not mandatory, if you want to enable it you need to run a few extra things:
 
-- Download mp3 from here: https://www.youtube.com/watch?v=maJVRkefBhw and place in `RopeOutroData/SFX/a_party_for_me.mp3` inside the converted resource folder
+- Download mp3 from here: https://www.youtube.com/watch?v=maJVRkefBhw and place in `resources/music/a_party_for_me.mp3`
 - Run [Audio Server](../audio-server) if you want to play the audios from the game.
-- Extract the audios from the videos using the following ffmpeg commands:
-```
-mkdir -p converted_resources/audio_for_videos/ar
-ffmpeg -i resources/videos/ar/attract_demo.avi -vn -acodec pcm_s16le converted_resources/audio_for_videos/ar/attract_demo.wav
-ffmpeg -i resources/videos/ar/have_luck.avi -vn -acodec pcm_s16le converted_resources/audio_for_videos/ar/have_luck.wav
-ffmpeg -i resources/videos/ar/hello_hello.avi -vn -acodec pcm_s16le converted_resources/audio_for_videos/ar/hello_hello.wav
-ffmpeg -i resources/videos/ar/press_5.avi -vn -acodec pcm_s16le converted_resources/audio_for_videos/ar/press_5.wav
-ffmpeg -i resources/videos/ar/scylla_cave.avi -vn -acodec pcm_s16le converted_resources/audio_for_videos/ar/scylla_cave.wav
-ffmpeg -i resources/videos/ar/you_lost.avi -vn -acodec pcm_s16le converted_resources/audio_for_videos/ar/you_lost.wav
-
-mkdir -p converted_resources/audio_for_videos/cl
-ffmpeg -i resources/videos/cl/attract_demo.avi -vn -acodec pcm_s16le converted_resources/audio_for_videos/cl/attract_demo.wav
-ffmpeg -i resources/videos/cl/have_luck.avi -vn -acodec pcm_s16le converted_resources/audio_for_videos/cl/have_luck.wav
-ffmpeg -i resources/videos/cl/hello_hello.avi -vn -acodec pcm_s16le converted_resources/audio_for_videos/cl/hello_hello.wav
-ffmpeg -i resources/videos/cl/press_5.avi -vn -acodec pcm_s16le converted_resources/audio_for_videos/cl/press_5.wav
-ffmpeg -i resources/videos/cl/scylla_cave.avi -vn -acodec pcm_s16le converted_resources/audio_for_videos/cl/scylla_cave.wav
-ffmpeg -i resources/videos/cl/you_lost.avi -vn -acodec pcm_s16le converted_resources/audio_for_videos/cl/you_lost.wav
-
-mkdir -p converted_resources/audio_for_videos/dn
-ffmpeg -i resources/videos/dn/attract_demo.avi -vn -acodec pcm_s16le converted_resources/audio_for_videos/dn/attract_demo.wav
-ffmpeg -i resources/videos/dn/have_luck.avi -vn -acodec pcm_s16le converted_resources/audio_for_videos/dn/have_luck.wav
-ffmpeg -i resources/videos/dn/hello_hello.avi -vn -acodec pcm_s16le converted_resources/audio_for_videos/dn/hello_hello.wav
-ffmpeg -i resources/videos/dn/press_5.avi -vn -acodec pcm_s16le converted_resources/audio_for_videos/dn/press_5.wav
-ffmpeg -i resources/videos/dn/scylla_cave.avi -vn -acodec pcm_s16le converted_resources/audio_for_videos/dn/scylla_cave.wav
-ffmpeg -i resources/videos/dn/you_lost.avi -vn -acodec pcm_s16le converted_resources/audio_for_videos/dn/you_lost.wav
-
-mkdir -p converted_resources/audio_for_videos/fr
-ffmpeg -i resources/videos/fr/attract_demo.avi -vn -acodec pcm_s16le converted_resources/audio_for_videos/fr/attract_demo.wav
-ffmpeg -i resources/videos/fr/have_luck.avi -vn -acodec pcm_s16le converted_resources/audio_for_videos/fr/have_luck.wav
-ffmpeg -i resources/videos/fr/hello_hello.avi -vn -acodec pcm_s16le converted_resources/audio_for_videos/fr/hello_hello.wav
-ffmpeg -i resources/videos/fr/press_5.avi -vn -acodec pcm_s16le converted_resources/audio_for_videos/fr/press_5.wav
-ffmpeg -i resources/videos/fr/scylla_cave.avi -vn -acodec pcm_s16le converted_resources/audio_for_videos/fr/scylla_cave.wav
-ffmpeg -i resources/videos/fr/you_lost.avi -vn -acodec pcm_s16le converted_resources/audio_for_videos/fr/you_lost.wav
-```
-- Execute `game.py <path to converted resource folder>`
+- Execute `game.py <path to resource folder>`
 
 ## Key mapping:
 

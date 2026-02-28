@@ -28,8 +28,8 @@ class ScoreboardResources:
 
     @staticmethod
     def init():
-        sprite1 = Resource.load_surface_raw("ScoreboardData", "sprite1.png")
-        sprite2 = Resource.load_surface_raw("ScoreboardData", "sprite2.png")
+        sprite1 = Resource.load_surface_res("scores/sprite1.png")
+        sprite2 = Resource.load_surface_res("scores/sprite2.png")
 
         bg_crop = sprite1.subsurface(pygame.Rect(464, 144, 320, 256))
         ScoreboardResources.background = pygame.transform.scale(bg_crop, (300, 240))

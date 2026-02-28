@@ -117,6 +117,11 @@ class ForestResources:
     @staticmethod
     def init():
         ForestResources.bg_hillsday = Resource.load_surfaces("ForestData", "hillsday.cgf", 0, 0)  # hills night
+        for surf in ForestResources.bg_hillsday:
+            rgb = pygame.surfarray.array3d(surf)
+            alpha = pygame.surfarray.pixels_alpha(surf)
+            alpha[(rgb[:, :, 0] == 0) & (rgb[:, :, 1] == 0) & (rgb[:, :, 2] == 0)] = 0
+            del alpha
         # ForestResources.bg_hillsnight = Resource.load_surfaces("ForestData", "hillsngt.cgf" ,0,0) # hills day
         ForestResources.bg_trees = Resource.load_surfaces("ForestData", "paratrees.cgf", 0, 0)  # more background
         ForestResources.bg_spooky_trees = Resource.load_surfaces("ForestData", "spooky.cgf", 0, 0)  # far background
