@@ -29,7 +29,7 @@ typedef struct {
     Texture* hugo_hand1;    // hand frame 1
     Texture* hugo_hand2;    // hand frame 2
     
-    // Sync data for talking animations (loaded from .oos.json files)
+    // Sync data for talking animations (loaded from .oos binary files)
     int* sync_start;        // sync for speak_start (005-01)
     int sync_start_count;
     int* sync_rock;         // sync for speak_rock (005-02)

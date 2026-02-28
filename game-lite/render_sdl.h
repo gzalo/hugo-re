@@ -21,6 +21,8 @@ void play(Audio *audio);
 int play_loop(Audio *audio);
 void stop_audio(int channel);
 
+Texture* texture_from_surface(SDL_Surface* surface);
+
 int get_time_ms();
 
 bool render_init();

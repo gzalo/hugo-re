@@ -31,6 +31,15 @@ void render_cleanup() {
     SDL_Quit();
 }
 
+Texture* texture_from_surface(SDL_Surface* surface) {
+    if (!surface) return NULL;
+    SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, surface);
+    if (!texture) {
+        printf("Warning: Could not create texture from surface: %s\n", SDL_GetError());
+    }
+    return texture;
+}
+
 Texture* load_texture(const char* path) {
     SDL_Surface* surface = IMG_Load(path);
     if (!surface) {
