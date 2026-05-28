@@ -234,7 +234,7 @@ class ForestResources:
 
         ForestResources.inverted_arrows = pygame.image.load("resources/fixed_assets/inverted_arrows.png").convert_alpha()
 
-        ForestResources.sfx_hint_dos = Resource.load_sfx("ForestData", "dos.wav")
-        ForestResources.sfx_hint_ocho = Resource.load_sfx("ForestData", "ocho.wav")
+        ForestResources.sfx_hint_dos = "sfx/dos.wav"
+        ForestResources.sfx_hint_ocho = "sfx/ocho.wav"
         ForestResources.hint_overlay_dos = pygame.image.load("resources/fixed_assets/hint_dos.png").convert_alpha()
         ForestResources.hint_overlay_ocho = pygame.image.load("resources/fixed_assets/hint_ocho.png").convert_alpha()
