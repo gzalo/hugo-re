@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hugo - Into the Multiverse</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      font-family: monospace;
+      color: #000;
+    }
+    #launch {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+    }
+    #launch h1 { font-size: 1.4rem; letter-spacing: 0.05em; }
+    #launch p { font-size: 0.85rem; color: #555; max-width: 380px; text-align: center; }
+    #launch .beta-note { font-size: 0.78rem; color: #a00; max-width: 380px; text-align: center; }
+    #launch .beta-note a { color: #a00; }
+    #pickFolder {
+      padding: 10px 24px;
+      background: #000;
+      color: #fff;
+      border: none;
+      font-family: monospace;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+    #pickFolder:hover { background: #333; }
+    #status { font-size: 0.8rem; color: #666; min-height: 1.2em; }
+
+    /* ── Game area ───────────────────────────────────────────────── */
+    #gameArea {
+      display: none;
+      flex-direction: row;
+      align-items: flex-start;
+    }
+    #gameLeft {
+      display: flex;
+      flex-direction: column;
+    }
+    #gameCanvas {
+      display: block;
+      border: 1px solid #000;
+      image-rendering: pixelated;
+      image-rendering: crisp-edges;
+    }
+
+    /* ── Per-player phone controls ───────────────────────────────── */
+    #phoneControls {
+      width: 640px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      border: 1px solid #000;
+      border-top: none;
+    }
+    .phone-cell {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 10px;
+    }
+    .phone-cell:nth-child(1),
+    .phone-cell:nth-child(2) { border-bottom: 1px solid #ccc; }
+    .phone-cell:nth-child(odd) { border-right: 1px solid #ccc; }
+    .phone-label {
+      font-size: 0.7rem;
+      font-weight: bold;
+      color: #777;
+      width: 22px;
+      flex-shrink: 0;
+    }
+    .phone-btn {
+      display: flex;
+      align-items: center;
+      gap: 3px;
+      padding: 3px 9px;
+      border: 1px solid;
+      border-radius: 3px;
+      font-family: monospace;
+      font-size: 0.8rem;
+      cursor: pointer;
+      user-select: none;
+      background: transparent;
+    }
+    .phone-btn:active { opacity: 0.6; }
+    .phone-pickup { border-color: #2a7; color: #2a7; }
+    .phone-pickup:hover { background: #eff8f3; }
+    .phone-hangup { border-color: #c33; color: #c33; }
+    .phone-hangup:hover { background: #fdf0f0; }
+    .phone-icon { font-size: 0.95rem; line-height: 1; }
+
+    /* ── Common phone panel (right side) ─────────────────────────── */
+    #commonPhone {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      padding: 10px 10px;
+      border: 1px solid #000;
+      border-left: none;
+      background: #f5f5f5;
+      width: 110px;
+    }
+    #commonPhone .cp-title {
+      font-size: 0.6rem;
+      color: #888;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      text-align: center;
+    }
+    #commonPhone .cp-divider {
+      width: 100%;
+      border: none;
+      border-top: 1px solid #ccc;
+      margin: 1px 0;
+    }
+    #commonPhone .cp-call-row {
+      display: flex;
+      gap: 4px;
+      width: 100%;
+    }
+    .cp-call-btn {
+      flex: 1;
+      padding: 5px 2px;
+      border: 1px solid;
+      border-radius: 3px;
+      font-family: monospace;
+      font-size: 0.75rem;
+      cursor: pointer;
+      background: transparent;
+      user-select: none;
+    }
+    .cp-call-btn:active { opacity: 0.6; }
+    .cp-pickup-all { border-color: #2a7; color: #2a7; }
+    .cp-pickup-all:hover { background: #eff8f3; }
+    .cp-hangup-all { border-color: #c33; color: #c33; }
+    .cp-hangup-all:hover { background: #fdf0f0; }
+    #commonPhone .cp-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 4px;
+      width: 100%;
+    }
+    .cp-digit {
+      padding: 7px 0;
+      border: 1px solid #aaa;
+      border-radius: 3px;
+      font-family: monospace;
+      font-size: 0.9rem;
+      font-weight: bold;
+      cursor: pointer;
+      background: #fff;
+      color: #000;
+      text-align: center;
+      user-select: none;
+    }
+    .cp-digit:hover { background: #e8e8e8; }
+    .cp-digit:active { background: #ccc; }
+
+    /* ── FX toggle button ──────────────────────────────────────── */
+    #fxToggle {
+      display: none;
+      position: fixed;
+      top: 8px;
+      right: 8px;
+      z-index: 100;
+      padding: 4px 10px;
+      background: rgba(255,255,255,0.92);
+      color: #000;
+      border: 1px solid #999;
+      font-family: monospace;
+      font-size: 0.75rem;
+      cursor: pointer;
+      border-radius: 3px;
+    }
+    #fxToggle:hover { background: #eee; }
+
+    /* ── FX slider panel ───────────────────────────────────────── */
+    #fxPanel {
+      display: none;
+      position: fixed;
+      top: 34px;
+      right: 8px;
+      z-index: 100;
+      background: rgba(255,255,255,0.97);
+      border: 1px solid #bbb;
+      border-radius: 4px;
+      padding: 10px 14px;
+      width: 230px;
+      font-family: monospace;
+      font-size: 0.72rem;
+    }
+    #fxPanel .fx-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 7px;
+    }
+    #fxPanel label {
+      width: 90px;
+      flex-shrink: 0;
+      color: #333;
+    }
+    #fxPanel input[type=range] {
+      flex: 1;
+      accent-color: #48a;
+    }
+    #fxPanel .fx-val {
+      width: 38px;
+      text-align: right;
+      color: #48a;
+    }
+    #fxReset {
+      margin-top: 4px;
+      width: 100%;
+      padding: 4px 0;
+      background: transparent;
+      border: 1px solid #bbb;
+      color: #666;
+      font-family: monospace;
+      font-size: 0.7rem;
+      cursor: pointer;
+      border-radius: 2px;
+    }
+    #fxReset:hover { border-color: #555; color: #000; }
+  </style>
+</head>
+<body>
+  <div id="launch">
+    <h1>Hugo - Into the Multiverse</h1>
+    <p>Select the game data folder (the directory that contains ForestData, RopeOutroData, etc.)</p>
+    <button id="pickFolder">Pick data folder</button>
+    <div id="status"></div>
+    <p class="beta-note">Beta web version &mdash; may fail or behave unexpectedly.<br>Source code: <a href="https://github.com/gzalo/hugo-re" target="_blank" rel="noopener">github.com/gzalo/hugo-re</a></p>
+  </div>
+
+  <!-- Game area: [canvas + per-player controls] | [common phone] -->
+  <div id="gameArea">
+    <!-- Left column: canvas + per-player pickup/hangup -->
+    <div id="gameLeft">
+      <canvas id="gameCanvas" width="640" height="480"></canvas>
+
+      <!-- Per-player phone tube controls: 2×2 grid matching the 4 quadrants -->
+      <div id="phoneControls">
+        <!-- Top-left: AR -->
+        <div class="phone-cell">
+          <span class="phone-label">AR</span>
+          <button class="phone-btn phone-pickup" data-player="0" title="Pick up phone (AR)">
+            <span class="phone-icon">☎</span>↑
+          </button>
+          <button class="phone-btn phone-hangup" data-player="0" title="Hang up phone (AR)">
+            <span class="phone-icon">☎</span>↓
+          </button>
+        </div>
+        <!-- Top-right: CL -->
+        <div class="phone-cell">
+          <span class="phone-label">CL</span>
+          <button class="phone-btn phone-pickup" data-player="1" title="Pick up phone (CL)">
+            <span class="phone-icon">☎</span>↑
+          </button>
+          <button class="phone-btn phone-hangup" data-player="1" title="Hang up phone (CL)">
+            <span class="phone-icon">☎</span>↓
+          </button>
+        </div>
+        <!-- Bottom-left: DN -->
+        <div class="phone-cell">
+          <span class="phone-label">DN</span>
+          <button class="phone-btn phone-pickup" data-player="2" title="Pick up phone (DN)">
+            <span class="phone-icon">☎</span>↑
+          </button>
+          <button class="phone-btn phone-hangup" data-player="2" title="Hang up phone (DN)">
+            <span class="phone-icon">☎</span>↓
+          </button>
+        </div>
+        <!-- Bottom-right: FR -->
+        <div class="phone-cell">
+          <span class="phone-label">FR</span>
+          <button class="phone-btn phone-pickup" data-player="3" title="Pick up phone (FR)">
+            <span class="phone-icon">☎</span>↑
+          </button>
+          <button class="phone-btn phone-hangup" data-player="3" title="Hang up phone (FR)">
+            <span class="phone-icon">☎</span>↓
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right column: common phone panel (broadcasts to all players) -->
+    <div id="commonPhone">
+      <div class="cp-title">All players</div>
+      <div class="cp-call-row">
+        <button class="cp-call-btn cp-pickup-all" id="allPickup" title="Pick up (all)">☎↑</button>
+        <button class="cp-call-btn cp-hangup-all" id="allHangup" title="Hang up (all)">☎↓</button>
+      </div>
+      <hr class="cp-divider">
+      <div class="cp-grid">
+        <button class="cp-digit" data-key="1">1</button>
+        <button class="cp-digit" data-key="2">2</button>
+        <button class="cp-digit" data-key="3">3</button>
+        <button class="cp-digit" data-key="4">4</button>
+        <button class="cp-digit" data-key="5">5</button>
+        <button class="cp-digit" data-key="6">6</button>
+        <button class="cp-digit" data-key="7">7</button>
+        <button class="cp-digit" data-key="8">8</button>
+        <button class="cp-digit" data-key="9">9</button>
+        <button class="cp-digit" data-key="*">*</button>
+        <button class="cp-digit" data-key="0">0</button>
+        <button class="cp-digit" data-key="#">#</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Post-processing FX toggle button (shown during game) -->
+  <button id="fxToggle">FX ▾</button>
+
+  <!-- Post-processing FX panel -->
+  <div id="fxPanel">
+    <div class="fx-row">
+      <label>Waviness</label>
+      <input type="range" id="sl-wavyness"            min="0"   max="0.1"  step="0.001" value="0">
+      <span  class="fx-val" id="val-wavyness">0.000</span>
+    </div>
+    <div class="fx-row">
+      <label>Bitcrush</label>
+      <input type="range" id="sl-bitcrush"            min="2"   max="256"  step="1"     value="256">
+      <span  class="fx-val" id="val-bitcrush">256</span>
+    </div>
+    <div class="fx-row">
+      <label>Hue shift</label>
+      <input type="range" id="sl-hueShift"            min="0"   max="1"    step="0.01"  value="0">
+      <span  class="fx-val" id="val-hueShift">0.00</span>
+    </div>
+    <div class="fx-row">
+      <label>Scale</label>
+      <input type="range" id="sl-scale"               min="1"   max="4"    step="0.05"  value="1">
+      <span  class="fx-val" id="val-scale">1.00</span>
+    </div>
+    <div class="fx-row">
+      <label>Line glitch</label>
+      <input type="range" id="sl-lineGlitch"          min="0"   max="0.5"  step="0.005" value="0">
+      <span  class="fx-val" id="val-lineGlitch">0.000</span>
+    </div>
+    <div class="fx-row">
+      <label>Chromatic</label>
+      <input type="range" id="sl-chromaticAberration" min="0"   max="1"    step="0.01"  value="0">
+      <span  class="fx-val" id="val-chromaticAberration">0.00</span>
+    </div>
+    <button id="fxReset">Reset / use gamepad</button>
+  </div>
+
+  <script type="module" src="/src/main.ts"></script>
+</body>
+</html>
