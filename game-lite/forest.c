@@ -56,7 +56,7 @@ typedef struct {
     double hugo_crawling_time;
     double last_time;
     int old_second;
-    
+
     // Cave game state (shared context)
     int cave_selected_rope;
     int cave_win_type;
@@ -66,6 +66,7 @@ typedef struct {
 static ForestContext game_ctx = {0};
 static ForestState current_forest_state = STATE_FOREST_WAIT_INTRO;
 static StateMetadata state_metadata;
+static bool debug_show_collisions = false;
 
 #define FOREST_BG_SPEED_MULTIPLIER 1.0
 
@@ -185,7 +186,7 @@ static SpriteSheetArea get_spritesheet_area(int value) {
     int height = 33;
     int xpos = value % 5;
     int ypos = value / 5;
-    
+
     SpriteSheetArea area;
     area.x = 1 + xpos * (width + 1);
     area.y = 1 + ypos * (height + 1);
@@ -410,12 +411,157 @@ void render_forest_background() {
     }
 }
 
+
+static void hugo_debug_bounds(int *out_x, int *out_y, int *out_w, int *out_h) {
+    int hugo_x = HUGO_X_POS;
+    double now = get_game_time();
+    Texture *t = NULL;
+    int y = 90;
+
+    if (game_ctx.arrow_up_focus && game_ctx.hugo_jumping_time >= 0) {
+        double dt = (now - game_ctx.hugo_jumping_time) / 0.75;
+        double dy = -250 * dt * dt + 250 * dt - 22.5;
+        y = (int)(40 - dy);
+        t = textures.hugo_jump[0];
+    } else if (game_ctx.arrow_down_focus && game_ctx.hugo_crawling_time >= 0) {
+        y = 105;
+        t = textures.hugo_crawl[0];
+    } else {
+        y = 90;
+        t = textures.hugo_side[0];
+    }
+
+    int w = t ? query_texture_width(t) : 32;
+    int h = t ? query_texture_height(t) : 48;
+    *out_x = hugo_x;
+    *out_y = y;
+    *out_w = w;
+    *out_h = h;
+}
+
+void render_collision_debug() {
+    if (!debug_show_collisions) return;
+
+    double fract = game_ctx.parallax_pos - floor(game_ctx.parallax_pos);
+    int check_idx = (int)floor(game_ctx.parallax_pos) + 1;
+    if (check_idx >= FOREST_MAX_TIME) check_idx = FOREST_MAX_TIME - 1;
+
+    // Collision trigger column (where checks fire relative to scrolling obstacles)
+    int trigger_x = (int)((check_idx - game_ctx.parallax_pos) * FOREST_GROUND_SPEED);
+    render_rect(trigger_x - 1, 0, 3, SCREEN_HEIGHT, 255, 255, 0, 90);
+    render_rect_outline(trigger_x - 2, 0, 5, SCREEN_HEIGHT, 255, 255, 0, 220);
+
+    // Hugo hitbox
+    int hx, hy, hw, hh;
+    hugo_debug_bounds(&hx, &hy, &hw, &hh);
+    bool hugo_safe_jump = game_ctx.arrow_up_focus;
+    bool hugo_safe_duck = game_ctx.arrow_down_focus;
+    render_rect(hx, hy, hw, hh, 0, 200, 255, 60);
+    render_rect_outline(hx, hy, hw, hh, 0, 220, 255, 255);
+
+    // Obstacle / sack hitboxes
+    for (int i = 0; i < FOREST_MAX_TIME; i++) {
+        double obstacle_pos = (i - game_ctx.parallax_pos) * FOREST_GROUND_SPEED;
+        if (obstacle_pos < -80 || obstacle_pos > SCREEN_WIDTH + 80) {
+            continue;
+        }
+
+        ObstacleType obs = game_ctx.obstacles[i];
+        if (obs != OBS_NONE) {
+            int x = 0, y = 0, w = 32, h = 32;
+            Uint8 r = 255, g = 80, b = 80;
+            bool would_hit = false;
+
+            switch (obs) {
+            case OBS_CATAPULT: {
+                Texture *t = textures.catapult[0];
+                w = t ? query_texture_width(t) : 40;
+                h = t ? query_texture_height(t) : 40;
+                x = (int)(obstacle_pos - 8);
+                y = 112;
+                would_hit = !hugo_safe_jump;
+                r = 255; g = 120; b = 40; // needs jump
+                break;
+            }
+            case OBS_TRAP: {
+                Texture *t = textures.trap[0];
+                w = t ? query_texture_width(t) : 40;
+                h = t ? query_texture_height(t) : 40;
+                x = (int)(obstacle_pos - 8);
+                y = 152;
+                would_hit = !hugo_safe_jump;
+                r = 255; g = 120; b = 40;
+                break;
+            }
+            case OBS_ROCK: {
+                Texture *t = textures.rock[0];
+                w = t ? query_texture_width(t) : 40;
+                h = t ? query_texture_height(t) : 40;
+                double offset = sin(fract * (2.0 * M_PI)) * 15.0;
+                x = (int)(obstacle_pos - offset);
+                y = 120;
+                would_hit = !hugo_safe_jump;
+                r = 255; g = 120; b = 40;
+                break;
+            }
+            case OBS_TREE: {
+                Texture *swing = textures.tree[0];
+                w = swing ? query_texture_width(swing) : 48;
+                h = swing ? query_texture_height(swing) : 48;
+                x = (int)obstacle_pos;
+                y = 62;
+                would_hit = !hugo_safe_duck;
+                r = 80; g = 180; b = 255; // needs duck
+                break;
+            }
+            default:
+                break;
+            }
+
+            if (would_hit) {
+                r = 255; g = 40; b = 40;
+            } else {
+                r = 40; g = 220; b = 80;
+            }
+
+            Uint8 fill_a = (i == check_idx) ? 120 : 70;
+            render_rect(x, y, w, h, r, g, b, fill_a);
+            render_rect_outline(x, y, w, h, r, g, b, 255);
+            if (i == check_idx) {
+                render_rect_outline(x - 2, y - 2, w + 4, h + 4, 255, 255, 0, 255);
+            }
+        }
+
+        if (game_ctx.sacks[i] != 0) {
+            Texture *t = textures.sack[0];
+            int sw = t ? query_texture_width(t) : 24;
+            int sh = t ? query_texture_height(t) : 24;
+            int sx = (int)(obstacle_pos - 16);
+            int sy = 32;
+            bool collectible = hugo_safe_jump;
+            Uint8 r = collectible ? 255 : 180;
+            Uint8 g = collectible ? 220 : 80;
+            Uint8 b = collectible ? 40 : 255;
+            render_rect(sx, sy, sw, sh, r, g, b, 70);
+            render_rect_outline(sx, sy, sw, sh, r, g, b, 255);
+        }
+    }
+
+    // Legend strip at top
+    render_rect(0, 0, SCREEN_WIDTH, 12, 0, 0, 0, 140);
+    render_rect(4, 2, 8, 8, 255, 40, 40, 200);      // hit
+    render_rect(16, 2, 8, 8, 40, 220, 80, 200);     // safe
+    render_rect(28, 2, 8, 8, 0, 220, 255, 200);      // hugo
+    render_rect(40, 2, 8, 8, 255, 255, 0, 200);      // trigger
+}
+
 void render_forest_playing_content() {
     render_obstacles();
     render_sacks();
     render_leaves();
     render_hugo();
     render_controls();
+    render_collision_debug();
 }
 
 void render_forest_playing() {
@@ -446,7 +592,7 @@ void render_forest_branch_talking() {
     Animation anim = textures.hugohitlog_talk;
     anim.sync_data = textures.sync_hitlog;
     anim.sync_count = textures.sync_hitlog_count;
-    
+
     Texture* frame = animation_get_sync_frame(anim, get_frame_index(&state_metadata));
     render(frame, 0, 0);
 }
@@ -460,7 +606,7 @@ void render_forest_flying_talking() {
     Animation anim = textures.catapult_airtalk;
     anim.sync_data = textures.sync_catapult_talktop;
     anim.sync_count = textures.sync_catapult_talktop_count;
-    
+
     Texture* frame = animation_get_sync_frame(anim, get_frame_index(&state_metadata));
     render(frame, 0, 0);
 }
@@ -484,7 +630,7 @@ void render_forest_flying_falling_hang_talking() {
     Animation mouth_anim = textures.catapult_hangspeak;
     mouth_anim.sync_data = textures.sync_catapult_hang;
     mouth_anim.sync_count = textures.sync_catapult_hang_count;
-    
+
     Texture* mouth = animation_get_sync_frame(mouth_anim, get_frame_index(&state_metadata));
     render(mouth, 115, 117);
 }
@@ -503,7 +649,7 @@ void render_forest_rock_talking() {
     Animation anim = textures.hugo_telllives;
     anim.sync_data = textures.sync_rock;
     anim.sync_count = textures.sync_rock_count;
-    
+
     Texture* frame = animation_get_sync_frame(anim, get_frame_index(&state_metadata));
     render(frame, 0, 0);
 }
@@ -516,7 +662,7 @@ void render_forest_trap_talking() {
     Animation anim = textures.hugo_telllives;
     anim.sync_data = textures.sync_trap;
     anim.sync_count = textures.sync_trap_count;
-    
+
     Texture* frame = animation_get_sync_frame(anim, get_frame_index(&state_metadata));
     render(frame, 0, 0);
 }
@@ -529,12 +675,12 @@ void render_forest_scylla_button() {
 
 void render_forest_talking_after_hurt() {
     int frame = get_frame_index(&state_metadata);
-    
+
     // Use appropriate sync data based on lives remaining
     Animation anim = textures.hugo_telllives;
     anim.sync_data = (game_ctx.lives == 1) ? textures.sync_lastlife : textures.sync_dieonce;
     anim.sync_count = (game_ctx.lives == 1) ? textures.sync_lastlife_count : textures.sync_dieonce_count;
-    
+
     Texture* hugo_frame = animation_get_sync_frame(anim, frame);
     render(hugo_frame, 128, -16);
 
@@ -550,7 +696,7 @@ void render_forest_talking_game_over() {
     Animation anim = textures.hugo_telllives;
     anim.sync_data = textures.sync_gameover;
     anim.sync_count = textures.sync_gameover_count;
-    
+
     Texture* frame = animation_get_sync_frame(anim, get_frame_index(&state_metadata));
     render(frame, 128, -16);
 }
@@ -559,7 +705,7 @@ void render_forest_win_talking() {
     Animation anim = textures.hugo_telllives;
     anim.sync_data = textures.sync_levelcompleted;
     anim.sync_count = textures.sync_levelcompleted_count;
-    
+
     Texture* frame = animation_get_sync_frame(anim, get_frame_index(&state_metadata));
     render(frame, 128, -16);
 }
@@ -568,7 +714,7 @@ void render_forest_wait_intro() {
     Animation anim = textures.hugo_telllives;
     anim.sync_data = textures.sync_start;
     anim.sync_count = textures.sync_start_count;
-    
+
     Texture* frame = animation_get_sync_frame(anim, get_frame_index(&state_metadata));
     render(frame, 128, -16);
 }
@@ -591,6 +737,10 @@ bool check_collision(int obstacle_idx) {
 // ---------------- STATE PROCESSING: PLAYING / HURT / TALKING / WIN / GAME OVER ----------------
 
 ForestState process_forest_playing(InputState state) {
+    if (state.debug_toggle) {
+        debug_show_collisions = !debug_show_collisions;
+        printf("Collision debug: %s\n", debug_show_collisions ? "ON" : "OFF");
+    }
     // Inputs: map to key_up / key_down from common.h
     if (!game_ctx.arrow_up_focus && !game_ctx.arrow_down_focus) {
         if (state.key_up) {
@@ -1026,11 +1176,11 @@ GameState process_forest(InputState state){
         if (next_state == STATE_FOREST_END) {
             return STATE_CAVE;
         }
-        
+
         current_forest_state = next_state;
         reset_state(&state_metadata);
     }
-       
+
     return STATE_NONE;
 }
 
@@ -1040,7 +1190,7 @@ void render_forest(){
     bool needs_pre_bottom = false;
     // States that need bottom rendered AFTER (POST)
     bool needs_post_bottom = false;
-    
+
     switch (current_forest_state) {
     case STATE_FOREST_WAIT_INTRO:
     case STATE_FOREST_PLAYING:

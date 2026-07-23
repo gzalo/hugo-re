@@ -23,6 +23,7 @@ typedef struct {
     bool cave_rope_1_pressed;
     bool cave_rope_2_pressed;
     bool cave_rope_3_pressed;
+    bool debug_toggle;
 } InputState;
 
 
