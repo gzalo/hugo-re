@@ -14,9 +14,12 @@ typedef SDL_Texture Texture;
 typedef Mix_Chunk Audio;
 
 int query_texture_width(Texture *texture);
+int query_texture_height(Texture *texture);
 Texture* load_texture(const char* path);
 void render(Texture *texture, int x, int y);
 void render_subtexture(Texture* texture, int sx, int sy, int w, int h, int dx, int dy);
+void render_rect(int x, int y, int w, int h, Uint8 r, Uint8 g, Uint8 b, Uint8 a);
+void render_rect_outline(int x, int y, int w, int h, Uint8 r, Uint8 g, Uint8 b, Uint8 a);
 void play(Audio *audio);
 int play_loop(Audio *audio);
 void stop_audio(int channel);
@@ -27,6 +30,7 @@ int get_time_ms();
 
 bool render_init();
 void render_cleanup();
+void render_clear();
 void render_step();
 bool render_getevents(InputState* input_state);
 
