@@ -29,3 +29,6 @@ Thumbs.db
 *.a
 *.exe
 game-lite/hugo_lite
+
+# Rust
+audio-server/target/

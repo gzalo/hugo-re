@@ -10,14 +10,14 @@ Multiplayer reimplementation of Hugo minigames using the original resources.
 
 - [Main game](game/)
 - [Audio server](audio-server/)
-- [Game asset converter](converter/)
 - [Lite version (single-player, C) ideal for porting into smaller platforms](game-lite/)
 
 If you want to play with actual phones/IP phones:
-- [PJSUA tool - converts SIP tones to keys](pjsua-to-keys/)
-- [Asterisk config](asterisk-config/)
+- [Hardware to convert phone keys into an USB keyboard](tools/phone-keys-usb/)
+- [PJSUA tool - converts SIP tones to keys](tools/pjsua-to-keys/) + [Sample asterisk config](tools/asterisk-config/)
 
-## Other resources
+## Other things
+- [Game asset converter](tools/converter/)
 - [Project phases, improvements and future ideas](docs/phases.md)
 - [Reverse engineered format documentation](docs/reverse.md)
 
@@ -44,12 +44,15 @@ I'm looking for contributors! If you are interested in:
 - [Nostalgikeren](https://www.youtube.com/@NostalgikerenDK/videos) uploaded many videos from the original TV show, which were very useful for reference!
 
 ## Similar projects
-- https://github.com/tuomasth/Hugo_Ski_Game_Finnish_24-2-2023
+- https://github.com/tuomasth/Hugo_Ski_Game_English_Texts_13-10-2024
 - https://github.com/supinrus/HugoMega
 - https://github.com/supinrus/HugoResourceViewer
 - https://github.com/supinrus/ite-hugo-utils
 - https://github.com/erengaygusuz/hugo-lululu
-- https://github.com/ElMiauro/KitoPizzas
 - https://github.com/humbertodias/hugo-resource-viewer
+
+### Related to Kito Pizzas 
+- https://github.com/gzalo/kitopizzas
+- https://github.com/ElMiauro/KitoPizzas
 
 ### By gzalo (Gonzalo Avila) 2023-20XX - In memoriam Hugo Avila - 1921-2007
