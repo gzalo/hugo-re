@@ -1,0 +1,6 @@
+[Desktop Entry]
+Type=Application
+Name=Hugo startup
+Comment=Open the Hugo components in separate terminals
+Exec=/bin/sh /home/gzalo/hugo-re/scripts/start-desktop.sh
+Terminal=false
